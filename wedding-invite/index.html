@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive Indian Wedding Invitation - Experience the magic of our celebrations with interactive festivities">
+  <meta name="theme-color" content="#7e252c">
+  <title>DeepDreams Weddings — AI Wedding Invitation Websites</title>
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Falling Petals Background -->
+  <div id="petal-container" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="nav-logo-icon">❤️</span>
+        <span class="nav-logo-text">DeepDreams <em>Weddings</em></span>
+      </a>
+      <div class="nav-links" id="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#festivities" class="nav-link">Festivities</a>
+        <a href="#templates" class="nav-link">Templates</a>
+        <a href="#testimonials" class="nav-link">Love Notes</a>
+      </div>
+      <div class="nav-actions">
+        <a href="invite.html?demo" class="nav-link nav-demo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          View demo
+        </a>
+        <a href="invite.html?edit" class="btn btn-primary btn-sm">Create yours</a>
+      </div>
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge animate-on-scroll">
+          <span class="badge-icon">✨</span>
+          <span class="badge-text">AI-CRAFTED WEDDING INVITATIONS</span>
+        </div>
+        <h1 class="hero-title animate-on-scroll">
+          Your wedding,<br>
+          worth <span class="hero-title-accent">framing.</span>
+        </h1>
+        <p class="hero-subtitle animate-on-scroll">
+          Design a cinematic invitation your family will screenshot and your friends will forward. 
+          Turmeric to rub off. Henna hearts to trace. Dhols to tap. 
+          All from your phone — in minutes.
+        </p>
+        <div class="hero-ctas animate-on-scroll">
+          <a href="invite.html?edit" class="btn btn-primary btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            Craft with AI — free
+          </a>
+          <a href="invite.html?demo" class="btn btn-outline btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            See a live demo
+          </a>
+        </div>
+        <div class="hero-features animate-on-scroll">
+          <div class="hero-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            WhatsApp RSVP
+          </div>
+          <div class="hero-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            4-day ceremonies
+          </div>
+          <div class="hero-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            No sign-up
+          </div>
+        </div>
+      </div>
+      <div class="hero-phone animate-on-scroll">
+        <div class="hero-phone-frame float-phone">
+          <div class="hero-phone-screen">
+            <!-- Real mobile view of the live invitation — tap opens the demo -->
+            <img class="phone-live-shot" src="assets/invite-mobile.jpg"
+                 alt="Live preview of the Saanvi &amp; Vihaan wedding invitation"
+                 onclick="location.href='invite.html?demo'" style="cursor:pointer" />
+            <span class="phone-live-cta" onclick="location.href='invite.html?demo'">· Tap to open ·</span>
+          </div>
+        </div>
+        <!-- Marigold decoration -->
+        <div class="marigold-deco" aria-hidden="true">🌼</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="section-container">
+      <div class="section-label">FEATURES</div>
+      <h2 class="section-title animate-on-scroll">Everything an unforgettable invite needs</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card animate-on-scroll">
+          <div class="feature-icon">✍️</div>
+          <h3 class="feature-title">AI love-story writer</h3>
+          <p class="feature-desc">Tell us two names — we write the quotes, ceremonies and love notes in your voice.</p>
+        </div>
+        <div class="feature-card animate-on-scroll">
+          <div class="feature-icon">🎭</div>
+          <h3 class="feature-title">Cinematic reveals</h3>
+          <p class="feature-desc">Rub off the turmeric, trace the henna heart, tap the dhol — tiny interactions your guests will adore.</p>
+        </div>
+        <div class="feature-card animate-on-scroll">
+          <div class="feature-icon">💬</div>
+          <h3 class="feature-title">WhatsApp RSVPs</h3>
+          <p class="feature-desc">One tap sends attendance, guest count and ceremony picks straight to your WhatsApp.</p>
+        </div>
+        <div class="feature-card animate-on-scroll">
+          <div class="feature-icon">⚡</div>
+          <h3 class="feature-title">Ready in 5 minutes</h3>
+          <p class="feature-desc">Pick a template, add your photos, publish. Your invite is live at a sharable link.</p>
+        </div>
+        <div class="feature-card animate-on-scroll">
+          <div class="feature-icon">🎊</div>
+          <h3 class="feature-title">4-day festivities</h3>
+          <p class="feature-desc">Haldi, Mehndi, Sangeet, Muhurtham — a page per ceremony with add-to-calendar buttons.</p>
+        </div>
+        <div class="feature-card animate-on-scroll">
+          <div class="feature-icon">👫</div>
+          <h3 class="feature-title">Team Bride vs Groom</h3>
+          <p class="feature-desc">A friendly rivalry your cousins will fight over! Guests pick a side with real RSVP.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Festivities Section -->
+  <section class="festivities" id="festivities">
+    <div class="section-container">
+      <div class="section-label-dark">INTERACTIVE FESTIVITIES</div>
+      <h2 class="section-title-dark animate-on-scroll">Experience the magic</h2>
+      <p class="section-subtitle-dark animate-on-scroll">Each ceremony comes alive with an interactive moment your guests will love</p>
+      
+      <div class="festivities-grid">
+        <!-- 1. Rub to Reveal (Haldi) -->
+        <div class="festivity-card" id="festivity-rub">
+          <div class="festivity-header">
+            <span class="festivity-emoji">🌾</span>
+            <h3 class="festivity-name">Haldi Ceremony</h3>
+            <p class="festivity-instruction">Rub to reveal the blessing</p>
+          </div>
+          <div class="festivity-interactive rub-container">
+            <div class="rub-message">
+              <span class="rub-reveal-text font-script">You are blessed!</span>
+              <span class="rub-reveal-sub">Haldi ceremony awaits you</span>
+            </div>
+            <canvas id="rub-canvas" class="rub-canvas"></canvas>
+            <div class="rub-hint" id="rub-hint">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12H18M18 12L13 7M18 12L13 17"/></svg>
+              Rub here
+            </div>
+          </div>
+          <div class="festivity-progress">
+            <div class="progress-bar" id="rub-progress"></div>
+          </div>
+        </div>
+
+        <!-- 2. Trace the Heart (Mehndi) -->
+        <div class="festivity-card" id="festivity-trace">
+          <div class="festivity-header">
+            <span class="festivity-emoji">💕</span>
+            <h3 class="festivity-name">Mehndi Ceremony</h3>
+            <p class="festivity-instruction">Trace the heart with love</p>
+          </div>
+          <div class="festivity-interactive trace-container">
+            <canvas id="trace-canvas" class="trace-canvas"></canvas>
+            <div class="trace-hint" id="trace-hint">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Trace the heart
+            </div>
+          </div>
+          <div class="festivity-progress">
+            <div class="progress-bar" id="trace-progress"></div>
+          </div>
+        </div>
+
+        <!-- 3. Tap the Dhol (Sangeet) -->
+        <div class="festivity-card" id="festivity-tap">
+          <div class="festivity-header">
+            <span class="festivity-emoji">🥁</span>
+            <h3 class="festivity-name">Sangeet Night</h3>
+            <p class="festivity-instruction">Tap the dhol to the beat!</p>
+          </div>
+          <div class="festivity-interactive tap-container">
+            <div class="dhol-wrapper">
+              <div class="dhol" id="dhol">
+                <div class="dhol-body">
+                  <div class="dhol-head"></div>
+                  <div class="dhol-strap dhol-strap-l"></div>
+                  <div class="dhol-strap dhol-strap-r"></div>
+                </div>
+                <div class="dhol-ripples" id="dhol-ripples"></div>
+              </div>
+              <div class="beat-counter" id="beat-counter">
+                <span class="beat-count">0</span>
+                <span class="beat-label">beats</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Light the Diya -->
+        <div class="festivity-card" id="festivity-diya">
+          <div class="festivity-header">
+            <span class="festivity-emoji">🪔</span>
+            <h3 class="festivity-name">Diya Lighting</h3>
+            <p class="festivity-instruction">Tap each diya to light it</p>
+          </div>
+          <div class="festivity-interactive diya-container">
+            <div class="diyas-row">
+              <div class="diya" data-diya="1">
+                <div class="diya-flame-wrapper">
+                  <div class="diya-flame"></div>
+                  <div class="diya-glow"></div>
+                </div>
+                <div class="diya-body">
+                  <div class="diya-oil"></div>
+                  <div class="diya-wick"></div>
+                </div>
+              </div>
+              <div class="diya" data-diya="2">
+                <div class="diya-flame-wrapper">
+                  <div class="diya-flame"></div>
+                  <div class="diya-glow"></div>
+                </div>
+                <div class="diya-body">
+                  <div class="diya-oil"></div>
+                  <div class="diya-wick"></div>
+                </div>
+              </div>
+              <div class="diya" data-diya="3">
+                <div class="diya-flame-wrapper">
+                  <div class="diya-flame"></div>
+                  <div class="diya-glow"></div>
+                </div>
+                <div class="diya-body">
+                  <div class="diya-oil"></div>
+                  <div class="diya-wick"></div>
+                </div>
+              </div>
+              <div class="diya" data-diya="4">
+                <div class="diya-flame-wrapper">
+                  <div class="diya-flame"></div>
+                  <div class="diya-glow"></div>
+                </div>
+                <div class="diya-body">
+                  <div class="diya-oil"></div>
+                  <div class="diya-wick"></div>
+                </div>
+              </div>
+              <div class="diya" data-diya="5">
+                <div class="diya-flame-wrapper">
+                  <div class="diya-flame"></div>
+                  <div class="diya-glow"></div>
+                </div>
+                <div class="diya-body">
+                  <div class="diya-oil"></div>
+                  <div class="diya-wick"></div>
+                </div>
+              </div>
+            </div>
+            <div class="diya-counter" id="diya-counter">
+              <span class="diya-lit-count">0</span> / 5 lit
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Blow the Dandelion -->
+        <div class="festivity-card" id="festivity-blow">
+          <div class="festivity-header">
+            <span class="festivity-emoji">🌸</span>
+            <h3 class="festivity-name">Flower Wishes</h3>
+            <p class="festivity-instruction">Blow the petals & make a wish</p>
+          </div>
+          <div class="festivity-interactive blow-container">
+            <canvas id="blow-canvas" class="blow-canvas"></canvas>
+            <button class="blow-btn" id="blow-btn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 4H3M21 4C21 4 21 7 17 10C13 13 12 12 12 12M3 4C3 4 3 7 7 10C11 13 12 12 12 12M12 12V20M12 20H9M12 20H15"/></svg>
+              Blow
+            </button>
+          </div>
+        </div>
+
+        <!-- 6. Shake the Snow Globe -->
+        <div class="festivity-card" id="festivity-shake">
+          <div class="festivity-header">
+            <span class="festivity-emoji">🔮</span>
+            <h3 class="festivity-name">Wedding Globe</h3>
+            <p class="festivity-instruction">Shake or tap the globe</p>
+          </div>
+          <div class="festivity-interactive globe-container">
+            <div class="snow-globe" id="snow-globe">
+              <div class="globe-glass">
+                <canvas id="globe-canvas" class="globe-canvas"></canvas>
+                <div class="globe-couple">💑</div>
+              </div>
+              <div class="globe-base">
+                <div class="globe-base-text">S & R</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Templates Section -->
+  <section class="templates" id="templates">
+    <div class="section-container">
+      <div class="section-label">TEMPLATES</div>
+      <h2 class="section-title animate-on-scroll">A palette for every couple</h2>
+      <p class="section-subtitle animate-on-scroll">Start from a theme, then let AI weave your story through every page.</p>
+      
+      <div class="templates-carousel">
+        <div class="template-card animate-on-scroll">
+          <div class="template-preview template-royal">
+            <div class="template-pattern diamond-pattern"></div>
+            <span class="template-initial">R&K</span>
+          </div>
+          <h4 class="template-name">Royal Maroon</h4>
+          <span class="template-tag">TRADITIONAL</span>
+        </div>
+        <div class="template-card animate-on-scroll">
+          <div class="template-preview template-golden">
+            <div class="template-pattern diamond-pattern"></div>
+            <span class="template-initial">A&S</span>
+          </div>
+          <h4 class="template-name">Golden Haldi</h4>
+          <span class="template-tag">VIBRANT</span>
+        </div>
+        <div class="template-card animate-on-scroll">
+          <div class="template-preview template-blush">
+            <div class="template-pattern diamond-pattern"></div>
+            <span class="template-initial">P&M</span>
+          </div>
+          <h4 class="template-name">Mehndi Blush</h4>
+          <span class="template-tag">DELICATE</span>
+        </div>
+        <div class="template-card animate-on-scroll">
+          <div class="template-preview template-nights">
+            <div class="template-pattern diamond-pattern"></div>
+            <span class="template-initial">N&V</span>
+          </div>
+          <h4 class="template-name">Sangeet Nights</h4>
+          <span class="template-tag">FESTIVE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials" id="testimonials">
+    <div class="section-container">
+      <div class="section-label">LOVE NOTES</div>
+      <h2 class="section-title animate-on-scroll">Couples who've said "I do" with us</h2>
+      
+      <div class="testimonials-grid">
+        <div class="testimonial-card animate-on-scroll">
+          <p class="testimonial-quote">"Our guests were absolutely stunned. The interactive cards for Haldi and Mehndi went viral in our family group!"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">A&R</div>
+            <div>
+              <p class="testimonial-name">Aditi & Rohan</p>
+              <p class="testimonial-location">Mumbai</p>
+            </div>
+          </div>
+          <div class="testimonial-stars">★★★★★</div>
+        </div>
+        <div class="testimonial-card animate-on-scroll">
+          <p class="testimonial-quote">"Made in 15 minutes. Sent to 300 guests. Everyone RSVPed via WhatsApp. Magical!"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">P&S</div>
+            <div>
+              <p class="testimonial-name">Priya & Saurav</p>
+              <p class="testimonial-location">Delhi</p>
+            </div>
+          </div>
+          <div class="testimonial-stars">★★★★★</div>
+        </div>
+        <div class="testimonial-card animate-on-scroll">
+          <p class="testimonial-quote">"The AI rewrote our love story so beautifully we cried. 10/10 recommend."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">M&A</div>
+            <div>
+              <p class="testimonial-name">Meera & Arjun</p>
+              <p class="testimonial-location">Bangalore</p>
+            </div>
+          </div>
+          <div class="testimonial-stars">★★★★★</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section" id="cta">
+    <div class="section-container">
+      <h2 class="cta-title animate-on-scroll">
+        Start with a spark.<br>
+        End with a story.
+      </h2>
+      <p class="cta-subtitle animate-on-scroll">Free to design. Only pay when you share.</p>
+      <div class="cta-buttons animate-on-scroll">
+        <a href="invite.html?edit" class="btn btn-primary btn-lg">Create your invitation</a>
+        <a href="invite.html?demo" class="btn btn-outline btn-lg">Preview sample</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ DEMO MODAL ═══════════ -->
+  <div class="demo-overlay" id="demo-overlay">
+    <div class="demo-modal">
+      <!-- Close Button -->
+      <button class="demo-close" id="demo-close" aria-label="Close demo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <!-- Phone Frame -->
+      <div class="demo-phone">
+        <div class="demo-phone-notch"></div>
+        <div class="demo-phone-screen" id="demo-screen">
+
+          <!-- ── Page 0: Envelope / Door Open ── -->
+          <div class="demo-page demo-page-active" id="demo-page-0">
+            <div class="demo-envelope">
+              <div class="demo-env-bg diamond-pattern"></div>
+              <!-- Ornate border -->
+              <div class="demo-env-border"></div>
+              <!-- Wax seal -->
+              <div class="demo-seal animate-seal-pulse" id="demo-seal">
+                <span>S&R</span>
+              </div>
+              <p class="demo-tap-text">· TAP THE SEAL TO OPEN ·</p>
+              <!-- Doors -->
+              <div class="demo-door demo-door-left" id="demo-door-l"></div>
+              <div class="demo-door demo-door-right" id="demo-door-r"></div>
+            </div>
+          </div>
+
+          <!-- ── Page 1: Couple / Welcome ── -->
+          <div class="demo-page" id="demo-page-1">
+            <div class="demo-welcome">
+              <p class="demo-script-accent">Together with their families</p>
+              <h2 class="demo-couple-names">Sanjana<br><span>&</span><br>Rohan</h2>
+              <div class="demo-divider"><span>💍</span></div>
+              <p class="demo-invite-line">Request the pleasure of your company<br>at their wedding celebration</p>
+              <div class="demo-date-box">
+                <span class="demo-date-day">Saturday</span>
+                <span class="demo-date-num">14</span>
+                <span class="demo-date-month">December 2025</span>
+              </div>
+              <p class="demo-venue">The Grand Palace, Jaipur</p>
+              <p class="demo-time">5:00 PM onwards</p>
+              <button class="demo-next-btn" data-goto="2">See the Ceremonies ↓</button>
+            </div>
+          </div>
+
+          <!-- ── Page 2: Haldi – Rub to Reveal ── -->
+          <div class="demo-page" id="demo-page-2">
+            <div class="demo-ceremony">
+              <span class="demo-cer-emoji">🌾</span>
+              <h3 class="demo-cer-title">Haldi Ceremony</h3>
+              <p class="demo-cer-date">Dec 12 · 10:00 AM</p>
+              <p class="demo-cer-desc">Blessings in saffron & turmeric</p>
+              <div class="demo-interact-area">
+                <div class="demo-rub-msg">
+                  <span class="font-script" style="font-size:1.6rem;color:#c8a253">You are blessed!</span>
+                </div>
+                <canvas class="demo-rub-canvas" id="demo-rub-canvas"></canvas>
+                <p class="demo-interact-hint">✋ Rub the turmeric to reveal</p>
+              </div>
+              <button class="demo-next-btn" data-goto="3">Next Ceremony →</button>
+            </div>
+          </div>
+
+          <!-- ── Page 3: Mehndi – Trace Heart ── -->
+          <div class="demo-page" id="demo-page-3">
+            <div class="demo-ceremony">
+              <span class="demo-cer-emoji">💕</span>
+              <h3 class="demo-cer-title">Mehndi Night</h3>
+              <p class="demo-cer-date">Dec 12 · 6:00 PM</p>
+              <p class="demo-cer-desc">Trace the heart with your love</p>
+              <div class="demo-interact-area">
+                <canvas class="demo-trace-canvas" id="demo-trace-canvas"></canvas>
+                <p class="demo-interact-hint">💕 Drag across the heart to trace</p>
+              </div>
+              <button class="demo-next-btn" data-goto="4">Next Ceremony →</button>
+            </div>
+          </div>
+
+          <!-- ── Page 4: Sangeet – Tap Dhol ── -->
+          <div class="demo-page" id="demo-page-4">
+            <div class="demo-ceremony">
+              <span class="demo-cer-emoji">🥁</span>
+              <h3 class="demo-cer-title">Sangeet Night</h3>
+              <p class="demo-cer-date">Dec 13 · 7:00 PM</p>
+              <p class="demo-cer-desc">Dance the night away!</p>
+              <div class="demo-interact-area demo-tap-area">
+                <div class="demo-dhol" id="demo-dhol">
+                  <div class="demo-dhol-body">
+                    <div class="demo-dhol-head"></div>
+                  </div>
+                  <div class="demo-dhol-ripples" id="demo-dhol-ripples"></div>
+                </div>
+                <div class="demo-beat-count" id="demo-beat-count"><span id="demo-beats">0</span> beats</div>
+                <p class="demo-interact-hint">🥁 Tap the dhol!</p>
+              </div>
+              <button class="demo-next-btn" data-goto="5">Next Ceremony →</button>
+            </div>
+          </div>
+
+          <!-- ── Page 5: Diya Lighting ── -->
+          <div class="demo-page" id="demo-page-5">
+            <div class="demo-ceremony">
+              <span class="demo-cer-emoji">🪔</span>
+              <h3 class="demo-cer-title">Diya Lighting</h3>
+              <p class="demo-cer-date">Dec 14 · 4:30 PM</p>
+              <p class="demo-cer-desc">Light the path of love</p>
+              <div class="demo-interact-area demo-diya-area">
+                <div class="demo-diyas">
+                  <div class="demo-diya-item" data-lit="false"><div class="demo-diya-flame"></div><div class="demo-diya-base"></div></div>
+                  <div class="demo-diya-item" data-lit="false"><div class="demo-diya-flame"></div><div class="demo-diya-base"></div></div>
+                  <div class="demo-diya-item" data-lit="false"><div class="demo-diya-flame"></div><div class="demo-diya-base"></div></div>
+                  <div class="demo-diya-item" data-lit="false"><div class="demo-diya-flame"></div><div class="demo-diya-base"></div></div>
+                  <div class="demo-diya-item" data-lit="false"><div class="demo-diya-flame"></div><div class="demo-diya-base"></div></div>
+                </div>
+                <p class="demo-interact-hint">🪔 Tap each diya to light it</p>
+              </div>
+              <button class="demo-next-btn" data-goto="6">View RSVP →</button>
+            </div>
+          </div>
+
+          <!-- ── Page 6: RSVP ── -->
+          <div class="demo-page" id="demo-page-6">
+            <div class="demo-rsvp">
+              <span class="demo-cer-emoji">💌</span>
+              <h3 class="demo-cer-title">RSVP</h3>
+              <p class="demo-cer-desc">We can't wait to celebrate with you!</p>
+              <div class="demo-rsvp-form">
+                <div class="demo-rsvp-group">
+                  <label>Your Name</label>
+                  <input type="text" placeholder="Enter your name" class="demo-input">
+                </div>
+                <div class="demo-rsvp-group">
+                  <label>Number of Guests</label>
+                  <div class="demo-guest-btns">
+                    <button class="demo-guest-btn active">1</button>
+                    <button class="demo-guest-btn">2</button>
+                    <button class="demo-guest-btn">3</button>
+                    <button class="demo-guest-btn">4+</button>
+                  </div>
+                </div>
+                <div class="demo-rsvp-group">
+                  <label>Attending</label>
+                  <div class="demo-attend-btns">
+                    <button class="demo-attend-btn demo-attend-yes">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                      Joyfully Accept
+                    </button>
+                    <button class="demo-attend-btn demo-attend-no">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                      Regretfully Decline
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button class="demo-next-btn" data-goto="0" style="margin-top:1rem">← Back to start</button>
+            </div>
+          </div>
+
+          <!-- Page indicator dots -->
+          <div class="demo-indicators" id="demo-indicators">
+            <span class="demo-dot active" data-page="0"></span>
+            <span class="demo-dot" data-page="1"></span>
+            <span class="demo-dot" data-page="2"></span>
+            <span class="demo-dot" data-page="3"></span>
+            <span class="demo-dot" data-page="4"></span>
+            <span class="demo-dot" data-page="5"></span>
+            <span class="demo-dot" data-page="6"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="#" class="nav-logo">
+        <span class="nav-logo-icon">❤️</span>
+        <span class="nav-logo-text">DeepDreams <em>Weddings</em></span>
+      </a>
+      <p class="footer-text">© 2026 DeepDreams AI Studio · Made in India with ❤️</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+  (function() {
+    document.addEventListener('DOMContentLoaded', function() {
+      var overlay = document.getElementById('demo-overlay');
+      if (!overlay) return;
+      var closeBtn = document.getElementById('demo-close');
+      var pages = overlay.querySelectorAll('.demo-page');
+      var dots = overlay.querySelectorAll('.demo-dot');
+      var inited = false;
+
+      function openModal() {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (!inited) { inited = true; setTimeout(setupAll, 250); }
+      }
+      function closeModal() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('.open-demo').forEach(function(b) {
+        b.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); openModal(); });
+      });
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+      function goToPage(idx) {
+        for (var i = 0; i < pages.length; i++) {
+          pages[i].classList.remove('demo-page-active');
+          if (dots[i]) dots[i].classList.remove('active');
+        }
+        pages[idx].classList.add('demo-page-active');
+        if (dots[idx]) dots[idx].classList.add('active');
+      }
+      overlay.querySelectorAll('.demo-next-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { goToPage(parseInt(btn.getAttribute('data-goto'))); });
+      });
+      for (var d = 0; d < dots.length; d++) {
+        (function(i) { dots[i].addEventListener('click', function() { goToPage(i); }); })(d);
+      }
+
+      function setupAll() {
+        // Seal
+        var seal = document.getElementById('demo-seal');
+        var env = overlay.querySelector('.demo-envelope');
+        if (seal && env) {
+          function openSeal() { env.classList.add('opened'); setTimeout(function() { goToPage(1); }, 1800); }
+          seal.addEventListener('click', openSeal);
+          seal.addEventListener('touchstart', function(e) { e.preventDefault(); openSeal(); });
+        }
+
+        // Rub to Reveal
+        var rubC = document.getElementById('demo-rub-canvas');
+        if (rubC) {
+          var rCtx = rubC.getContext('2d'), rDraw = false, rDone = false, rSetup = false;
+          function rubSetup() {
+            if (rSetup) return;
+            var r = rubC.parentElement.getBoundingClientRect();
+            if (r.width < 10) return;
+            rSetup = true;
+            rubC.width = r.width; rubC.height = r.height;
+            rCtx.fillStyle = '#c8a253';
+            rCtx.fillRect(0, 0, rubC.width, rubC.height);
+            rCtx.strokeStyle = 'rgba(184,135,58,0.35)'; rCtx.lineWidth = 1;
+            for (var i = -rubC.height; i < rubC.width + rubC.height; i += 14) {
+              rCtx.beginPath(); rCtx.moveTo(i, 0); rCtx.lineTo(i + rubC.height, rubC.height); rCtx.stroke();
+              rCtx.beginPath(); rCtx.moveTo(i + rubC.height, 0); rCtx.lineTo(i, rubC.height); rCtx.stroke();
+            }
+            rCtx.fillStyle = 'rgba(125,39,39,0.5)';
+            rCtx.font = '500 13px Inter,sans-serif';
+            rCtx.textAlign = 'center'; rCtx.textBaseline = 'middle';
+            rCtx.fillText('\u270b Rub here', rubC.width/2, rubC.height/2);
+            rCtx.globalCompositeOperation = 'destination-out';
+          }
+          var pg2 = document.getElementById('demo-page-2');
+          if (pg2) new MutationObserver(function() { if (pg2.classList.contains('demo-page-active')) rubSetup(); }).observe(pg2, {attributes:true,attributeFilter:['class']});
+          function rPos(e) { var b=rubC.getBoundingClientRect(), cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; return {x:cx-b.left,y:cy-b.top}; }
+          function rMove(e) { if(!rDraw||rDone)return; e.preventDefault(); var p=rPos(e); rCtx.beginPath(); rCtx.arc(p.x,p.y,24,0,Math.PI*2); rCtx.fill(); }
+          function rCheck() { if(rDone||!rSetup)return; var d=rCtx.getImageData(0,0,rubC.width,rubC.height).data,t=0; for(var i=3;i<d.length;i+=16)if(d[i]<128)t++; if(t/(d.length/16)>0.35){rDone=true;rubC.style.transition='opacity 0.5s';rubC.style.opacity='0';setTimeout(function(){rubC.style.display='none';},500);} }
+          rubC.addEventListener('mousedown',function(){if(!rDone){rDraw=true;rubSetup();}});
+          rubC.addEventListener('mousemove',rMove);
+          rubC.addEventListener('mouseup',function(){rDraw=false;rCheck();});
+          rubC.addEventListener('mouseleave',function(){rDraw=false;});
+          rubC.addEventListener('touchstart',function(e){e.preventDefault();if(!rDone){rDraw=true;rubSetup();rMove(e);}},{passive:false});
+          rubC.addEventListener('touchmove',function(e){rMove(e);},{passive:false});
+          rubC.addEventListener('touchend',function(){rDraw=false;rCheck();});
+        }
+
+        // Trace Heart
+        var trC = document.getElementById('demo-trace-canvas');
+        if (trC) {
+          var tCtx = trC.getContext('2d'), tDrag = false, tProg = 0, tDone = false, tSetup = false;
+          function hPts() {
+            var pts=[],cx=trC.width/2,cy=trC.height/2+8,s=Math.min(trC.width,trC.height)*0.32;
+            for(var t=0;t<=Math.PI*2;t+=0.06) pts.push({x:cx+s*16*Math.pow(Math.sin(t),3)/16,y:cy-s*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16});
+            return pts;
+          }
+          function tDraw() {
+            var pts=hPts(); tCtx.clearRect(0,0,trC.width,trC.height);
+            tCtx.setLineDash([5,5]); tCtx.strokeStyle='rgba(200,162,83,0.35)'; tCtx.lineWidth=2; tCtx.beginPath();
+            for(var i=0;i<pts.length;i++) i===0?tCtx.moveTo(pts[i].x,pts[i].y):tCtx.lineTo(pts[i].x,pts[i].y);
+            tCtx.closePath(); tCtx.stroke();
+            if(tProg>0){var n=Math.floor(pts.length*Math.min(tProg,1)),g=tCtx.createLinearGradient(0,0,trC.width,trC.height);g.addColorStop(0,'#c8a253');g.addColorStop(0.5,'#f2d98a');g.addColorStop(1,'#b8873a');tCtx.setLineDash([]);tCtx.strokeStyle=g;tCtx.lineWidth=4;tCtx.lineCap='round';tCtx.lineJoin='round';tCtx.beginPath();for(var j=0;j<=n&&j<pts.length;j++)j===0?tCtx.moveTo(pts[j].x,pts[j].y):tCtx.lineTo(pts[j].x,pts[j].y);tCtx.stroke();}
+            if(tDone){var g2=tCtx.createLinearGradient(0,0,trC.width,trC.height);g2.addColorStop(0,'rgba(200,162,83,0.25)');g2.addColorStop(1,'rgba(242,217,138,0.25)');tCtx.setLineDash([]);tCtx.fillStyle=g2;tCtx.beginPath();for(var k=0;k<pts.length;k++)k===0?tCtx.moveTo(pts[k].x,pts[k].y):tCtx.lineTo(pts[k].x,pts[k].y);tCtx.closePath();tCtx.fill();}
+          }
+          function trSetup(){if(tSetup)return;var r=trC.parentElement.getBoundingClientRect();if(r.width<10)return;tSetup=true;trC.width=r.width;trC.height=r.height;tDraw();}
+          var pg3=document.getElementById('demo-page-3');
+          if(pg3) new MutationObserver(function(){if(pg3.classList.contains('demo-page-active'))trSetup();}).observe(pg3,{attributes:true,attributeFilter:['class']});
+          function tMove(e){if(!tDrag||tDone)return;e.preventDefault();tProg+=0.018;if(tProg>=1){tProg=1;tDone=true;}tDraw();}
+          trC.addEventListener('mousedown',function(){if(!tDone){tDrag=true;trSetup();}});
+          trC.addEventListener('mousemove',tMove);
+          trC.addEventListener('mouseup',function(){tDrag=false;});
+          trC.addEventListener('touchstart',function(e){e.preventDefault();if(!tDone){tDrag=true;trSetup();}},{passive:false});
+          trC.addEventListener('touchmove',function(e){tMove(e);},{passive:false});
+          trC.addEventListener('touchend',function(){tDrag=false;});
+        }
+
+        // Dhol
+        var dhol = document.getElementById('demo-dhol');
+        var dRip = document.getElementById('demo-dhol-ripples');
+        var dBeat = document.getElementById('demo-beats');
+        if (dhol) {
+          var beats = 0;
+          function dTap() {
+            beats++; if(dBeat)dBeat.textContent=beats;
+            dhol.classList.remove('bounce'); void dhol.offsetWidth; dhol.classList.add('bounce');
+            for(var i=0;i<2;i++){var r=document.createElement('div');r.className='demo-ripple-ring';r.style.animationDelay=(i*0.1)+'s';if(dRip)dRip.appendChild(r);(function(el){setTimeout(function(){el.remove();},900);})(r);}
+          }
+          dhol.addEventListener('click', dTap);
+          dhol.addEventListener('touchstart', function(e){e.preventDefault();dTap();});
+        }
+
+        // Diyas
+        overlay.querySelectorAll('.demo-diya-item').forEach(function(d) {
+          d.addEventListener('click', function(){d.setAttribute('data-lit','true');});
+          d.addEventListener('touchstart', function(e){e.preventDefault();d.setAttribute('data-lit','true');});
+        });
+
+        // Guest btns
+        var gBtns = overlay.querySelectorAll('.demo-guest-btn');
+        gBtns.forEach(function(b){b.addEventListener('click',function(){gBtns.forEach(function(x){x.classList.remove('active');});b.classList.add('active');});});
+
+        // Attend btns
+        var aYes = overlay.querySelector('.demo-attend-yes');
+        var aNo = overlay.querySelector('.demo-attend-no');
+        if(aYes)aYes.addEventListener('click',function(){aYes.style.background='#22a34a';aYes.style.color='#fff';if(aNo){aNo.style.background='';aNo.style.color='';}});
+        if(aNo)aNo.addEventListener('click',function(){aNo.style.background='#c73030';aNo.style.color='#fff';if(aYes){aYes.style.background='';aYes.style.color='';}});
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

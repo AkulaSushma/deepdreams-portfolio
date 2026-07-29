@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# The editor writes drafts to a query string, not a route, but keep crawlers
+# out of the create/editor surface either way — it is a tool, not content.
+Disallow: /3D%20Wedding%20Invitation%20Sample%202/create.html
+
+Sitemap: https://deepdreams-portfolio.vercel.app/sitemap.xml

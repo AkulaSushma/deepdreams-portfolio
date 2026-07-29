@@ -1,0 +1,38 @@
+# Nothing here is needed to serve the site. Without this file the deploy
+# uploads ~458 MB, most of it the Three.js build toolchain — the production
+# world lives in "3D Wedding Invitation Sample 2/world/" and ships on its own.
+
+node_modules
+**/node_modules
+
+# Editable 3D source + its dist duplicate (218 MB). Built output is synced
+# into world/ by BUILD-AND-SYNC-WORLD.ps1 and is what actually gets served.
+3D Wedding Invitation Sample 2/3d-world-source
+
+# Retired design, kept for reference only
+_previous-design
+
+# Dev tooling, capture scripts and audit helpers
+capture-*.js
+scratch-*.js
+_audit.js
+_routecheck.js
+_weight.js
+_optimize-images.js
+BUILD-AND-SYNC-WORLD.ps1
+
+# Pre-compression originals of the landing images, kept so the optimisation
+# is reversible. Never served.
+_img-originals
+
+# Logs and working screenshots
+*.log
+_shot-*.png
+_nav-fixed.png
+_phone-fixed.png
+verify-*.png
+
+# Local-only config
+.claude
+.zcode
+serve.json

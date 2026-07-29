@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>DeepDreams AI Studio — Cinematic Tribute AI Videos</title>
+<meta name="description" content="DeepDreams AI Studio crafts cinematic tribute AI videos from photographs. We also build websites, Chrome extensions, and AI agents." />
+<meta name="theme-color" content="#05060a" />
+
+<meta property="og:title" content="DeepDreams AI Studio — Cinematic Tribute AI Videos" />
+<meta property="og:description" content="Watch our cinematic tribute AI films. Crafted for photographers & the families they serve." />
+<meta property="og:image" content="assets/logo.png" />
+<meta property="og:type" content="website" />
+
+<link rel="icon" type="image/png" href="assets/icon.png" />
+<link rel="manifest" href="manifest.json" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ===== PRELOADER ===== -->
+<div class="preloader" id="preloader">
+  <div class="pre-logo">
+    <img src="assets/logo.png" alt="DeepDreams" />
+    <span class="pre-ring"></span>
+  </div>
+  <div class="pre-bar"><i></i></div>
+</div>
+
+<!-- ===== ANIMATED BACKGROUND ===== -->
+<div class="bg-fx">
+  <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+  <canvas id="stars"></canvas>
+</div>
+<div class="grain"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ===== NAV ===== -->
+<header id="header">
+  <div class="nav">
+    <a href="#top" class="brand">
+      <img src="assets/logo.png" alt="DeepDreams logo" class="brand-mark" />
+      <span class="brand-name">Deep<b>Dreams</b><small>AI STUDIO</small></span>
+    </a>
+    <a href="#contact" class="nav-cta" data-magnetic>Get a Tribute</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <div class="eyebrow split">DeepDreams AI Studio</div>
+    <h1 class="hero-title">
+      <span class="line"><span>Cinematic</span></span>
+      <span class="line"><span><em>Tribute</em> Films,</span></span>
+      <span class="line"><span>born from a photo.</span></span>
+    </h1>
+    <p class="hero-sub split">Beautiful video tributes made from your simple photos. Bring your memories back to life and share them with your loved ones.</p>
+    <div class="hero-actions split">
+      <a href="#work" class="btn-ghost" data-magnetic>View Our Films</a>
+      <a id="heroWa" class="btn-solid" data-magnetic>Start a Project</a>
+    </div>
+  </div>
+
+  <div class="hero-video reveal-scale">
+    <div class="hv-shell">
+      <div class="hv-loader"><span></span></div>
+      <iframe id="heroFrame" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="DeepDreams sample tribute film"></iframe>
+      <div class="hv-glow"></div>
+    </div>
+    <div class="hv-caption">Featured Film · sound off — tap any film below to listen</div>
+  </div>
+
+  <div class="scroll-cue"><span></span>Scroll</div>
+</section>
+
+<!-- ===== MARQUEE ===== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marquee"></div>
+</div>
+
+<!-- ===== WORK / GALLERY ===== -->
+<section id="work" class="section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Portfolio</span>
+      <h2 class="sec-title">Selected <em>Tribute</em> Films</h2>
+      <p class="sec-desc">Click on any video below to watch. We update our new works here daily.</p>
+    </div>
+  </div>
+  <div class="filters reveal" id="filters"></div>
+  <div class="container">
+    <div class="grid" id="gallery">
+      <div class="loading"><div class="spinner"></div><p>Loading our latest films…</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section id="services" class="section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Beyond Tributes</span>
+      <h2 class="sec-title">A Full <em>Creative-Tech</em> Studio</h2>
+      <p class="sec-desc">Making tribute videos is our main work. But we also design websites, browser extensions, and smart AI tools.</p>
+    </div>
+    <div class="services">
+      <article class="svc reveal" data-tilt>
+        <div class="svc-no">01</div>
+        <h3>Tribute AI Videos</h3>
+        <p>Beautiful videos for birthdays, weddings, anniversaries, and in memory of departed family members.</p>
+        <span class="svc-tag">Our Main Work</span>
+      </article>
+      <article class="svc reveal" data-tilt>
+        <div class="svc-no">02</div>
+        <h3>Websites</h3>
+        <p>Get your own professional website or business portfolio page built exactly like this one.</p>
+        <span class="svc-tag">Design + Build</span>
+      </article>
+      <article class="svc reveal" data-tilt>
+        <div class="svc-no">03</div>
+        <h3>Chrome Extensions</h3>
+        <p>Custom browser tools to automate your daily tasks and save your work hours.</p>
+        <span class="svc-tag">Automation</span>
+      </article>
+      <article class="svc reveal" data-tilt>
+        <div class="svc-no">04</div>
+        <h3>AI Agents</h3>
+        <p>Smart AI bots to answer your customer messages and do support work for you 24/7.</p>
+        <span class="svc-tag">Intelligence</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT / STATEMENT ===== -->
+<section id="about" class="section about">
+  <div class="container">
+    <p class="statement reveal-words">
+      We turn your simple photos into <em>moving memories</em> — so you can cherish your loved ones forever.
+    </p>
+    <div class="stats">
+      <div class="stat reveal"><b data-count="150">0</b><span>+</span><small>Films Delivered</small></div>
+      <div class="stat reveal"><b data-count="40">0</b><span>+</span><small>Happy Partners</small></div>
+      <div class="stat reveal"><b data-count="48">0</b><span>h</span><small>Avg. Turnaround</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact" class="section contact">
+  <div class="container">
+    <div class="contact-card reveal-scale">
+      <span class="kicker">Let's create</span>
+      <h2 class="sec-title">Something <em>moving</em>.</h2>
+      <p class="sec-desc">Everyone is welcome. Drop a WhatsApp message to get samples, pricing, or order your video.</p>
+
+      <div class="contact-btns">
+        <a id="waBtn" class="cbtn cbtn-wa" data-magnetic>
+          <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.737-.979z"/></svg>
+          Chat on WhatsApp</a>
+        <a id="mailBtn" class="cbtn cbtn-line" data-magnetic>✉ Email Us</a>
+      </div>
+
+      <div class="contact-meta">
+        <a id="igLink" target="_blank" rel="noopener" class="meta-link">Instagram</a>
+        <a id="ytLink" target="_blank" rel="noopener" class="meta-link">YouTube</a>
+        <button id="upiBtn" class="meta-link">UPI / Pay</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <img src="assets/logo.png" alt="" class="foot-logo" />
+  <p>© <span id="yr"></span> <b>DeepDreams AI Studio</b></p>
+  <p class="foot-tag">Cinematic Tribute AI Videos · Websites · Chrome Extensions · AI Agents</p>
+</footer>
+
+<!-- ===== FLOATING WHATSAPP ===== -->
+<a id="fab" class="fab" aria-label="WhatsApp us">
+  <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.737-.979z"/></svg>
+</a>
+
+<!-- ===== VIDEO LIGHTBOX ===== -->
+<div class="lb" id="lb">
+  <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
+  <div class="lb-inner" id="lbInner"></div>
+  <div class="lb-title" id="lbTitle"></div>
+</div>
+
+<!-- ===== UPI MODAL ===== -->
+<div class="lb upi" id="upiModal">
+  <button class="lb-close" id="upiClose" aria-label="Close">✕</button>
+  <div class="upi-card">
+    <h3>Pay DeepDreams</h3>
+    <p id="upiId">your-upi@bank</p>
+    <a id="upiPay" class="cbtn cbtn-wa">Open UPI App</a>
+    <small>Or copy the UPI ID above into any UPI app.</small>
+  </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

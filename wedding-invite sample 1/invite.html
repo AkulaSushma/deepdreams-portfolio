@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Wedding Invitation — DeepDreams AI Studio</title>
+<meta name="description" content="A beautiful South Indian wedding invitation website. Create yours free with DeepDreams AI Studio." />
+<meta name="theme-color" content="#5C0F1C" />
+<meta property="og:title" content="You are lovingly invited" />
+<meta property="og:description" content="Join us as two families become one. Tap to open the invitation." />
+<meta property="og:type" content="website" />
+<link rel="icon" type="image/png" href="assets/icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500;600&family=Noto+Serif+Telugu:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css?v=160" />
+</head>
+<body>
+
+<!-- ===== FLOATING MARIGOLD PETALS (ambient) ===== -->
+<div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
+
+<!-- ===== TAP-TO-OPEN COVER — golden temple doors ===== -->
+<div class="cover" id="cover" hidden>
+  <div class="cover-door l">
+    <div class="door-panel"></div>
+    <div class="door-handle l" aria-hidden="true"><span class="handle-ring"></span></div>
+    <span class="door-seam" aria-hidden="true"></span>
+  </div>
+  <div class="cover-door r">
+    <div class="door-panel"></div>
+    <div class="door-handle r" aria-hidden="true"><span class="handle-ring"></span></div>
+    <span class="door-seam" aria-hidden="true"></span>
+  </div>
+  <div class="cover-garland" aria-hidden="true"></div>
+  <div class="cover-center" role="button" aria-label="Open the invitation" tabindex="0">
+    <span class="seal">
+      <img id="sealImg" alt="The couple" hidden />
+      <b class="seal-mono" id="sealMono">S ♥ V</b>
+    </span>
+    <button class="seal-edit" id="sealEdit" type="button" hidden>✎ Replace cover photo</button>
+    <p class="cover-names"><span data-bind="bride">Saanvi</span> <em>&amp;</em> <span data-bind="groom">Vihaan</span></p>
+    <p class="cover-open">• TAP TO OPEN •</p>
+  </div>
+  <p class="cover-invited">You are warmly invited</p>
+</div>
+
+<!-- ===== EXPIRED SCREEN (shown by JS when the wedding has passed) ===== -->
+<div class="expired" id="expiredScreen" hidden>
+  <div class="expired-card">
+    <span class="om">ఓం</span>
+    <h1 class="expired-names" id="expNames">The Celebration</h1>
+    <p class="expired-note">This invitation has gracefully retired — the wedding has been celebrated, the blessings received, and two families are now one.</p>
+    <p class="expired-blessing">May their life together be filled with love, laughter, and light.</p>
+    <a class="wbtn wbtn-gold" href="https://deepdreams-portfolio.vercel.app/" id="expStudioLink">Made by DeepDreams AI Studio</a>
+  </div>
+</div>
+
+<div id="invitation">
+
+<!-- ===== THORANAM (mango-leaf garland) ===== -->
+<div class="thoranam" aria-hidden="true"></div>
+
+<!-- ===== HERO ===== -->
+<header class="w-hero">
+  <p class="invoke">॥ శ్రీ విఘ్నేశ్వర ప్రసన్న ॥</p>
+  <p class="invoke-sub">With the blessings of Lord Ganesha and our beloved elders</p>
+
+  <!-- GRAND FIRST IMPRESSION POSTER — full-frame couple image with live editable name board -->
+  <div id="welcomePoster"></div>
+
+  <div class="hero-date-card">
+    <span class="hdc-line" aria-hidden="true"></span>
+    <p class="hdc-date" data-bind="dateLong">Saturday, 11 December 2024</p>
+    <p class="hdc-muhurtham"><em>Subha Muhurtham</em> · <span data-bind="muhurthamTime">9:42 AM</span></p>
+    <p class="hdc-venue" data-bind="venueShort">The Grand Pavilion, Hyderabad</p>
+    <span class="hdc-line" aria-hidden="true"></span>
+  </div>
+
+  <div class="countdown" id="countdown" aria-label="Countdown to the wedding">
+    <div class="cd"><b id="cdD">0</b><span>Days</span></div>
+    <div class="cd"><b id="cdH">0</b><span>Hours</span></div>
+    <div class="cd"><b id="cdM">0</b><span>Minutes</span></div>
+    <div class="cd"><b id="cdS">0</b><span>Seconds</span></div>
+  </div>
+</header>
+
+<!-- ===== FAMILIES ===== -->
+<section class="w-section families">
+  <div class="w-container">
+    <div class="fam-grid">
+      <div class="fam reveal">
+        <span class="fam-flower" aria-hidden="true">✿</span>
+        <h2 class="fam-name" data-bind="bride">Priya</h2>
+        <p class="fam-daughter">daughter of</p>
+        <p class="fam-parents" data-bind="brideParents">Smt. Lakshmi &amp; Sri. Venkateswara Rao</p>
+        <p class="fam-city" data-bind="brideCity">Hyderabad</p>
+      </div>
+      <span class="fam-knot" aria-hidden="true">
+        <i class="knot-ring"></i>
+      </span>
+      <div class="fam reveal">
+        <span class="fam-flower" aria-hidden="true">✿</span>
+        <h2 class="fam-name" data-bind="groom">Karthik</h2>
+        <p class="fam-daughter">son of</p>
+        <p class="fam-parents" data-bind="groomParents">Smt. Saraswathi &amp; Sri. Raghunatha Reddy</p>
+        <p class="fam-city" data-bind="groomCity">Vijayawada</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GALLERY ===== -->
+<section class="w-section gallery-sec">
+  <div class="w-container">
+    <header class="w-head reveal">
+      <span class="w-orn" aria-hidden="true">❁ ❁ ❁</span>
+      <h2 class="w-title">Our Moments</h2>
+    </header>
+    <div class="gal" id="gallery">
+      <figure class="gal-item g-a" data-photo="0"><img src="" alt="Couple photograph" /><figcaption class="gal-add">＋ Add photo</figcaption></figure>
+      <figure class="gal-item g-b" data-photo="1"><img src="" alt="Couple photograph" /><figcaption class="gal-add">＋ Add photo</figcaption></figure>
+      <figure class="gal-item g-c" data-photo="2"><img src="" alt="Couple photograph" /><figcaption class="gal-add">＋ Add photo</figcaption></figure>
+      <figure class="gal-item g-d" data-photo="3"><img src="" alt="Couple photograph" /><figcaption class="gal-add">＋ Add photo</figcaption></figure>
+      <figure class="gal-item g-e" data-photo="4"><img src="" alt="Couple photograph" /><figcaption class="gal-add">＋ Add photo</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===== THE FESTIVITIES (interactive reveals) ===== -->
+<section class="w-section events-sec">
+  <div class="w-container">
+    <header class="w-head reveal">
+      <span class="w-orn" aria-hidden="true">❁ ❁ ❁</span>
+      <h2 class="w-title">The Festivities</h2>
+      <p class="w-sub">Rub off the turmeric, trace the henna heart, tap the dhol, light the diya — every celebration opens with a little magic.</p>
+    </header>
+    <div class="events" id="eventsList"><!-- rendered by JS --></div>
+  </div>
+</section>
+
+<!-- ===== OUR STORY ===== -->
+<section class="w-section story-sec">
+  <div class="w-container">
+    <div class="story-card reveal">
+      <span class="w-orn" aria-hidden="true">❁</span>
+      <h2 class="w-title">Two Hearts, One Journey</h2>
+      <p class="story-text" data-bind="story">What began as a chance meeting at a family gathering blossomed — with the blessings of both families — into a love written in the stars. Now, we begin our forever, and we want you beside us when we do.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VENUE ===== -->
+<section class="w-section venue-sec">
+  <div class="w-container">
+    <header class="w-head reveal">
+      <span class="w-orn" aria-hidden="true">❁ ❁ ❁</span>
+      <h2 class="w-title">The Venue</h2>
+    </header>
+    <div class="venue-card reveal">
+      <p class="venue-name" data-bind="venueName">Sri Lakshmi Kalyana Mandapam</p>
+      <p class="venue-addr" data-bind="venueAddr">Road No. 12, Banjara Hills, Hyderabad, Telangana</p>
+      <div class="venue-actions">
+        <a class="wbtn wbtn-gold" id="mapBtn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.4-6.5-10.2A6.5 6.5 0 0112 4.2a6.5 6.5 0 016.5 6.6C18.5 15.6 12 21 12 21z"/><circle cx="12" cy="10.6" r="2.3"/></svg>
+          Open in Google Maps
+        </a>
+        <button class="wbtn wbtn-line" id="icsBtn" type="button">＋ Add to calendar</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BLESSING / RSVP ===== -->
+<section class="w-section bless-sec">
+  <div class="w-container">
+    <div class="bless reveal">
+      <button class="bell" id="templeBell" type="button" aria-label="Ring the temple bell">
+        <svg viewBox="0 0 90 116" aria-hidden="true">
+          <path class="bell-loop" d="M39 4 h12 v8 h-12 z"/>
+          <path class="bell-body" d="M45 8 C48 8 51 10 51 14 L51 17 C66 22 74 36 74 54 L74 76 L16 76 L16 54 C16 36 24 22 39 17 L39 14 C39 10 42 8 45 8 Z"/>
+          <rect class="bell-lip" x="9" y="76" width="72" height="9" rx="4.5"/>
+          <circle class="bell-clapper" cx="45" cy="97" r="9"/>
+        </svg>
+      </button>
+      <p class="bell-cap">Ring the temple bell, then send us your blessing</p>
+      <div class="side-pick" id="sidePick">
+        <p class="side-q">Whose side are you cheering for?</p>
+        <div class="side-btns">
+          <button class="side-btn" data-side="bride" type="button">Team <b data-bind="bride">Priya</b> 🌸</button>
+          <button class="side-btn" data-side="groom" type="button">Team <b data-bind="groom">Karthik</b> 🥁</button>
+        </div>
+      </div>
+      <p class="bless-verse">“శ్రీరస్తు - శుభమస్తు - అవిఘ్నమస్తు”</p>
+      <p class="bless-text">Your presence is our greatest blessing. Kindly confirm so we may welcome you with open hearts.</p>
+      <a class="wbtn wbtn-maroon" id="rsvpBtn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.737-.979z"/></svg>
+        RSVP on WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="w-foot">
+  <div class="thoranam flip" aria-hidden="true"></div>
+  <p class="foot-names"><span class="script" data-bind="bride">Priya</span> &amp; <span class="script" data-bind="groom">Karthik</span></p>
+  <p class="foot-made">Invitation crafted with <a href="https://deepdreams-portfolio.vercel.app/" target="_blank" rel="noopener">DeepDreams AI Studio</a></p>
+</footer>
+
+</div><!-- /#invitation -->
+
+<!-- ===== FESTIVITY REVEAL MODAL ===== -->
+<div class="fest-modal" id="festModal" hidden role="dialog" aria-modal="true" aria-label="Ceremony invitation">
+  <div class="fest-veil" id="festVeil"></div>
+  <div class="fest-dialog" id="festDialog">
+    <button class="fest-x" id="festClose" type="button" aria-label="Close">✕</button>
+    <span class="fest-chip" id="festChip" hidden>✦ Revealed</span>
+    <div class="fest-paper" id="festPaper"><!-- rendered by JS --></div>
+    <div class="fest-foot">
+      <p class="fest-foot-hint" id="festFootHint"></p>
+      <div class="fest-bless" id="festBless" hidden>
+        <p>Bless us with your presence</p>
+        <button class="fest-close-btn" id="festCloseBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDITOR DOCK (only in edit mode) ===== -->
+<div class="dock" id="dock" hidden>
+  <button class="dock-btn" id="dockEdit" type="button">✎ Edit details</button>
+  <button class="dock-btn dock-share" id="dockShare" type="button">➦ Share</button>
+</div>
+
+<!-- ===== EDITOR PANEL ===== -->
+<div class="panel-veil" id="panelVeil" hidden></div>
+<aside class="panel" id="editorPanel" hidden aria-label="Edit invitation details">
+  <header class="panel-head">
+    <h2>Your wedding details</h2>
+    <button class="panel-x" id="panelClose" type="button" aria-label="Close editor">✕</button>
+  </header>
+  <div class="panel-body" id="panelBody"><!-- form rendered by JS --></div>
+  <footer class="panel-foot">
+    <button class="wbtn wbtn-maroon" id="panelApply" type="button">Save &amp; preview</button>
+  </footer>
+</aside>
+
+<!-- ===== SHARE SHEET ===== -->
+<div class="panel-veil" id="shareVeil" hidden></div>
+<div class="share-sheet" id="shareSheet" hidden>
+  <button class="panel-x" id="shareClose" type="button" aria-label="Close">✕</button>
+  <h2>Share your invitation</h2>
+  <p class="share-note" id="shareNote">Your link carries everything — it needs no website account, and it will gracefully retire the day after your wedding.</p>
+  <div class="share-linkbox"><input id="shareLink" readonly /><button id="copyLink" type="button">Copy</button></div>
+  <a class="wbtn wbtn-maroon" id="shareWa" target="_blank" rel="noopener">Share on WhatsApp</a>
+  <p class="share-upsell">Want your own domain, unlimited photos &amp; RSVP tracking? <a id="orderFull" target="_blank" rel="noopener">Order the full website from DeepDreams →</a></p>
+</div>
+
+<!-- ===== AI PROMPT GENERATOR MODAL ===== -->
+<div class="panel-veil" id="promptVeil" hidden></div>
+<div class="prompt-modal" id="promptModal" hidden role="dialog" aria-modal="true" aria-label="AI Image Prompt Generator">
+  <button class="panel-x" id="promptClose" type="button" aria-label="Close AI Prompt Generator">✕</button>
+  <div class="prompt-modal-header">
+    <span class="prompt-badge">✨ Smart AI Feature</span>
+    <h2>Generate Custom AI Poster Prompts</h2>
+    <p>Create personalized wedding artwork matching your faces and personality in ChatGPT, Midjourney, Leonardo, or Gemini.</p>
+  </div>
+  <div class="prompt-modal-body">
+    <div class="prompt-field-group">
+      <label for="promptCeremonySelect">Select Ceremony Poster:</label>
+      <select id="promptCeremonySelect" class="prompt-select">
+        <option value="welcome">Main Welcome Invitation Poster</option>
+        <option value="trace">Nichitartam (Engagement Poster)</option>
+        <option value="rub">Haldi Ceremony Poster</option>
+        <option value="light">Shubha Muhurtam (Wedding Poster)</option>
+        <option value="tap">Grand Reception Poster</option>
+      </select>
+    </div>
+    <div class="prompt-field-group">
+      <label for="promptStyleSelect">Art &amp; Personality Style:</label>
+      <select id="promptStyleSelect" class="prompt-select">
+        <option value="traditional">Royal South Indian Silk &amp; Gold Zari (Rich &amp; Regal)</option>
+        <option value="chibi">Charming Storybook / Animated Chibi (Cute &amp; Warm)</option>
+        <option value="heritage">Classic Temple Heritage Illustration (Ornate &amp; Sacred)</option>
+        <option value="cinematic">85mm Cinematic Photo (Soft Bokeh, Golden Hour)</option>
+        <option value="pastel">Pastel Pink &amp; Floral Dream (Modern Elegance)</option>
+      </select>
+    </div>
+    <div class="prompt-field-group">
+      <label for="promptCustomDetails">Custom Outfit / Feature Notes (Optional):</label>
+      <input type="text" id="promptCustomDetails" class="prompt-input" placeholder="e.g. Red kanjivaram saree, ivory veshti, smiling happily" />
+    </div>
+
+    <div class="prompt-output-box">
+      <label>Your Master AI Prompt:</label>
+      <textarea id="promptOutputArea" class="prompt-textarea" readonly></textarea>
+      <div class="prompt-actions-row">
+        <button id="copyMasterPromptBtn" class="pca-btn primary" type="button">📋 Copy Prompt to Clipboard</button>
+        <button id="uploadGeneratedArtBtn" class="pca-btn" type="button">📷 Upload Generated Image</button>
+      </div>
+    </div>
+
+    <div class="prompt-guide-box">
+      <h4>💡 How to generate your artwork with your faces:</h4>
+      <ol>
+        <li>Click <b>Copy Prompt to Clipboard</b> above.</li>
+        <li>Open <b>ChatGPT</b> (DALL-E 3), <b>Midjourney</b>, <b>Leonardo AI</b>, <b>Gemini</b>, or <b>Canva AI</b>.</li>
+        <li><b>Attach a clear photo</b> of the couple / family, paste the prompt, and click generate.</li>
+        <li>Save the generated image and click <b>Upload Generated Image</b> here to place it on your card!</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="photoInput" accept="image/*" hidden />
+
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+<script src="app.js?v=160"></script>
+</body>
+</html>
