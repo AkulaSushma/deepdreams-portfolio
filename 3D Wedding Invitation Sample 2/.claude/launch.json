@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "autoPort": true,
+  "configurations": [
+    {
+      "name": "wedding-invite",
+      "runtimeExecutable": "npx.cmd",
+      "runtimeArgs": ["--yes", "http-server", "."],
+      "port": 4180,
+      "autoPort": true
+    }
+  ]
+}

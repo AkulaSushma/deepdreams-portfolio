@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+/* Opened straight from disk? On file:// URLs the "?v=…" cache tag is treated as
+   part of the filename, so every versioned asset 404s and the page renders as
+   raw text. Re-point them at the bare filenames. No effect over http(s). */
+if (location.protocol === "file:") {
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('link[href*="?v="]').forEach(function (l) {
+      l.href = l.getAttribute("href").split("?")[0];
+    });
+    document.querySelectorAll('script[src*="?v="]').forEach(function (s) {
+      var n = document.createElement("script");
+      n.src = s.getAttribute("src").split("?")[0];
+      n.async = false;                      // keep config.js before the engine
+      s.parentNode.replaceChild(n, s);
+    });
+  });
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Create Your Invitation — Deepdreams AI Studio</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/stills/favicon.png?v=2" type="image/png">
+<link rel="icon" sizes="512x512" href="assets/stills/favicon-512.png?v=2" type="image/png">
+<link rel="apple-touch-icon" href="assets/stills/apple-touch-icon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="studio.css?v=20260731a">
+</head>
+<body class="studio editor-body">
+
+<header class="ed-bar">
+  <a class="ed-back" href="index.html" aria-label="Back to studio">‹</a>
+  <div class="ed-title">
+    <strong>Design your invitation</strong>
+    <small id="ed-saved">Saved on this device</small>
+  </div>
+  <div class="ed-bar-actions">
+    <button class="btn btn-quiet btn-sm" id="btn-reset" type="button">Reset</button>
+    <a class="btn btn-gold btn-sm" id="btn-preview" href="invitation.html?draft=1" target="_blank" rel="noopener">Preview&nbsp;↗</a>
+  </div>
+</header>
+
+<div class="ed-progress" aria-hidden="true"><span id="ed-progress-fill"></span></div>
+
+<nav class="ed-steps" id="ed-steps" aria-label="Editor sections">
+  <button class="ed-step is-on" data-panel="couple" type="button">1 · Couple</button>
+  <button class="ed-step" data-panel="events" type="button">2 · Functions</button>
+  <button class="ed-step" data-panel="venue" type="button">3 · Venue &amp; RSVP</button>
+  <button class="ed-step" data-panel="videos" type="button">4 · Videos</button>
+  <button class="ed-step" data-panel="blessing" type="button">5 · Blessing</button>
+  <button class="ed-step" data-panel="theme" type="button">6 · Palette</button>
+  <button class="ed-step" data-panel="launch" type="button">7 · Launch</button>
+</nav>
+
+<main class="ed-shell">
+
+  <!-- ─────────── FORM COLUMN ─────────── -->
+  <section class="ed-form" aria-label="Invitation settings">
+
+    <!-- 1 · COUPLE -->
+    <div class="ed-panel is-on" data-panel="couple">
+      <h2 class="ed-h">The couple</h2>
+      <p class="ed-p">These names appear on the seal, the hero film, the countdown and the finale.</p>
+
+      <div class="ed-row">
+        <label class="fld"><span>Bride's name <em>(shown first)</em></span>
+          <input id="f-bride" type="text" maxlength="22" placeholder="Harshitha"></label>
+        <label class="fld"><span>Groom's name</span>
+          <input id="f-groom" type="text" maxlength="22" placeholder="Sai Charan"></label>
+      </div>
+      <div class="ed-row">
+        <label class="fld"><span>Bride's full name</span>
+          <input id="f-brideFull" type="text" placeholder="Harshitha Chowdary"></label>
+        <label class="fld"><span>Groom's full name</span>
+          <input id="f-groomFull" type="text" placeholder="Sai Charan Reddy"></label>
+      </div>
+      <div class="ed-row">
+        <label class="fld"><span>Monogram <em>(wax seal)</em></span>
+          <input id="f-monogram" type="text" maxlength="9" placeholder="M · M"></label>
+        <label class="fld"><span>Wedding hashtag</span>
+          <input id="f-hashtag" type="text" maxlength="34" placeholder="#HarshithaWedsSaiCharan"></label>
+      </div>
+      <label class="fld"><span>Tagline <em>(under the names)</em></span>
+        <input id="f-tagline" type="text" maxlength="64" placeholder="Two souls · Seven vows · One forever"></label>
+
+
+      <h3 class="ed-sub">The main muhurat</h3>
+      <div class="ed-row">
+        <label class="fld"><span>Wedding date</span><input id="f-date" type="date"></label>
+        <label class="fld"><span>Pheras time</span><input id="f-time" type="time"></label>
+        <label class="fld fld-sm"><span>UTC offset</span>
+          <select id="f-tz">
+            <option value="+05:30">India +05:30</option>
+            <option value="+04:00">Gulf +04:00</option>
+            <option value="+00:00">UK +00:00</option>
+            <option value="-05:00">US East −05:00</option>
+            <option value="-08:00">US West −08:00</option>
+            <option value="+10:00">AU East +10:00</option>
+          </select></label>
+      </div>
+      <label class="fld"><span>Muhurat line</span>
+        <input id="f-muhurat" type="text" placeholder="Shubh Muhurat · 7:08 PM"></label>
+      <p class="ed-hint">Live countdown target: <b id="ed-iso">—</b></p>
+
+      <div class="ed-nav"><button class="btn btn-gold" data-next="events" type="button">Next · Functions</button></div>
+    </div>
+
+    <!-- 2 · EVENTS -->
+    <div class="ed-panel" data-panel="events">
+      <h2 class="ed-h">The celebrations</h2>
+      <p class="ed-p">Add every function. They appear as cards in the order below.</p>
+      <div id="ev-list" class="ev-list"></div>
+      <button class="btn btn-ghost btn-block" id="ev-add" type="button">+ Add a function</button>
+      <div class="ed-nav">
+        <button class="btn btn-quiet" data-next="couple" type="button">Back</button>
+        <button class="btn btn-gold" data-next="venue" type="button">Next · Venue</button>
+      </div>
+    </div>
+
+    <!-- 3 · VENUE -->
+    <div class="ed-panel" data-panel="venue">
+      <h2 class="ed-h">Venue &amp; RSVP</h2>
+      <label class="fld"><span>Venue name</span>
+        <input id="f-venueName" type="text" placeholder="The Royal Palace Gardens"></label>
+      <label class="fld"><span>Full address</span>
+        <input id="f-venueAddress" type="text" placeholder="Lake Pichola Road, Udaipur, Rajasthan 313001"></label>
+      <div class="ed-row">
+        <label class="fld"><span>City <em>(shown in the finale)</em></span>
+          <input id="f-city" type="text" placeholder="Udaipur"></label>
+        <label class="fld"><span>Google Maps search</span>
+          <input id="f-mapsQuery" type="text" placeholder="The Oberoi Udaivilas, Udaipur"></label>
+      </div>
+      <p class="ed-hint">Tip: paste the exact name Google Maps shows, so the pin lands perfectly.</p>
+
+      <h3 class="ed-sub">RSVP</h3>
+      <label class="fld"><span>Google Form link <em>(optional — leave blank for the built-in form)</em></span>
+        <input id="f-formUrl" type="url" placeholder="https://docs.google.com/forms/d/e/…/viewform?embedded=true"></label>
+      <label class="fld"><span>RSVP deadline line</span>
+        <input id="f-deadline" type="text" placeholder="Please respond by 1 November 2026"></label>
+
+      <div class="ed-nav">
+        <button class="btn btn-quiet" data-next="events" type="button">Back</button>
+        <button class="btn btn-gold" data-next="videos" type="button">Next · Videos</button>
+      </div>
+    </div>
+
+    <!-- 4 · VIDEOS -->
+    <div class="ed-panel" data-panel="videos">
+      <h2 class="ed-h">Wedding Films &amp; Video Clips</h2>
+      <p class="ed-p">Replace the invitation's cinematic video bands with your own pre-wedding videos or teaser clips. Paste direct MP4 video URLs or choose a video file from your device.</p>
+      <p class="ed-hint" style="margin-bottom:18px;"><b>Video Duration Guidance:</b> Videos between <b>10 to 50 seconds</b> (up to 1 minute / 60s max) are recommended for fast mobile streaming and smooth scrolling.</p>
+
+      <div class="ev-list">
+        <!-- Film 1 -->
+        <div class="ev open">
+          <div class="ev-head">
+            <span class="ev-dot" style="background:var(--s-gold)"></span>
+            <span class="ev-name">Film 1 · The Wedding Film</span>
+          </div>
+          <div class="ev-body">
+            <div class="ed-row">
+              <label class="fld"><span>Eyebrow</span><input id="f-film1-eyebrow" type="text" placeholder="The Wedding Film"></label>
+              <label class="fld"><span>Caption</span><input id="f-film1-line" type="text" placeholder="Every love story deserves cinema"></label>
+            </div>
+            <label class="fld"><span>Video URL <em>(MP4 / WebM link)</em></span>
+              <input id="f-film1-src" type="url" placeholder="assets/film/film1.mp4"></label>
+            <label class="fld"><span>Or upload video file</span>
+              <input id="f-film1-file" type="file" accept="video/mp4,video/webm,video/*"></label>
+            <p class="ed-hint" id="f-film1-status">Recommended: 10s to 50s clip.</p>
+          </div>
+        </div>
+
+        <!-- Film 2 -->
+        <div class="ev open">
+          <div class="ev-head">
+            <span class="ev-dot" style="background:var(--s-gold)"></span>
+            <span class="ev-name">Film 2 · A Royal Affair</span>
+          </div>
+          <div class="ev-body">
+            <div class="ed-row">
+              <label class="fld"><span>Eyebrow</span><input id="f-film2-eyebrow" type="text" placeholder="A Royal Affair"></label>
+              <label class="fld"><span>Caption</span><input id="f-film2-line" type="text" placeholder="Dressed in gold, bound by fire"></label>
+            </div>
+            <label class="fld"><span>Video URL <em>(MP4 / WebM link)</em></span>
+              <input id="f-film2-src" type="url" placeholder="assets/film/film2.mp4"></label>
+            <label class="fld"><span>Or upload video file</span>
+              <input id="f-film2-file" type="file" accept="video/mp4,video/webm,video/*"></label>
+            <p class="ed-hint" id="f-film2-status">Recommended: 10s to 50s clip.</p>
+          </div>
+        </div>
+
+        <!-- Film 3 -->
+        <div class="ev open">
+          <div class="ev-head">
+            <span class="ev-dot" style="background:var(--s-gold)"></span>
+            <span class="ev-name">Film 3 · The Grand Walk</span>
+          </div>
+          <div class="ev-body">
+            <div class="ed-row">
+              <label class="fld"><span>Eyebrow</span><input id="f-film3-eyebrow" type="text" placeholder="The Grand Walk"></label>
+              <label class="fld"><span>Caption</span><input id="f-film3-line" type="text" placeholder="Every step, toward forever"></label>
+            </div>
+            <label class="fld"><span>Video URL <em>(MP4 / WebM link)</em></span>
+              <input id="f-film3-src" type="url" placeholder="assets/film/film3.mp4"></label>
+            <label class="fld"><span>Or upload video file</span>
+              <input id="f-film3-file" type="file" accept="video/mp4,video/webm,video/*"></label>
+            <p class="ed-hint" id="f-film3-status">Recommended: 10s to 50s clip.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-nav">
+        <button class="btn btn-quiet" data-next="venue" type="button">Back</button>
+        <button class="btn btn-gold" data-next="blessing" type="button">Next · Blessing</button>
+      </div>
+    </div>
+
+    <!-- 4 · BLESSING -->
+    <div class="ed-panel" data-panel="blessing">
+      <h2 class="ed-h">The hidden blessing</h2>
+      <p class="ed-p">Guests rub away a gold foil card to find this. Keep it personal — it's the moment they screenshot.</p>
+      <label class="fld"><span>Heading</span>
+        <input id="f-scratchHeading" type="text" maxlength="52" placeholder="A little secret, just for you"></label>
+      <label class="fld"><span>Secret message</span>
+        <textarea id="f-scratchMessage" rows="4" maxlength="260" placeholder="You hold a special place in our story…"></textarea></label>
+      <label class="fld"><span>Hidden-moment heading</span>
+        <input id="f-sanctumHeading" type="text" maxlength="40" placeholder="The Hidden Moment"></label>
+      <label class="fld"><span>Hidden-moment hint</span>
+        <input id="f-sanctumHint" type="text" maxlength="70" placeholder="Scroll gently to unfold this hidden moment"></label>
+      <div class="ed-nav">
+        <button class="btn btn-quiet" data-next="venue" type="button">Back</button>
+        <button class="btn btn-gold" data-next="theme" type="button">Next · Palette</button>
+      </div>
+    </div>
+
+    <!-- 5 · THEME -->
+    <div class="ed-panel" data-panel="theme">
+      <h2 class="ed-h">Your palette</h2>
+      <p class="ed-p">Start from a preset, then fine-tune. Everything in the invitation follows these six colours.</p>
+      <div class="preset-row" id="preset-row"></div>
+      <div class="swatches">
+        <label class="sw"><input id="f-maroon" type="color"><span>Primary</span></label>
+        <label class="sw"><input id="f-maroonDeep" type="color"><span>Deep</span></label>
+        <label class="sw"><input id="f-gold" type="color"><span>Gold</span></label>
+        <label class="sw"><input id="f-goldSoft" type="color"><span>Gold soft</span></label>
+        <label class="sw"><input id="f-ivory" type="color"><span>Ivory</span></label>
+        <label class="sw"><input id="f-inkOnIvory" type="color"><span>Ink</span></label>
+      </div>
+      <div class="ed-nav">
+        <button class="btn btn-quiet" data-next="blessing" type="button">Back</button>
+        <button class="btn btn-gold" data-next="launch" type="button">Next · Launch</button>
+      </div>
+    </div>
+
+    <!-- 6 · LAUNCH -->
+    <div class="ed-panel" data-panel="launch">
+      <h2 class="ed-h">Launch</h2>
+      <p class="ed-p">Your draft lives on this device. Preview it as a real invitation as often as you like — designing and previewing are free. When you are happy with it, publish it with your activation code and you will get one permanent link for your guests.</p>
+
+      <ul class="checklist" id="checklist"></ul>
+
+      <div class="launch-grid">
+        <a class="btn btn-gold btn-block" id="btn-open" href="invitation.html?draft=1" target="_blank" rel="noopener">Open my invitation ↗</a>
+        <button class="btn btn-ghost btn-block" id="btn-publish" type="button">Publish my invitation</button>
+        <button class="btn btn-ghost btn-block" id="btn-config" type="button">Download config.js</button>
+        <button class="btn btn-ghost btn-block" id="btn-json" type="button">Download brief (.json)</button>
+        <a class="btn btn-quiet btn-block" id="btn-send" href="#">Email the brief to the studio</a>
+      </div>
+
+      <!-- PUBLISH — the paid step.
+           The code is typed here, sent in the body of one POST, and checked on
+           our server. This page holds no list of codes and cannot decide for
+           itself whether one is genuine. -->
+      <div class="publish-box" id="publish-box" hidden>
+        <div id="publish-form">
+          <label class="publish-label" for="publish-token">Activation code</label>
+          <input class="publish-input" id="publish-token" type="text" inputmode="text"
+                 autocomplete="off" autocapitalize="characters" spellcheck="false"
+                 placeholder="DD-XXXXX-XXXXX-XXXXX" aria-describedby="publish-status">
+          <button class="btn btn-gold btn-block" id="btn-publish-go" type="button">Publish my website</button>
+          <p class="publish-status" id="publish-status" role="status" aria-live="polite" hidden></p>
+          <button class="btn btn-quiet btn-block" id="btn-publish-recover" type="button" hidden>I already published — find my link</button>
+          <p class="ed-hint">Do not have a code yet? <a href="https://wa.me/919010901232" target="_blank" rel="noopener">Ask us for one on WhatsApp →</a></p>
+        </div>
+
+        <div id="publish-done" hidden>
+          <p class="publish-done-h">Your invitation is live 🪔</p>
+          <p class="ed-hint">This is your permanent link. It will keep working, and nothing about it depends on this device any more.</p>
+          <div class="publish-linkbox"><input id="publish-link" readonly><button class="btn btn-quiet" id="btn-publish-copy" type="button">Copy</button></div>
+          <a class="btn btn-gold btn-block" id="btn-publish-wa" target="_blank" rel="noopener">Share on WhatsApp</a>
+          <p class="ed-hint">Need a change later? <a href="https://wa.me/919010901232" target="_blank" rel="noopener">Message us and we will update it for you →</a></p>
+        </div>
+      </div>
+
+      <p class="ed-hint">A published invitation opens in <b>view-only</b> mode — your guests see the invitation, never the editor.</p>
+      <p class="ed-hint" id="ed-toast" role="status" aria-live="polite"></p>
+
+      <div class="ed-nav"><button class="btn btn-quiet" data-next="theme" type="button">Back</button></div>
+    </div>
+  </section>
+
+  <!-- ─────────── LIVE PREVIEW COLUMN ───────────
+       Contextual: the card shows only the part of the invitation the
+       open editor step actually changes. Step 7 (Launch) unhides every
+       scene at once so the whole invitation can be read end-to-end. -->
+  <aside class="ed-preview" aria-label="Live preview">
+    <div class="pv-sticky">
+      <p class="pv-label">Live preview <b id="pv-label-what">· The couple</b></p>
+      <div class="pv-card" id="pv-card" data-scene="couple">
+
+        <!-- 1 · COUPLE — seal, names, muhurat, countdown -->
+        <div class="pv-scene is-on" data-pv="couple">
+          <span class="pv-seal" id="pv-monogram">M · M</span>
+          <p class="pv-eyebrow">శ్రీ రస్తు · శుభమస్తు</p>
+          <h3 class="pv-names" id="pv-names">Harshitha <i>♥</i> Sai Charan</h3>
+          <p class="pv-vow" id="pv-vow">Two souls · Seven vows · One forever</p>
+          <div class="pv-rule"></div>
+          <p class="pv-date" id="pv-date">Thursday, 26 November 2026</p>
+          <div class="pv-cd" id="pv-cd"></div>
+          <p class="pv-muhurat" id="pv-muhurat">Shubh Muhurat · 7:08 PM</p>
+        </div>
+
+        <!-- 2 · FUNCTIONS — the celebration cards -->
+        <div class="pv-scene" data-pv="events">
+          <p class="pv-eyebrow pv-scene-eyebrow" id="pv-ev-eyebrow">Four days of festivity</p>
+          <h4 class="pv-scene-h">The Celebrations</h4>
+          <div class="pv-rule"></div>
+          <div class="pv-events" id="pv-events"></div>
+          <p class="pv-empty" id="pv-ev-empty" hidden>No functions yet — add one on the left.</p>
+        </div>
+
+        <!-- 3 · VENUE & RSVP -->
+        <div class="pv-scene" data-pv="venue">
+          <p class="pv-eyebrow pv-scene-eyebrow">Where the stars align</p>
+          <h4 class="pv-scene-h">The Venue</h4>
+          <div class="pv-rule"></div>
+          <p class="pv-venue" id="pv-venue">The Royal Palace Gardens</p>
+          <p class="pv-addr" id="pv-address">Lake Pichola Road, Udaipur, Rajasthan</p>
+          <span class="pv-chip" id="pv-maps">📍 Open in Google Maps</span>
+          <div class="pv-rule"></div>
+          <p class="pv-deadline" id="pv-deadline">Please respond by 1 November 2026</p>
+          <span class="pv-chip pv-chip-solid">RSVP · Confirm Your Presence</span>
+          <p class="pv-rsvp-kind" id="pv-rsvp-kind">Built-in RSVP form</p>
+        </div>
+
+        <!-- 4 · VIDEOS — real film bands, loaded only on this step -->
+        <div class="pv-scene" data-pv="videos">
+          <p class="pv-eyebrow pv-scene-eyebrow">Between the chapters</p>
+          <h4 class="pv-scene-h">Wedding Films</h4>
+          <div class="pv-rule"></div>
+          <div class="pv-films" id="pv-films">
+            <figure class="pv-film" data-film="1">
+              <video id="pv-film1" muted loop playsinline preload="none"></video>
+              <figcaption><b id="pv-film1-eyebrow">The Wedding Film</b><span id="pv-film1-line">Every love story deserves cinema</span></figcaption>
+            </figure>
+            <figure class="pv-film" data-film="2">
+              <video id="pv-film2" muted loop playsinline preload="none"></video>
+              <figcaption><b id="pv-film2-eyebrow">A Royal Affair</b><span id="pv-film2-line">Dressed in gold, bound by fire</span></figcaption>
+            </figure>
+            <figure class="pv-film pv-film-portrait" data-film="3">
+              <video id="pv-film3" muted loop playsinline preload="none"></video>
+              <figcaption><b id="pv-film3-eyebrow">The Grand Walk</b><span id="pv-film3-line">Every step, toward forever</span></figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <!-- 5 · BLESSING — the scratch card, already revealed -->
+        <div class="pv-scene" data-pv="blessing">
+          <p class="pv-eyebrow pv-scene-eyebrow">For our dearest guests</p>
+          <h4 class="pv-scene-h">A Hidden Blessing</h4>
+          <div class="pv-rule"></div>
+          <div class="pv-foil">
+            <span class="pv-foil-tag">Scratched open</span>
+            <b id="pv-scratch-heading">A little secret, just for you</b>
+            <p id="pv-scratch-message">You hold a special place in our story…</p>
+          </div>
+          <div class="pv-rule"></div>
+          <p class="pv-date" id="pv-sanctum-heading">The Hidden Moment</p>
+          <p class="pv-muhurat" id="pv-sanctum-hint">Scroll gently to unfold this hidden moment</p>
+        </div>
+
+        <!-- 6 · PALETTE — the six colours, live on this card -->
+        <div class="pv-scene" data-pv="theme">
+          <p class="pv-eyebrow pv-scene-eyebrow">Your six colours</p>
+          <h4 class="pv-scene-h" id="pv-theme-names">Harshitha &amp; Sai Charan</h4>
+          <div class="pv-rule"></div>
+          <div class="pv-pal" id="pv-pal"></div>
+          <span class="pv-chip pv-chip-solid">Enter the Wedding World</span>
+          <p class="pv-tag" id="pv-tag">#HarshithaWedsSaiCharan</p>
+        </div>
+      </div>
+      <p class="pv-note">Previewing the step you're editing. Tap <b>Preview&nbsp;↗</b> for the real, full-motion invitation.</p>
+    </div>
+  </aside>
+</main>
+
+<!-- Shared with the other invitation design and with the server: one set of
+     limits, one publishing client. Neither holds a key or a list of codes. -->
+<script src="/shared/limits.js?v=1"></script>
+<script src="/shared/publish-client.js?v=1"></script>
+<script src="config.js?v=20260731a"></script>
+<script src="editor.js?v=20260731a"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+source/
+node_modules/
+3d-world-source/node_modules/
+3d-world-source/dist/
+3d-world-source/dist-single/
+.DS_Store
+Thumbs.db

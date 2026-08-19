@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+/* Opened straight from disk? On file:// URLs the "?v=…" cache tag is treated as
+   part of the filename, so every versioned asset 404s and the page renders as
+   raw text. Re-point them at the bare filenames. No effect over http(s). */
+if (location.protocol === "file:") {
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('link[href*="?v="]').forEach(function (l) {
+      l.href = l.getAttribute("href").split("?")[0];
+    });
+    document.querySelectorAll('script[src*="?v="]').forEach(function (s) {
+      var n = document.createElement("script");
+      n.src = s.getAttribute("src").split("?")[0];
+      n.async = false;                      // keep config.js before the engine
+      s.parentNode.replaceChild(n, s);
+    });
+  });
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DeepDreams AI Studio — Interactive Wedding Invitation Websites</title>
+<meta name="description" content="Interactive wedding invitation websites you share with one link — your photographs, event details, countdown, RSVP and a 3D wedding world. See the live demo or create your own.">
+<meta name="theme-color" content="#1A0710">
+<!-- These pointed at the old GitHub Pages copy. A cross-domain canonical tells
+     Google to index THAT site instead of this one, so the Vercel deployment
+     would never rank and its link equity would flow to the retired host. -->
+<link rel="canonical" href="https://fluffy-gaufre-c412ed.netlify.app/3D%20Wedding%20Invitation%20Sample%202/index.html">
+<meta property="og:title" content="DeepDreams AI Studio — Interactive Wedding Invitation Websites">
+<meta property="og:description" content="Share your complete wedding invitation through one link. See the live demo, or create your own.">
+<meta property="og:image" content="https://fluffy-gaufre-c412ed.netlify.app/3D%20Wedding%20Invitation%20Sample%202/assets/stills/logo.png">
+<meta property="og:url" content="https://fluffy-gaufre-c412ed.netlify.app/3D%20Wedding%20Invitation%20Sample%202/index.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/stills/favicon.png?v=2" type="image/png">
+<link rel="icon" sizes="512x512" href="assets/stills/favicon-512.png?v=2" type="image/png">
+<link rel="apple-touch-icon" href="assets/stills/apple-touch-icon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="studio.css?v=20260728n">
+</head>
+<body class="studio">
+
+<!-- ═══════════ NAV ═══════════ -->
+<header class="nav" id="nav">
+  <a class="nav-brand" href="#top">
+    <span class="nav-sigil" aria-hidden="true">॥</span>
+    <span class="nav-brand-text">
+      <strong data-studio="name">DeepDreams AI Studio</strong>
+      <small data-studio="tagline">Interactive Wedding Invitations</small>
+    </span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#showcase">Showcase</a>
+    <a href="#inside">What's inside</a>
+    <a href="#world">3D World</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="btn btn-gold btn-sm" href="create.html">Create yours</a>
+  <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<main id="top">
+<section class="hero-studio">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-grain" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <p class="kicker reveal">కల్యాణ శుభలేఖ &nbsp;·&nbsp; Wedding Invitation Studio</p>
+
+    <h1 class="hero-h1 reveal">
+      Invitations that open<br>
+      <span class="foil">like a palace door.</span>
+    </h1>
+
+    <!-- The old wording ("scroll-driven film", "real-time 3D") described how the
+         page is built rather than what the couple receives. Plain sentences a
+         family can read in one pass. -->
+    <p class="hero-sub reveal">
+      A complete wedding invitation website you share with a single link. It opens
+      with a wax seal, moves through your photographs as your guests scroll, counts
+      down to your muhurat, collects RSVPs, and ends in a 3D wedding celebration
+      they can explore from their phone.
+    </p>
+
+    <div class="hero-cta reveal">
+      <a class="btn btn-gold btn-lg" href="invitation.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        See the Live Demo
+      </a>
+      <a class="btn btn-ghost btn-lg" href="create.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Create Your Own
+      </a>
+    </div>
+    <!-- "about 6 minutes" was a promise no one measured. "In minutes" is true
+         and does not contradict anything else on the page. -->
+    <p class="hero-note reveal">Free to design and preview · No sign-up · Ready in minutes</p>
+
+    <!-- "181 frames" and "60fps" are production details, not benefits. What a
+         couple actually wants to know is what they get and on what device. -->
+    <ul class="trust reveal" aria-label="At a glance">
+      <li><b>1</b><span>link to share with everyone</span></li>
+      <li><b>3D</b><span>wedding celebration</span></li>
+      <li><b>100%</b><span>designed for phones</span></li>
+      <li><b>RSVP</b><span>collected for you</span></li>
+    </ul>
+  </div>
+
+  <a class="hero-scroll" href="#showcase" aria-label="Scroll to showcase"><i></i></a>
+</section>
+
+<!-- ═══════════ SHOWCASE — living phone mockup ═══════════ -->
+<section id="showcase" class="section showcase">
+  <header class="sec-h reveal">
+    <p class="kicker">A real page, not a mockup</p>
+    <h2 class="sec-t foil">This is what your guests receive</h2>
+    <p class="sec-s">Scroll down — the invitation below moves exactly the way it does on your guests' phones.</p>
+  </header>
+
+  <div class="stage">
+    <!-- floating frame carries the drift; .phone keeps its reveal animation so
+         the two transforms never fight -->
+    <div class="phone-float">
+      <div class="phone reveal" id="phone">
+        <div class="phone-notch" aria-hidden="true"></div>
+        <div class="phone-screen">
+          <img class="phone-shot" src="assets/stills/site-invite2.jpg" alt="Harshitha and Sai Charan wedding invitation on a phone" loading="lazy" decoding="async" />
+        </div>
+        <span class="phone-glare" aria-hidden="true"></span>
+      </div>
+      <span class="phone-shadow" aria-hidden="true"></span>
+    </div>
+
+    <ul class="orbit" aria-hidden="true">
+      <li class="orbit-chip o1">🎞 Your wedding artwork</li>
+      <li class="orbit-chip o2">🪙 Scratch blessing</li>
+      <li class="orbit-chip o3">⏳ Live countdown</li>
+      <li class="orbit-chip o4">🔔 Temple-bell score</li>
+      <li class="orbit-chip o5">🪷 Hidden moment</li>
+      <li class="orbit-chip o6">🐘 3D baraat world</li>
+    </ul>
+  </div>
+
+  <div class="showcase-cta reveal">
+    <a class="btn btn-gold" href="invitation.html">Open the full demo</a>
+    <a class="btn btn-quiet" href="invitation.html#sanctum">Jump to the hidden moment</a>
+  </div>
+</section>
+
+<!-- ═══════════ WHAT'S INSIDE ═══════════ -->
+<section id="inside" class="section inside">
+  <header class="sec-h reveal">
+    <p class="kicker">Every page includes</p>
+    <h2 class="sec-t foil">What's inside your invitation</h2>
+  </header>
+
+  <div class="cards">
+    <article class="card reveal"><span class="card-ico">🕉</span>
+      <h3>The Wax Seal</h3>
+      <p>Guests tap a glowing monogram seal. Palace doors part, a temple bell rings, and the score begins — the single gesture that unlocks sound on mobile.</p></article>
+
+    <article class="card reveal"><span class="card-ico">🎞</span>
+      <h3>Your Wedding Artwork</h3>
+      <p>Your photographs and artwork move gently as guests scroll through the invitation, so the whole story unfolds under their finger. Smooth on every phone.</p></article>
+
+    <article class="card reveal"><span class="card-ico">⏳</span>
+      <h3>Live Countdown</h3>
+      <p>A gold-bordered card counting days, hours, minutes and seconds to your muhurat — down to the second, in your timezone.</p></article>
+
+    <article class="card reveal"><span class="card-ico">🎊</span>
+      <h3>Every Function</h3>
+      <p>Haldi, Sangeet, Pheras, Reception — each with its own icon, accent colour, timings and venue. Add, remove and reorder as many as you need.</p></article>
+
+    <article class="card reveal"><span class="card-ico">🪙</span>
+      <h3>Scratch Blessing</h3>
+      <p>A gold foil card guests physically rub away with a finger — with foil texture audio, haptics, rising bells and a petal fountain. Hide a private message inside.</p></article>
+
+    <article class="card reveal"><span class="card-ico">🪷</span>
+      <h3>The Hidden Moment</h3>
+      <p>A second, private film that opens only when guests scroll down to it — one special moment of yours, framed inside a carved arch.</p></article>
+
+    <article class="card reveal"><span class="card-ico">📍</span>
+      <h3>Venue &amp; RSVP</h3>
+      <p>A tap-to-navigate map, one-tap Google Maps handoff, and an RSVP sheet — your own Google Form, or the built-in royal form.</p></article>
+
+    <article class="card reveal"><span class="card-ico">🎼</span>
+      <h3>Sound Design</h3>
+      <p>A looping score blended with synthesized temple bells, scroll gusts and foil texture — with a persistent mute that respects every guest's choice.</p></article>
+  </div>
+</section>
+
+<!-- ═══════════ 3D WORLD ═══════════ -->
+<section id="world" class="section world">
+  <div class="world-split">
+    <div class="world-copy reveal">
+      <p class="kicker">The finale</p>
+      <h2 class="sec-t foil">A 3D wedding world they can walk into</h2>
+      <p>At the end of the invitation stands a carved gateway. One tap and your guests
+        step into a 3D wedding celebration, right inside their phone browser.</p>
+      <ul class="ticks">
+        <li>A moving baraat: groom on horseback, elephant and walking guests</li>
+        <li>Bride and mandap, arrival petals and fireworks</li>
+        <li>A "Follow Baraat" camera, or explore freely with simple touch controls</li>
+        <li>Wedding music that begins the moment they enter</li>
+        <li>Loaded <em>only</em> after the tap, so the invitation itself opens quickly</li>
+      </ul>
+      <div class="world-cta">
+        <a class="btn btn-gold" href="invitation.html#finale">Experience the journey</a>
+        <a class="btn btn-quiet" href="invitation.html">See the full invitation</a>
+      </div>
+    </div>
+
+    <a class="world-art reveal" href="invitation.html#finale" aria-label="Experience the 3D wedding world through the invitation">
+      <img src="assets/stills/world.webp" alt="The 3D wedding world with the baraat procession" loading="lazy" decoding="async">
+      <span class="world-play">▶</span>
+    </a>
+  </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section id="how" class="section how">
+  <header class="sec-h reveal">
+    <p class="kicker">From blank page to shareable link</p>
+    <h2 class="sec-t foil">How it works</h2>
+  </header>
+
+  <ol class="steps">
+    <li class="step reveal"><span class="step-n">01</span>
+      <h3>See the demo</h3>
+      <p>Open the live invitation and feel the whole experience end to end — seal, cinema, blessing, world.</p></li>
+    <li class="step reveal"><span class="step-n">02</span>
+      <h3>Create your own</h3>
+      <p>Fill in your names, muhurat, functions, venue and palette in the editor. A live preview updates as you type.</p></li>
+    <li class="step reveal"><span class="step-n">03</span>
+      <h3>Preview &amp; send</h3>
+      <p>Open your real invitation instantly. Happy? Send the brief to us — we replace the artwork and film with <em>your</em> photographs and hand over the finished site.</p></li>
+  </ol>
+
+  <div class="how-cta reveal">
+    <a class="btn btn-gold btn-lg" href="create.html">Start building — it's free</a>
+  </div>
+</section>
+
+<!-- ═══════════ PRICING ═══════════ -->
+<section id="pricing" class="section pricing">
+  <header class="sec-h reveal">
+    <p class="kicker">Simple, honest packages</p>
+    <h2 class="sec-t foil">Choose your celebration</h2>
+    <!-- This line used to read "Prices are placeholders — edit them in
+         index.html": an internal note to ourselves, visible to every customer.
+         The ₹499 / ₹599 / ₹999 figures below it were placeholders too, so they
+         are now quoted on request rather than published before they can be
+         honoured. Put real figures back only when every package can be
+         delivered at that price. -->
+    <p class="sec-s">Every package is quoted after we understand your requirement. Message us on WhatsApp and we will share the price for the package you need.</p>
+  </header>
+
+  <div class="tiers">
+    <article class="tier reveal">
+      <h3>Muhurat</h3>
+      <p class="tier-price">On request</p>
+      <p class="tier-line">The invitation, beautifully yours</p>
+      <ul>
+        <li>Seal, scroll cinema &amp; countdown</li>
+        <li>All your functions &amp; venue map</li>
+        <li>Scratch blessing + RSVP</li>
+        <li>Your palette &amp; typography</li>
+        <li>Custom link, live in 5 days</li>
+      </ul>
+      <a class="btn btn-ghost" href="create.html">Start a draft</a>
+    </article>
+
+    <article class="tier tier-best reveal">
+      <span class="tier-flag">Most chosen</span>
+      <h3>Baraat</h3>
+      <p class="tier-price">On request</p>
+      <p class="tier-line">Everything, plus the hidden moment</p>
+      <ul>
+        <li>Everything in Muhurat</li>
+        <li>Frames cut from <em>your</em> photoshoot</li>
+        <li>The Hidden Moment film</li>
+        <li>Three cinematic film bands</li>
+        <li>Licensed score of your choosing</li>
+        <li>Live in 7 days</li>
+      </ul>
+      <a class="btn btn-gold" href="create.html">Start a draft</a>
+    </article>
+
+    <article class="tier reveal">
+      <h3>Rajwada</h3>
+      <p class="tier-price">On request</p>
+      <p class="tier-line">The full 3D wedding world</p>
+      <ul>
+        <li>Everything in Baraat</li>
+        <li>Real-time 3D baraat world</li>
+        <li>Characters styled to your couple</li>
+        <li>Venue-inspired 3D environment</li>
+        <li>RSVP dashboard &amp; guest analytics</li>
+        <li>Priority support through the wedding</li>
+      </ul>
+      <a class="btn btn-ghost" href="create.html">Start a draft</a>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════ WORDS ═══════════
+     Removed: two invented quotes credited to "— Placeholder testimonial".
+     A visitor reading that learns the studio has no real reviews yet, which
+     is worse than showing none at all. When a real couple sends one, put the
+     section back with their words and their name:
+
+     <section class="section words">
+       <div class="quotes">
+         <figure class="quote reveal">
+           <blockquote>"…their words…"</blockquote>
+           <figcaption>— Their name, city</figcaption>
+         </figure>
+       </div>
+     </section>
+     ═══════════════════════════ -->
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section id="faq" class="section faq">
+  <header class="sec-h reveal">
+    <p class="kicker">Before you ask</p>
+    <h2 class="sec-t foil">Questions, answered</h2>
+  </header>
+
+  <div class="acc">
+    <details class="reveal"><summary>Can I really edit everything myself?</summary>
+      <p>Yes. Names, monogram, muhurat, every function, venue, maps, RSVP link, the secret
+      blessing and the entire colour palette are editable in the browser — no code, no
+      account. Your draft is saved on your own device.</p></details>
+
+    <details class="reveal"><summary>What about the artwork and the films?</summary>
+      <p>The demo uses our own artwork so you can see the real thing immediately. In a paid
+      package we prepare the scrolling artwork and the hidden-moment film from your own
+      pre-wedding photographs, with the same motion and pacing you see here.</p></details>
+
+    <details class="reveal"><summary>Will it work on my relatives' old phones?</summary>
+      <p>It is built phone-first. Image quality, particle count, shadows and effects adapt to
+      each device, and the heavy 3D world downloads only when a guest chooses to enter it.</p></details>
+
+    <details class="reveal"><summary>Is the 3D world included by default?</summary>
+      <p>It's part of the Rajwada package. The other packages end at the finale card; the
+      gateway simply isn't shown.</p></details>
+
+    <details class="reveal"><summary>How do RSVPs reach us?</summary>
+      <p>Paste any Google Form link and it embeds inside the invitation. Leave it blank and
+      the built-in royal RSVP form is used instead.</p></details>
+
+    <details class="reveal"><summary>Can we change details after it's live?</summary>
+      <p>Yes — timings, venues and functions can be updated at any point up to the wedding,
+      and the link your guests already have stays the same.</p></details>
+  </div>
+</section>
+
+<!-- ═══════════ FINAL CTA ═══════════ -->
+<section class="section final">
+  <div class="final-card reveal">
+    <p class="kicker">Two ways in</p>
+    <h2 class="sec-t foil">See it, or build it.</h2>
+    <p class="final-sub">Open the demo to feel the craft. Or start your own draft and watch
+      your names appear inside it within minutes.</p>
+    <div class="hero-cta">
+      <a class="btn btn-gold btn-lg" href="invitation.html">See the Live Demo</a>
+      <a class="btn btn-ghost btn-lg" href="create.html">Create Your Own</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="foot">
+  <div class="foot-in">
+    <div>
+      <p class="foot-brand" data-studio="name">DeepDreams AI Studio</p>
+      <p class="foot-line" data-studio="tagline">Interactive Wedding Invitations</p>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="invitation.html">Live demo</a>
+      <a href="create.html">Create your own</a>
+      <a href="invitation.html#finale">3D world</a>
+      <a data-studio="mailto" href="#">Email us</a>
+      <a data-studio="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <a data-studio="instagram" href="#" target="_blank" rel="noopener">Instagram</a>
+    </nav>
+  </div>
+  <p class="foot-fine">© <span id="year"></span> <span data-studio="name">DeepDreams AI Studio</span> · Crafted in India</p>
+</footer>
+
+<script src="studio.js?v=20260730a"></script>
+</body>
+</html>

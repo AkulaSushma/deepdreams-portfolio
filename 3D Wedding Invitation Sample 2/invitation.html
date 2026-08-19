@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+/* Opened straight from disk? On file:// URLs the "?v=…" cache tag is treated as
+   part of the filename, so every versioned asset 404s and the page renders as
+   raw text. Re-point them at the bare filenames. No effect over http(s). */
+if (location.protocol === "file:") {
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('link[href*="?v="]').forEach(function (l) {
+      l.href = l.getAttribute("href").split("?")[0];
+    });
+    document.querySelectorAll('script[src*="?v="]').forEach(function (s) {
+      var n = document.createElement("script");
+      n.src = s.getAttribute("src").split("?")[0];
+      n.async = false;                      // keep config.js before the engine
+      s.parentNode.replaceChild(n, s);
+    });
+  });
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Harshitha ♥ Sai Charan — A Royal Wedding Invitation</title>
+<meta name="description" content="With the blessings of Lord Ganesha, join us for the royal wedding of Harshitha &amp; Sai Charan — 26 November 2026, The Royal Palace Gardens, Udaipur.">
+<meta name="theme-color" content="#4A0F22">
+<meta property="og:title" content="Harshitha ♥ Sai Charan — The Royal Wedding">
+<meta property="og:description" content="You are royally invited. Scroll to open the invitation.">
+<!-- Invitations are shared almost entirely on WhatsApp, which shows a large
+     preview card only when og:image is an absolute URL. Without this the
+     invitation link arrives as a bare grey rectangle. Kept as JPEG on purpose:
+     WhatsApp's preview renderer is unreliable with WebP. -->
+<meta property="og:image" content="https://fluffy-gaufre-c412ed.netlify.app/3D%20Wedding%20Invitation%20Sample%202/assets/stills/phone-invite.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/stills/favicon.png?v=2" type="image/png">
+<link rel="icon" sizes="512x512" href="assets/stills/favicon-512.png?v=2" type="image/png">
+<link rel="apple-touch-icon" href="assets/stills/apple-touch-icon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260731a">
+</head>
+<body class="is-loading">
+
+<!-- ═══════════════ EXPIRED SCREEN (shown when wedding date has passed) ═══════════════ -->
+<div id="expired" class="expired" hidden>
+  <div class="expired-inner">
+    <span class="expired-om">॥</span>
+    <h1 class="expired-title" id="expiredCouple">Harshitha ♥ Sai Charan</h1>
+    <div class="expired-divider" aria-hidden="true">
+      <span></span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      <span></span>
+    </div>
+    <p class="expired-message">This sacred invitation has gracefully concluded its journey. The wedding has been joyously celebrated, blessings have been bestowed, and two hearts have become one eternal flame.</p>
+    <p class="expired-blessing">May the divine light that united them illuminate their path through every season of life, filling their days with boundless love, radiant joy, and timeless grace.</p>
+    <p class="expired-verse" lang="te">శుభం భవతు</p>
+    <p class="expired-verse-sub">May all be auspicious</p>
+  </div>
+</div>
+
+<!-- ═══════════════ THE SEAL (loader / entry) ═══════════════ -->
+<div id="loader" aria-label="Opening invitation">
+  <div class="door door-l"></div>
+  <div class="door door-r"></div>
+  <div class="loader-center">
+    <svg id="mandala" viewBox="-100 -100 200 200" aria-hidden="true">
+      <g id="mandala-spin">
+        <g id="petal-ring"></g>
+        <circle r="58" fill="none" stroke="currentColor" stroke-width=".8" opacity=".7"/>
+        <circle r="52" fill="none" stroke="currentColor" stroke-width=".4" stroke-dasharray="2 3" opacity=".6"/>
+      </g>
+      <circle id="progress-ring" r="66" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" transform="rotate(-90)"/>
+    </svg>
+    <button id="seal-btn" aria-label="Open the invitation">
+      <span class="seal-monogram">S · H</span>
+      <span class="seal-rim"></span>
+    </button>
+    <p id="loader-status" class="hidden" role="status" aria-live="polite"><span id="loader-copy">Preparing the baraat…</span> <span id="loader-pct">100%</span></p>
+    <button id="loader-retry" class="hidden" type="button">Retry preparation</button>
+    <p id="loader-tap">Tap the seal to open</p>
+  </div>
+</div>
+
+<!-- ═══════════════ AMBIENT PETALS ═══════════════ -->
+<canvas id="petals" aria-hidden="true"></canvas>
+
+<!-- ═══════════════ HERO — THE UNFOLDING ═══════════════ -->
+<section id="hero">
+  <div class="hero-sticky">
+    <canvas id="scrub" aria-hidden="true"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <!-- Wide-screen editorial side notes — decorative and deliberately CSS-only -->
+    <div class="hero-side hero-side-left" aria-hidden="true">
+      <span class="hero-side-dev">వధువు</span>
+      <span class="hero-side-role">The Bride</span>
+      <span class="hero-side-rule"></span>
+      <em>Grace in every step</em>
+      <small>26 · XI · 2026</small>
+    </div>
+    <div class="hero-side hero-side-right" aria-hidden="true">
+      <span class="hero-side-dev">వరుడు</span>
+      <span class="hero-side-role">The Groom</span>
+      <span class="hero-side-rule"></span>
+      <em>Joy in every beat</em>
+      <small>Udaipur · Rajasthan</small>
+    </div>
+
+    <!-- Crown — a quiet, constant signature above the unfolding world -->
+    <div id="hero-crown" aria-hidden="true">
+      <span class="crown-mono">S · H</span>
+      <span class="crown-rule"></span>
+      <span class="crown-chapter">A Royal Union</span>
+    </div>
+
+    <!-- One permanent message: the imagery moves, the invitation remains serene. -->
+    <div class="beat beat-static">
+      <div class="hero-copy-glass">
+        <p class="eyebrow">శ్రీ రస్తు · శుభమస్తు</p>
+        <!-- Sized and (if needed) stacked by nameBoard in app.js — do not hard-code a font size here. -->
+        <h1 class="names"><span class="name-word">Harshitha</span> <span class="amp">♥</span> <span class="name-word">Sai Charan</span></h1>
+        <p class="hero-vow">Two souls · Seven vows · One forever</p>
+        <div class="scroll-hint" aria-hidden="true"><span>Scroll to witness their story</span><i class="chev"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ THE COUNTDOWN ═══════════════ -->
+<section id="countdown-section" aria-labelledby="countdown-title">
+  <div class="countdown-card">
+    <span class="countdown-sigil" aria-hidden="true">S · H</span>
+    <p class="eyebrow">The sacred day draws near</p>
+    <h2 id="countdown-title">Until forever begins</h2>
+    <p class="countdown-date">Thursday · 26 November 2026</p>
+    <div id="countdown" class="countdown" role="timer" aria-label="Countdown to the wedding">
+      <div class="cd-cell"><span class="cd-num" id="cd-d">–</span><span class="cd-lbl">Days</span></div>
+      <div class="cd-cell"><span class="cd-num" id="cd-h">–</span><span class="cd-lbl">Hours</span></div>
+      <div class="cd-cell"><span class="cd-num" id="cd-m">–</span><span class="cd-lbl">Mins</span></div>
+      <div class="cd-cell"><span class="cd-num" id="cd-s">–</span><span class="cd-lbl">Secs</span></div>
+    </div>
+    <p class="countdown-detail">Shubh Muhurat · 7:08 PM · Udaipur</p>
+  </div>
+</section>
+
+<!-- ═══════════════ THE CELEBRATIONS ═══════════════ -->
+<section id="events">
+  <img loading="lazy" class="decor decor-toran" src="assets/decor/toran.webp" alt="" aria-hidden="true">
+  <img loading="lazy" class="decor decor-elephant" data-depth="0.22" src="assets/decor/elephant.webp" alt="" aria-hidden="true">
+  <img loading="lazy" class="decor decor-umbrella" data-depth="0.38" src="assets/decor/umbrella.webp" alt="" aria-hidden="true">
+  <header class="sec-head">
+    <p class="eyebrow">Four days of festivity</p>
+    <h2 class="sec-title gold-foil">The Celebrations</h2>
+  </header>
+  <div id="event-cards"></div>
+</section>
+
+<!-- ═══════════════ FILM BAND 1 ═══════════════ -->
+<div class="film-band"><div class="film-inner"><video muted loop playsinline preload="none" data-poster="assets/film/film1_poster.webp" data-src="assets/film/film1.mp4" aria-label="Wedding film teaser"></video><p class="film-caption"><span class="film-eyebrow">The Wedding Film</span><span class="film-line">Every love story deserves cinema</span></p></div></div>
+
+<!-- ═══════════════ BLESSINGS · SCRATCH ═══════════════ -->
+<section id="blessings">
+  <header class="sec-head">
+    <p class="eyebrow">For our dearest guests</p>
+    <h2 class="sec-title gold-foil">A Hidden Blessing</h2>
+    <p class="sec-sub">Scratch the golden card with your finger</p>
+  </header>
+
+  <div id="scratch-wrap">
+    <div id="scratch-under">
+      <img src="assets/stills/scratch_reveal.webp" alt="The couple at sunset" loading="lazy">
+      <div class="scratch-msg">
+        <h3 id="scratch-heading">A little secret, just for you</h3>
+        <p id="scratch-message"></p>
+      </div>
+    </div>
+    <canvas id="scratch-foil"></canvas>
+  </div>
+
+  <img loading="lazy" class="decor decor-lotus" data-depth="0.3" src="assets/decor/lotus.webp" alt="" aria-hidden="true">
+</section>
+
+<!-- ═══════════════ THE HIDDEN MOMENT (scroll-driven) ═══════════════ -->
+<section id="sanctum">
+  <div id="sanctum-stage">
+    <header class="sec-head">
+      <p class="eyebrow" id="sanctum-eyebrow">A sacred moment awaits</p>
+      <h2 class="sec-title gold-foil" id="sanctum-heading">The Hidden Moment</h2>
+      <p class="sec-sub" id="sanctum-hint"></p>
+    </header>
+    <div id="sanctum-portal">
+      <div id="sanctum-view">
+        <canvas id="sanctum-canvas" aria-hidden="true"></canvas>
+        <img loading="lazy" id="sanctum-poster" src="assets/stills/sanctum_start.webp" alt="A hidden origami moment, veiled">
+        <div id="sanctum-veil">
+          <span class="veil-lotus">🪷</span>
+          <span class="veil-text" id="sanctum-veil-text"></span>
+          <span class="veil-progress hidden" id="sanctum-progress"></span>
+        </div>
+      </div>
+      <img loading="lazy" class="sanctum-arch" src="assets/decor/arch.webp" alt="" aria-hidden="true">
+    </div>
+    <div id="sanctum-filmbar" aria-hidden="true">
+      <span class="bar"><span class="fill" id="sanctum-fill"></span></span>
+      <span class="cap">The moment · unfolding</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ VENUE & RSVP ═══════════════ -->
+<!-- ═══════════════ FILM BAND 2 ═══════════════ -->
+<div class="film-band"><div class="film-inner"><video muted loop playsinline preload="none" data-poster="assets/film/film2_poster.webp" data-src="assets/film/film2.mp4" aria-label="A royal affair film clip"></video><p class="film-caption"><span class="film-eyebrow">A Royal Affair</span><span class="film-line">Dressed in gold, bound by fire</span></p></div></div>
+
+<section id="venue">
+  <img class="decor decor-toran decor-toran-2" src="assets/decor/toran.webp" alt="" aria-hidden="true">
+  <header class="sec-head">
+    <p class="eyebrow">Where the stars align</p>
+    <h2 class="sec-title gold-foil">The Venue</h2>
+  </header>
+
+  <div class="venue-card">
+    <div class="venue-art" style="background-image:url('assets/stills/venue_art.webp')"></div>
+    <div class="venue-info">
+      <h3 id="venue-name">The Royal Palace Gardens</h3>
+      <p id="venue-address">Lake Pichola Road, Udaipur, Rajasthan</p>
+      <a id="map-link" href="#" target="_blank" rel="noopener" aria-label="Open venue location in Google Maps">
+        <img src="assets/stills/map.webp" width="1000" height="1072" loading="lazy" decoding="async" alt="Map showing the venue location">
+      </a>
+      <a id="maps-btn" class="btn-gold" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        Open in Google Maps
+      </a>
+    </div>
+  </div>
+
+  <div class="rsvp-block">
+    <p id="rsvp-deadline" class="rsvp-deadline"></p>
+    <button id="rsvp-btn" class="btn-maroon">RSVP · Confirm Your Presence</button>
+  </div>
+
+  <!-- ═══════════════ FILM FINALE (portrait) ═══════════════ -->
+  <div class="film-band portrait">
+    <div class="film-inner">
+      <video muted loop playsinline preload="none" data-poster="assets/film/film3_poster.webp" data-src="assets/film/film3.mp4" aria-label="The grand walk"></video>
+      <p class="film-caption"><span class="film-eyebrow">The Grand Walk</span><span class="film-line">Every step, toward forever</span></p>
+    </div>
+  </div>
+
+  <footer id="finale">
+    <p class="finale-eyebrow"><span class="fe-rule"></span>With love<span class="fe-rule"></span></p>
+    <h3 class="finale-script">Harshitha &amp; Sai Charan</h3>
+    <p class="finale-heart" aria-hidden="true">♥</p>
+    <p class="finale-date">26th November 2026 · Udaipur</p>
+    <p class="finale-tag">#HarshithaWedsSaiCharan</p>
+    <div class="world-gateway" aria-labelledby="world-gateway-title">
+      <p class="world-gateway-kicker" lang="te">కల్యాణ మండపానికి స్వాగతం</p>
+      <a id="world-portal-link" class="world-portal-link" href="./world/index.html"
+        aria-labelledby="world-gateway-title world-gateway-hint">
+        <span class="world-portal-visual" aria-hidden="true">
+          <span class="world-gate-crown"></span>
+          <span class="world-gate-opening">
+            <span class="world-gate-door world-gate-door-left"></span>
+            <span class="world-gate-door world-gate-door-right"></span>
+          </span>
+          <span class="world-gate-threshold"></span>
+          <span class="world-gate-path"></span>
+        </span>
+        <span class="world-portal-action">
+          <strong id="world-gateway-title">Enter the Wedding World</strong>
+          <small id="world-gateway-hint">Step through the gates · join the baraat</small>
+        </span>
+        <span class="portal-tap-cue" aria-hidden="true">
+          <span class="portal-tap-hand">&#9757;&#65038;</span>
+          <span>Tap to enter</span>
+        </span>
+      </a>
+    </div>
+    <a class="finale-credit" href="index.html">Crafted by DeepDreams AI Studio</a>
+  </footer>
+</section>
+
+<!-- ═══════════════ RSVP MODAL ═══════════════ -->
+<div id="rsvp-modal" class="hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="RSVP form">
+  <div class="modal-sheet">
+    <button id="rsvp-close" aria-label="Close">✕</button>
+    <h3 class="gold-foil">Confirm Your Presence</h3>
+    <div id="rsvp-frame-slot"></div>
+  </div>
+</div>
+
+<!-- Golden scroll thread -->
+<div id="thread" aria-hidden="true"><i id="thread-lotus">🪷</i></div>
+
+<!-- Sound toggle -->
+<button id="sound-toggle" class="hidden" aria-label="Toggle sound">🔔</button>
+
+<!-- Full-screen handoff into the separately loaded 3D wedding world -->
+<div id="portal-transition" aria-hidden="true">
+  <div class="portal-transition-rays" aria-hidden="true"></div>
+  <p class="portal-transition-copy" role="status" aria-live="polite">
+    <span>స్వాగతం</span>
+    <strong>The baraat awaits</strong>
+  </p>
+</div>
+
+<a id="draft-badge" class="hidden" href="create.html">Draft preview · keep editing</a>
+
+<!-- The share pill that used to sit here is gone. A guest link is what the
+     studio is paid for, so it is issued by the server after the activation
+     code is accepted — this page can no longer make one. -->
+
+<!-- Reads window.DD_SITE when this page is served as a published invitation,
+     and resolves each photograph to the width this device actually wants.
+     On the demo, the draft and old ?c= links it does nothing at all. -->
+<script src="/shared/hydrate.js?v=1"></script>
+<script src="config.js?v=20260731a"></script>
+<script src="app.js?v=20260731a"></script>
+</body>
+</html>
