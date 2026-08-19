@@ -1,13 +1,19 @@
 /* ============================================================
    DEEPDREAMS WEDDING BUILDER
-   One page, three lives:
-     1. EDITOR  — couple opens /wedding/ (or ?edit), fills their
-        details, uploads photos, sees the site live.
-     2. SHARED  — guests open the couple's link; every detail
-        travels compressed inside the link itself (#d=...).
-        No accounts, no database, no cost.
-     3. RETIRED — the link reads its own wedding date and retires
-        itself the day after the wedding, automatically.
+   One page, four lives:
+     1. EDITOR    — couple opens ?edit, fills their details,
+        uploads photos, sees the site live. Free, private to
+        their own device.
+     2. PUBLISHED — the paid website at /invite/{slug}. The
+        server has already written the content into the page as
+        window.DD_SITE, so it renders on the first paint with no
+        fetch, and the photographs come from storage.
+     3. LEGACY    — an old ?d= link, still read so invitations
+        already sent keep opening. No new one can be made.
+     4. RETIRED   — a free preview reads its own wedding date and
+        retires itself the day after the wedding. A paid website
+        does not: the couple bought it, and only the studio takes
+        it down.
 
    Festivities: each celebration is a sealed card guests open
    with a ritual gesture — rub off the turmeric, trace the henna
@@ -49,36 +55,73 @@ const DEFAULTS = {
   DEFAULTS.date = d.toISOString().slice(0, 10);
 })();
 
-/* ---------- state & mode ---------- */
-let DATA = JSON.parse(JSON.stringify(DEFAULTS));
-const hashData = location.hash.startsWith("#d=") ? location.hash.slice(3) : null;
-const urlParams = new URLSearchParams(location.search);
-const wantsEdit = urlParams.has("edit");
-const VIEWING = !!hashData && !wantsEdit;  /* guest opening a shared link */
-const EDITING = wantsEdit;                 /* the couple building theirs */
-const DEMO    = !hashData && !wantsEdit;   /* bare page or ?demo — the live demo */
+/* ---------- state & mode ----------
+   The invitation payload used to travel inside the link itself, first in a
+   "#d=" fragment and later in "?d=". That is gone as a way of *sharing*: a
+   link that carries the whole wedding is a wedding website nobody paid for,
+   and it could never carry the photographs anyway — the budget that kept it
+   tappable in WhatsApp silently threw them away.
 
+   Reading such a link is still supported, so invitations already sent to
+   guests keep opening. Nothing in this file can create a new one. */
+let DATA = JSON.parse(JSON.stringify(DEFAULTS));
+const urlParams = new URLSearchParams(location.search);
+const hashData = urlParams.get("d")
+  || (location.hash.startsWith("#d=") ? location.hash.slice(3) : null);
+const wantsEdit = urlParams.has("edit");
+
+/* The paid website. /api/invite has already written the couple's content into
+   the page, so this is decided before anything is read from the URL — a guest
+   on a paid link must never be shown the sample couple, and must never depend
+   on a query parameter surviving a forward. */
+const PUBLISHED = !!(window.DD_HYDRATE && window.DD_HYDRATE.isPublished());
+
+const VIEWING = PUBLISHED || (!!hashData && !wantsEdit);  /* a guest */
+const EDITING = wantsEdit && !PUBLISHED;                  /* the couple building theirs */
+const DEMO    = !PUBLISHED && !hashData && !wantsEdit;    /* the live demo */
+
+/* LZString's URI-safe alphabet contains "+", and in a QUERY string a literal
+   "+" decodes to a space, which corrupts the payload. Swap it back for "_".
+   Reading tolerates both, so links shared before that change (which carry "+"
+   in the #fragment) still decode. */
 function decode(comp) {
   try {
+    const safe = String(comp).replace(/_/g, "+").replace(/ /g, "+");
     const json = window.LZString
-      ? LZString.decompressFromEncodedURIComponent(comp)
-      : decodeURIComponent(escape(atob(comp)));
+      ? LZString.decompressFromEncodedURIComponent(safe)
+      : decodeURIComponent(escape(atob(safe)));
     const d = JSON.parse(json);
     return { ...JSON.parse(JSON.stringify(DEFAULTS)), ...d,
              events: d.events?.length ? d.events : DEFAULTS.events,
              photos: [...(d.photos || []), null, null, null, null, null].slice(0, 5) };
   } catch (e) { return null; }
 }
-function encode(obj) {
-  const json = JSON.stringify(obj);
-  return window.LZString
-    ? LZString.compressToEncodedURIComponent(json)
-    : btoa(unescape(encodeURIComponent(json)));
-}
-
-if (VIEWING) {
+if (PUBLISHED) {
+  /* The server sends photographs as position markers rather than URLs, so the
+     device — not the server — chooses whether it downloads the 640 w file or
+     the 1280 w one. DD_HYDRATE resolves them here, where the screen width is
+     actually known. */
+  DATA = window.DD_HYDRATE.merge(DATA, window.DD_HYDRATE.content());
+  document.body.classList.add("viewing");
+} else if (VIEWING) {
   const d = decode(hashData);
-  if (d) DATA = d;
+  if (d) {
+    DATA = d;
+  } else {
+    /* A payload was present but would not decode — the link was cut short in
+       transit. Showing the sample couple here is the worst possible outcome:
+       the guest believes they are looking at the real invitation. Say plainly
+       that the link is incomplete instead. */
+    document.documentElement.innerHTML =
+      '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+      'background:#1a0f14;color:#f5e6d3;font:16px/1.7 Georgia,serif;text-align:center;padding:28px">' +
+      '<div style="max-width:30rem"><p style="font-size:2.6rem;margin:0 0 .4em">🪔</p>' +
+      '<h1 style="font-size:1.35rem;font-weight:600;margin:0 0 .6em">This invitation link is incomplete</h1>' +
+      '<p style="opacity:.85;margin:0 0 1.4em">Some messaging apps shorten long links. Please ask the couple ' +
+      'to send it again — or open it from the original message rather than a forward.</p>' +
+      '<a href="../index.html" style="color:#c8a253">DeepDreams AI Studio</a></div></body>';
+    throw new Error("share link truncated");
+  }
   document.body.classList.add("viewing");
 } else if (DEMO) {
   /* the live demo behaves exactly like a guest view of the sample couple */
@@ -110,7 +153,10 @@ function expired() {
   const gone = new Date(w); gone.setDate(gone.getDate() + 1); gone.setHours(23, 59, 59);
   return Date.now() > gone.getTime();
 }
-if (VIEWING && expired()) {
+/* A free preview link retires itself. A paid website does not: the couple
+   bought it, families reopen it for years afterwards, and taking it down is
+   the studio's decision to make from the admin console, not a date's. */
+if (VIEWING && !PUBLISHED && expired()) {
   $("#invitation").style.display = "none";
   const ex = $("#expiredScreen");
   ex.hidden = false;
@@ -1168,64 +1214,6 @@ if (EDITING) {
   });
 }
 
-/* ---------- share: everything travels inside the link ---------- */
-async function buildShareLink() {
-  const base = location.origin + location.pathname;
-  /* photos re-compressed small for travel; drop from the end until the link fits */
-  /* uploaded art (data:) is shrunk to travel inside the link;
-     posters that live as site files (posters/…) pass through as tiny paths */
-  const packImg = async (src, side, q) =>
-    !src ? null : src.startsWith("data:") ? await shrinkDataUrl(src, side, q) : src;
-  const travel = { ...DATA };
-  travel.cover = await packImg(DATA.cover, 240, .5);
-  travel.welcomeImg = await packImg(DATA.welcomeImg, 340, .45);
-  travel.events = [];
-  for (const ev of DATA.events)
-    travel.events.push(ev.img ? { ...ev, img: await packImg(ev.img, 340, .45) } : { ...ev });
-  const smalls = [];
-  for (const p of DATA.photos) {
-    if (!p) { smalls.push(null); continue; }
-    smalls.push(await shrinkDataUrl(p, 320, .5));
-  }
-  let n = smalls.filter(Boolean).length;
-  while (n >= 0) {
-    travel.photos = smalls.map((p, i) =>
-      p && smalls.slice(0, i + 1).filter(Boolean).length <= n ? p : null);
-    let link = base + "#d=" + encode(travel);
-    if (link.length < 28000 || n === 0) {
-      /* still too heavy? shed ceremony posters from the end, then the welcome poster */
-      if (link.length >= 28000) {
-        for (let k = travel.events.length - 1; k >= 0 && link.length >= 28000; k--) {
-          if (travel.events[k].img) {
-            travel.events[k] = { ...travel.events[k], img: null };
-            link = base + "#d=" + encode(travel);
-          }
-        }
-        if (link.length >= 28000 && travel.welcomeImg) {
-          travel.welcomeImg = null;
-          link = base + "#d=" + encode(travel);
-        }
-      }
-      return { link, photosIn: n, photosTotal: smalls.filter(Boolean).length };
-    }
-    n--;
-  }
-}
-function shrinkDataUrl(dataUrl, maxSide, q) {
-  return new Promise(res => {
-    const img = new Image();
-    img.onload = () => {
-      const sc = Math.min(1, maxSide / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      res(c.toDataURL("image/jpeg", q));
-    };
-    img.onerror = () => res(null);
-    img.src = dataUrl;
-  });
-}
-
 /* ---------- editor chrome ---------- */
 const panel = $("#editorPanel"), veil = $("#panelVeil");
 const openPanel = () => { buildForm(); if (panel) panel.hidden = false; if (veil) veil.hidden = false; };
@@ -1248,50 +1236,181 @@ if ($("#panelApply")) {
   });
 }
 
-const sheet = $("#shareSheet"), sVeil = $("#shareVeil");
-if ($("#dockShare")) {
-  $("#dockShare").addEventListener("click", async () => {
+function harvestFormIfOpen() { if (panel && !panel.hidden) harvestForm(); }
+
+/* ============================================================
+   PUBLISH — the activation code becomes a real website
+   ============================================================
+   Designing and previewing is free and always was. What is not free is a
+   link the couple can send to two hundred relatives, because that link is
+   the product. So there is no share button here at all: there is a sheet
+   that asks for the activation code we send after payment, and the public
+   link only ever comes back from the server.
+
+   The code is typed, held in a variable for the length of one request, and
+   never written to the URL, to localStorage, to the draft or to a log. The
+   only thing kept on the device is a random retry key, filed under a digest
+   of the code — see shared/publish-client.js. */
+const sheet = $("#publishSheet"), sVeil = $("#publishVeil");
+const closeShare = () => { if (sheet) sheet.hidden = true; if (sVeil) sVeil.hidden = true; };
+
+/* Where the customer is in the flow. `sent` matters: once a publish request
+   has left this device, "try again" must mean recover, never publish twice. */
+let publishSent = false;
+
+function pubShow(id, on) { const el = $(id); if (el) el.hidden = !on; }
+function pubSay(text, kind) {
+  const el = $("#publishStatus");
+  if (!el) return;
+  el.textContent = text || "";
+  el.hidden = !text;
+  el.className = "publish-status" + (kind ? " is-" + kind : "");
+}
+function pubBusy(on) {
+  const btn = $("#publishGo");
+  if (btn) { btn.disabled = on; btn.textContent = on ? "Publishing…" : "Publish my website"; }
+  const rec = $("#publishRecover");
+  if (rec) rec.disabled = on;
+}
+
+/** The finished website. Shown once, and the draft is only cleared here —
+ *  after the server has confirmed, never before. */
+function pubDone(url) {
+  pubShow("#publishForm", false);
+  pubShow("#publishDone", true);
+  pubSay("");
+
+  const box = $("#publishLink");
+  if (box) box.value = url;
+
+  const waText = `🌺 With the blessings of our families —\nYou are lovingly invited to the wedding of ${DATA.bride} & ${DATA.groom}!\nOpen our invitation: ${url}`;
+  const wa = $("#publishWa");
+  if (wa) wa.href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+
+  try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+}
+
+/* The photographs the couple actually uploaded, swapped for position markers
+   and handed to the image pipeline. Anything already living as a site file
+   (posters/…) is left alone — it does not need uploading and must not be
+   re-encoded. */
+async function collectForPublish() {
+  const H = window.DD_HYDRATE, P = window.DD_IMAGE_PREP;
+  if (!H || !P) throw new Error("PUBLISH_UNAVAILABLE");
+
+  const picked = H.collectImages(DATA, { coverKey: "cover" });
+
+  const blobs = [];
+  for (const dataUrl of picked.images) {
+    const blob = H.dataUrlToBlob(dataUrl);
+    if (!blob) throw new Error("PUBLISH_UNAVAILABLE");
+    blobs.push(blob);
+  }
+
+  const roles = picked.images.map((_, i) => (i === picked.coverIndex ? "cover" : "gallery"));
+
+  const photos = await P.prepareAll(blobs, {
+    roles,
+    onProgress: p => {
+      if (p.total) pubSay(`Preparing your photographs… ${Math.min(p.done + 1, p.total)} of ${p.total}`, "busy");
+    },
+  });
+
+  return { content: picked.content, photos };
+}
+
+if ($("#dockPublish")) {
+  $("#dockPublish").addEventListener("click", () => {
     harvestFormIfOpen();
     save();
-    const { link, photosIn, photosTotal } = await buildShareLink();
-    if ($("#shareLink")) $("#shareLink").value = link;
-    const note = $("#shareNote");
-    if (note) {
-      if (photosTotal === 0)
-        note.textContent = "Your link carries every detail. Add photos from the page to include them too. It retires by itself the day after your wedding.";
-      else if (photosIn === photosTotal)
-        note.textContent = `Your link carries every detail and all ${photosTotal} photos inside it — nothing stored anywhere. It retires by itself the day after your wedding.`;
-      else
-        note.textContent = `Your link carries every detail and ${photosIn} of your ${photosTotal} photos (links have a size limit). For all photos in full quality, order the full website below.`;
-    }
-    const waText = `🌺 With the blessings of our families —\nYou are lovingly invited to the wedding of ${DATA.bride} & ${DATA.groom}!\nOpen our invitation: ${link}`;
-    if ($("#shareWa")) $("#shareWa").href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+    pubSay("");
+    pubShow("#publishForm", true);
+    pubShow("#publishDone", false);
     if (sheet) sheet.hidden = false;
     if (sVeil) sVeil.hidden = false;
+    const input = $("#publishToken");
+    if (input) setTimeout(() => input.focus(), 60);
   });
 }
 
-const closeShare = () => { if (sheet) sheet.hidden = true; if (sVeil) sVeil.hidden = true; };
-if ($("#shareClose")) $("#shareClose").addEventListener("click", closeShare);
+if ($("#publishClose")) $("#publishClose").addEventListener("click", closeShare);
 if (sVeil) sVeil.addEventListener("click", closeShare);
 
-if ($("#copyLink")) {
-  $("#copyLink").addEventListener("click", () => {
-    navigator.clipboard?.writeText($("#shareLink") ? $("#shareLink").value : "");
-    $("#copyLink").textContent = "Copied ✓";
-    setTimeout(() => $("#copyLink").textContent = "Copy", 1500);
+if ($("#publishGo")) {
+  $("#publishGo").addEventListener("click", async () => {
+    const input = $("#publishToken");
+    const token = input ? input.value.trim() : "";
+    if (!token) { pubSay("Please enter the activation code we sent you.", "warn"); return; }
+
+    harvestFormIfOpen();
+    save();
+    pubBusy(true);
+
+    try {
+      const { content, photos } = await collectForPublish();
+
+      publishSent = true;
+      const res = await window.DD_PUBLISH.publish({
+        token,
+        template: "sample1",
+        content,
+        photos,
+        weddingDate: DATA.date,
+        onState: s => pubSay(s.message, s.phase === "error" ? "error" : "busy"),
+      });
+
+      if (input) input.value = "";   // off the screen the moment it is spent
+      pubDone(res.url);
+    } catch (err) {
+      /* A code already used may well be this customer's own earlier attempt
+         that never reached them. Offer the way back rather than an apology. */
+      const canRecover = (err && err.recoverable) || (err && err.code === "TOKEN_USED") || publishSent;
+      pubShow("#publishRecover", !!canRecover);
+      pubSay((err && err.userMessage) || "Something went wrong. Please try again, or contact us on WhatsApp.", "error");
+    } finally {
+      pubBusy(false);
+    }
   });
 }
 
-const orderMsg = `Hi DeepDreams! I built my wedding invitation preview and I'd like the full website (own link, all photos, RSVP tracking). My preview: `;
+if ($("#publishRecover")) {
+  $("#publishRecover").addEventListener("click", async () => {
+    const input = $("#publishToken");
+    const token = input ? input.value.trim() : "";
+    if (!token) { pubSay("Please enter your activation code so we can find your website.", "warn"); return; }
+
+    pubBusy(true);
+    pubSay("Looking for your website…", "busy");
+    try {
+      const res = await window.DD_PUBLISH.recover(token);
+      if (input) input.value = "";
+      pubDone(res.url);
+    } catch (err) {
+      pubSay((err && err.userMessage) || "We could not find a website for that code.", "error");
+    } finally {
+      pubBusy(false);
+    }
+  });
+}
+
+if ($("#publishCopy")) {
+  $("#publishCopy").addEventListener("click", () => {
+    navigator.clipboard?.writeText($("#publishLink") ? $("#publishLink").value : "");
+    $("#publishCopy").textContent = "Copied ✓";
+    setTimeout(() => { $("#publishCopy").textContent = "Copy"; }, 1500);
+  });
+}
+
+/* How a customer asks for a code. No preview link travels with it any more —
+   there is nothing to send — so it is a plain message, and the conversation
+   carries on in WhatsApp as it already does. */
+const orderMsg = "Hi DeepDreams! I have designed my wedding invitation and I would like to publish it. Please send me the activation code.";
 if ($("#orderFull")) {
-  $("#orderFull").addEventListener("click", async () => {
-    const { link } = await buildShareLink();
-    open(`https://wa.me/${STUDIO_WA}?text=${encodeURIComponent(orderMsg + link)}`, "_blank", "noopener");
+  $("#orderFull").addEventListener("click", e => {
+    e.preventDefault();
+    open(`https://wa.me/${STUDIO_WA}?text=${encodeURIComponent(orderMsg)}`, "_blank", "noopener");
   });
 }
-
-function harvestFormIfOpen() { if (panel && !panel.hidden) harvestForm(); }
 
 if (EDITING) {
   if ($("#dock")) $("#dock").hidden = false;

@@ -1,0 +1,120 @@
+#  DeepDreams AI Studio — Netlify configuration
+#
+#  Netlify's free plan permits commercial use; Vercel's does not. That is the
+#  only reason this file exists. Nothing about the application changed: the
+#  handlers under api/ are the same files, and netlify/lib/bridge.js is the
+#  single place that knows which platform is running them.
+#
+#  vercel.json is kept alongside this deliberately. Until the first customer
+#  link is handed out, both deployments can serve the same repository, and
+#  having a working way back costs nothing.
+
+[build]
+  # dist/ holds only the website. See netlify/build.js for what is left out
+  # and why — publishing the repository root would publish the server code.
+  command  = "node netlify/build.js"
+  publish  = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# The daily housekeeping run. UTC — 02:17 here is 07:47 in India.
+# Netlify caps a scheduled function at 30 seconds; api/cron/keepalive.js
+# budgets its sweep accordingly and leaves the remainder for the next night.
+[functions."keepalive"]
+  schedule = "17 2 * * *"
+
+
+# ── Routes ───────────────────────────────────────────────────────────────────
+# All rewrites (status 200), never redirects. The browser's address bar keeps
+# showing /api/…, which matters for more than tidiness: the admin session
+# cookie is scoped to Path=/api, and a 30x to /.netlify/functions/… would move
+# the request off that path and sign you out on every call.
+
+# The public invitation. This is the one URL a family forwards to two hundred
+# relatives, so it is first and it is plain.
+[[redirects]]
+  from = "/invite/*"
+  to = "/.netlify/functions/invite"
+  status = 200
+
+# Longest paths first — Netlify takes the first match, so /api/publish placed
+# above /api/publish/preflight would swallow it.
+[[redirects]]
+  from = "/api/publish/preflight"
+  to = "/.netlify/functions/publish-preflight"
+  status = 200
+
+[[redirects]]
+  from = "/api/publish/recover"
+  to = "/.netlify/functions/publish-recover"
+  status = 200
+
+[[redirects]]
+  from = "/api/publish"
+  to = "/.netlify/functions/publish"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/login"
+  to = "/.netlify/functions/admin-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/tokens"
+  to = "/.netlify/functions/admin-tokens"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/site"
+  to = "/.netlify/functions/admin-site"
+  status = 200
+
+# The manual run. The scheduled one has no route at all — Netlify will not let
+# a URL reach a scheduled function, which is why netlify/functions/keepalive.js
+# may supply its own secret and this one may not.
+[[redirects]]
+  from = "/api/cron/keepalive"
+  to = "/.netlify/functions/cron-keepalive"
+  status = 200
+
+# Anything else under /api is not a route this application has. Answering 404
+# rather than letting it fall through to the static site means a scanner
+# walking paths learns nothing about what is here.
+[[redirects]]
+  from = "/api/*"
+  to = "/404.html"
+  status = 404
+
+
+# ── Headers ──────────────────────────────────────────────────────────────────
+# The per-file-extension caching rules from vercel.json are gone: Netlify
+# matches header rules by path, not by extension, and inventing directory rules
+# to imitate them would be guesswork that rots. Netlify's own default for
+# static assets — revalidate against a content hash, serve 304 — is correct for
+# this site, and the two things where caching genuinely matters set their own
+# headers in code: the invitation page in api/invite.js, and every API reply
+# via json() in api/_lib/http.js.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# The studio console. It gives up nothing without a password, but it should
+# not be indexed and it should never sit in a shared cache.
+[[headers]]
+  for = "/admin"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"

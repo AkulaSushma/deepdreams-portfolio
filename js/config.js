@@ -46,30 +46,13 @@ window.DD_CONFIG = {
      showreel in the hero.                                       */
   HERO_VIDEO: "9dZuuFF6UvE",
 
-  /* ---- 3. FEATURED STRIP (top of the Work section) ----
-     A single hero piece chosen to lead the showcase, shown
-     above the tabbed collection. Pick your strongest work here.
-
-     tribute     : one YouTube link/ID + caption + category tag
-     invitations : up to two { title, youtube }
-     website     : one live wedding-website URL + couple / note
-                   (poster optional — see WEDDING_SITES note)    */
-  FEATURED: {
-    tribute: {
-      title:    "Featured Tribute — A Father's Blessing",
-      youtube:  "9dZuuFF6UvE",
-      category: "Memorial"
-    },
-    invitations: [
-      { title: "Sample invitation — garden ceremony", youtube: "9-aldmF3BWo" },
-      { title: "Sample invitation — temple wedding",  youtube: "cJ3x90THdOo" }
-    ],
-    website: {
-      couple: "Ananya & Rahul",
-      note:   "Live wedding invitation website",
-      url:    ""                     /* paste a live https:// link */
-    }
-  },
+  /* ---- 3. FEATURED STRIP ----
+     Removed. This block described a "Featured" strip that no longer
+     exists on the page — nothing in app.js or carousel.js ever read it.
+     It also carried an invented couple ("Ananya & Rahul") that would
+     have gone live the moment anything started reading it again.
+     The hero film is set by HERO_VIDEO above; everything else comes
+     from the Google Sheet.                                          */
 
   /* ---- 4. TRIBUTE FILMS (tab on the site) ----
      Fed from your Google Sheet's first tab (SHEET_ID above).
@@ -82,22 +65,28 @@ window.DD_CONFIG = {
      Or paste links directly below (links or 11-char IDs,
      or { title: "...", youtube: "..." } for a custom caption).
 
-     ⚠ TEMPORARY: the links below are stand-ins so the section
-     looks complete. Replace them with real invitation videos
-     (here or in the Sheet tab).                                 */
-  INVITATION_VIDEOS: [
-    { title: "Sample — cinematic style",  youtube: "9-aldmF3BWo" },
-    { title: "Sample — celebration film", youtube: "cJ3x90THdOo" },
-    { title: "Sample — family moments",   youtube: "NcsfmkNb-M0" }
-  ],
+     These are only used if the Sheet tab is empty or fails to load.
+     Titles here are what a visitor reads, so keep them plain and
+     professional — no "Sample —" or "Placeholder" wording.
+
+     Emptied on purpose. The three videos that used to sit here
+     (9-aldmF3BWo, cJ3x90THdOo, NcsfmkNb-M0) are all tribute films, so
+     whenever the Sheet was slow or empty this section quietly filled
+     itself with tribute work under a "Wedding Invitation" heading.
+     Only add a video here if it is genuinely an invitation film; if
+     this list is empty and the Sheet has nothing, the whole section
+     hides itself instead of showing the wrong work.               */
+  INVITATION_VIDEOS: [],
 
   /* ---- 6. NAME REVEAL VIDEO SAMPLES ----
      Google Sheet tab name:  NameReveals   (headers: Title | YouTube)
-     ⚠ TEMPORARY stand-ins below — replace with real ones.        */
-  NAME_REVEAL_VIDEOS: [
-    { title: "Sample — reveal style",  youtube: "jY5ooyW_Oug" },
-    { title: "Sample — blessing film", youtube: "FQXVaP6ZBM4" }
-  ],
+     Fallback only — used if the Sheet tab is empty. Visitor-facing
+     titles, so keep them plain.
+
+     Emptied for the same reason as above: jY5ooyW_Oug and FQXVaP6ZBM4
+     are tribute films ("Late father attending to his son's marriage"
+     and "…his daughter's marriage"), not name reveals.            */
+  NAME_REVEAL_VIDEOS: [],
 
   /* ---- 7. WEDDING WEBSITE SHOWCASE ----
      Google Sheet tab name:  Websites   (headers: Couple | Website | Note)
@@ -112,16 +101,16 @@ window.DD_CONFIG = {
                 (some hosts send X-Frame-Options). If absent, a
                 tasteful gradient placeholder is used.            */
   WEDDING_SITES: [
-    { couple: "Lakshmi & Sri",          note: "Cinematic wedding invitation website", url: "wedding-invite%20sample%201/index.html", poster: "site-invite1.jpg" },
-    { couple: "Harshitha & Sai Charan", note: "3D cinematic wedding website · interactive", url: "3D%20Wedding%20Invitation%20Sample%202/index.html", poster: "site-invite2.jpg" }
+    { couple: "Lakshmi & Sri",          note: "Interactive wedding invitation with event details and RSVP", url: "wedding-invite%20sample%201/index.html", poster: "site-invite1.jpg" },
+    { couple: "Harshitha & Sai Charan", note: "Interactive 3D wedding invitation experience", url: "3D%20Wedding%20Invitation%20Sample%202/index.html", poster: "site-invite2.jpg" }
   ],
 
   /* ---- 8. AI BUILDS / AI AGENT & WORKFLOW WEBSITES ----
      Google Sheet tab name:  AIBuilds   (headers: Title | Website | Note)
      Same shape as WEDDING_SITES.                                    */
   AI_BUILDS: [
-    { title: "Sample AI agent — lead intake",     note: "Custom workflow · WhatsApp-first", url: "", poster: "ai-lead-intake.jpg" },
-    { title: "Sample AI workflow — content engine", note: "Batched generation · dashboard",   url: "", poster: "ai-content-engine.jpg" }
+    { title: "AI Lead Enquiry Assistant", note: "Collects and organises customer enquiries through a simple WhatsApp-based process.", url: "", poster: "ai-lead-intake.jpg" },
+    { title: "AI Content Workflow",       note: "Helps businesses create, review and manage content from one simple dashboard.",     url: "", poster: "ai-content-engine.jpg" }
   ],
 
   /* ---- 9. CONTACT ---- */

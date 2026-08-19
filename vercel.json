@@ -2,6 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": false,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/invite/:slug", "destination": "/api/invite?slug=:slug" }
+  ],
+  "crons": [
+    { "path": "/api/cron/keepalive", "schedule": "17 2 * * *" }
+  ],
   "headers": [
     {
       "source": "/(.*)\\.html",
@@ -31,6 +37,13 @@
       "source": "/(.*)/world/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/admin(/.*)?",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Cache-Control", "value": "no-store" }
       ]
     },
     {

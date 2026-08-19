@@ -4,7 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Wedding Invitation — DeepDreams AI Studio</title>
-<meta name="description" content="A beautiful South Indian wedding invitation website. Create yours free with DeepDreams AI Studio." />
+<!-- "Create yours free" was a promise the studio does not keep: designing and
+     previewing is free, the finished invitation is a paid package. The
+     description now says what is actually free. -->
+<meta name="description" content="A beautiful wedding invitation website by DeepDreams AI Studio. Design and preview your invitation free, then we build and deliver the finished site." />
 <meta name="theme-color" content="#5C0F1C" />
 <meta property="og:title" content="You are lovingly invited" />
 <meta property="og:description" content="Join us as two families become one. Tap to open the invitation." />
@@ -13,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500;600&family=Noto+Serif+Telugu:wght@400;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css?v=160" />
+<link rel="stylesheet" href="style.css?v=162" />
 </head>
 <body>
 
@@ -52,7 +55,7 @@
     <h1 class="expired-names" id="expNames">The Celebration</h1>
     <p class="expired-note">This invitation has gracefully retired — the wedding has been celebrated, the blessings received, and two families are now one.</p>
     <p class="expired-blessing">May their life together be filled with love, laughter, and light.</p>
-    <a class="wbtn wbtn-gold" href="https://deepdreams-portfolio.vercel.app/" id="expStudioLink">Made by DeepDreams AI Studio</a>
+    <a class="wbtn wbtn-gold" href="/" id="expStudioLink">Made by DeepDreams AI Studio</a>
   </div>
 </div>
 
@@ -204,7 +207,7 @@
 <footer class="w-foot">
   <div class="thoranam flip" aria-hidden="true"></div>
   <p class="foot-names"><span class="script" data-bind="bride">Priya</span> &amp; <span class="script" data-bind="groom">Karthik</span></p>
-  <p class="foot-made">Invitation crafted with <a href="https://deepdreams-portfolio.vercel.app/" target="_blank" rel="noopener">DeepDreams AI Studio</a></p>
+  <p class="foot-made">Invitation crafted with <a href="/" target="_blank" rel="noopener">DeepDreams AI Studio</a></p>
 </footer>
 
 </div><!-- /#invitation -->
@@ -229,7 +232,7 @@
 <!-- ===== EDITOR DOCK (only in edit mode) ===== -->
 <div class="dock" id="dock" hidden>
   <button class="dock-btn" id="dockEdit" type="button">✎ Edit details</button>
-  <button class="dock-btn dock-share" id="dockShare" type="button">➦ Share</button>
+  <button class="dock-btn dock-share" id="dockPublish" type="button">✦ Publish</button>
 </div>
 
 <!-- ===== EDITOR PANEL ===== -->
@@ -245,15 +248,37 @@
   </footer>
 </aside>
 
-<!-- ===== SHARE SHEET ===== -->
-<div class="panel-veil" id="shareVeil" hidden></div>
-<div class="share-sheet" id="shareSheet" hidden>
-  <button class="panel-x" id="shareClose" type="button" aria-label="Close">✕</button>
-  <h2>Share your invitation</h2>
-  <p class="share-note" id="shareNote">Your link carries everything — it needs no website account, and it will gracefully retire the day after your wedding.</p>
-  <div class="share-linkbox"><input id="shareLink" readonly /><button id="copyLink" type="button">Copy</button></div>
-  <a class="wbtn wbtn-maroon" id="shareWa" target="_blank" rel="noopener">Share on WhatsApp</a>
-  <p class="share-upsell">Want your own domain, unlimited photos &amp; RSVP tracking? <a id="orderFull" target="_blank" rel="noopener">Order the full website from DeepDreams →</a></p>
+<!-- ===== PUBLISH SHEET =====
+     Designing and previewing is free. Publishing — a permanent link the
+     couple can send to their guests — needs the activation code we send
+     after payment. The code is checked on our server, never in this page. -->
+<div class="panel-veil" id="publishVeil" hidden></div>
+<div class="share-sheet" id="publishSheet" hidden>
+  <button class="panel-x" id="publishClose" type="button" aria-label="Close">✕</button>
+
+  <div id="publishForm">
+    <h2>Publish your invitation</h2>
+    <p class="share-note">Enter the activation code we sent you on WhatsApp. Your invitation will be published with all your photos, and you will get one permanent link to share with your guests.</p>
+
+    <label class="publish-label" for="publishToken">Activation code</label>
+    <input class="publish-input" id="publishToken" type="text" inputmode="text"
+           autocomplete="off" autocapitalize="characters" spellcheck="false"
+           placeholder="DD-XXXXX-XXXXX-XXXXX" aria-describedby="publishStatus" />
+
+    <button class="wbtn wbtn-maroon" id="publishGo" type="button">Publish my website</button>
+    <p class="publish-status" id="publishStatus" role="status" aria-live="polite" hidden></p>
+    <button class="publish-ghost" id="publishRecover" type="button" hidden>I already published — find my link</button>
+
+    <p class="share-upsell">Do not have a code yet? <a id="orderFull" href="#" target="_blank" rel="noopener">Ask us for one on WhatsApp →</a></p>
+  </div>
+
+  <div id="publishDone" hidden>
+    <h2>Your invitation is live 🪔</h2>
+    <p class="share-note">This is your permanent link. It will keep working, and your photos are safely stored — nothing depends on this device any more.</p>
+    <div class="share-linkbox"><input id="publishLink" readonly /><button id="publishCopy" type="button">Copy</button></div>
+    <a class="wbtn wbtn-maroon" id="publishWa" target="_blank" rel="noopener">Share on WhatsApp</a>
+    <p class="share-upsell">Need a change later? <a href="https://wa.me/919010901232" target="_blank" rel="noopener">Message us and we will update it for you →</a></p>
+  </div>
 </div>
 
 <!-- ===== AI PROMPT GENERATOR MODAL ===== -->
@@ -314,7 +339,18 @@
 
 <input type="file" id="photoInput" accept="image/*" hidden />
 
+<!-- lz-string reads invitation links shared before publishing existed. Nothing
+     in this page creates one any more. -->
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
-<script src="app.js?v=160"></script>
+
+<!-- Shared with the other invitation design, and with the server: one set of
+     limits, one image pipeline, one publishing client. None of them holds a
+     key, a token list or anything a browser should not have. -->
+<script src="/shared/limits.js?v=1"></script>
+<script src="/shared/image-prep.js?v=1"></script>
+<script src="/shared/publish-client.js?v=1"></script>
+<script src="/shared/hydrate.js?v=1"></script>
+
+<script src="app.js?v=162"></script>
 </body>
 </html>

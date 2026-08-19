@@ -5,4 +5,8 @@ Allow: /
 # out of the create/editor surface either way — it is a tool, not content.
 Disallow: /3D%20Wedding%20Invitation%20Sample%202/create.html
 
-Sitemap: https://deepdreams-portfolio.vercel.app/sitemap.xml
+# The studio console. It gives up nothing without a password, but a listing in
+# a search result is an invitation to try.
+Disallow: /admin
+
+Sitemap: https://fluffy-gaufre-c412ed.netlify.app/sitemap.xml

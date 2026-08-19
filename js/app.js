@@ -145,8 +145,8 @@ if (matchMedia('(hover:hover)').matches) {
    ============================================================ */
 function openLB(id, title, isVertical) {
   if (!id) return;
-  const videoTitle = title || 'Sample Video';
-  const msg = `Hi DeepDreams, I watched your video "${videoTitle}" on your website and I want to request this video style!`;
+  const videoTitle = title || 'your work';
+  const msg = `Hi DeepDreams AI Studio, I watched "${videoTitle}" on your website and I would like a similar video for my family.`;
   const waUrl = `https://wa.me/${CFG.WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
   const lbInner = $('#lbInner');
@@ -197,7 +197,10 @@ $('#upiId').addEventListener('click', () => { navigator.clipboard?.writeText(CFG
 
 /* ---------- marquee ---------- */
 (() => {
-  const words = ['Tribute Films', 'Memorial Videos', 'Wedding Blessings', 'Name Reveals', 'Invitation Websites', 'AI Cinematics', 'AI Agents', 'Websites'];
+  /* Kept in the same plain wording as the section headings. "AI Cinematics"
+     and "AI Agents" were jargon that appeared nowhere else on the page. */
+  const words = ['AI Tribute Films', 'Remembrance Videos', 'Wedding Invitation Videos',
+                 'Baby Name Reveals', 'Wedding Websites', 'Business Websites', 'AI Solutions'];
   const set = `<span>${words.join('</span><span>')}</span>`;
   $('#marquee').innerHTML = set + set;
 })();

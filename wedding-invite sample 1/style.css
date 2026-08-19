@@ -398,6 +398,38 @@ body.viewing .gal-item:not(.has-photo){display:none}
 .share-upsell{font-size:12.5px;color:#7A5240;margin-top:16px}
 .share-upsell a{color:var(--kumkum);font-weight:600;text-decoration:none;cursor:pointer}
 
+/* ---------- publish sheet ---------- */
+.publish-label{
+  display:block;text-align:left;font-family:var(--sans);font-size:11.5px;
+  font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:#7A5240;margin-bottom:7px;
+}
+/* Monospaced and letter-spaced because the code is read off a phone screen
+   and typed into another one. "0" against "O" is the whole difference between
+   a published wedding website and a customer who thinks we cheated them. */
+.publish-input{
+  width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  /* 16px is deliberate — anything smaller makes iOS Safari zoom the page in
+     the moment the code is tapped. The letter-spacing is what gives, not the
+     size: twenty monospaced characters plus .06em no longer fit inside the
+     sheet on a 360 px phone, and a clipped placeholder hides the very format
+     the customer is being asked to copy. */
+  font-size:16px;letter-spacing:.01em;text-align:center;text-transform:uppercase;
+  color:var(--ink);background:#fff;border:1px solid rgba(92,15,28,.22);
+  border-radius:12px;padding:13px 8px;margin-bottom:14px;
+}
+.publish-input:focus{outline:none;border-color:var(--kumkum);box-shadow:0 0 0 3px rgba(212,169,55,.22)}
+.publish-status{
+  font-size:13px;line-height:1.6;margin-top:12px;min-height:1.2em;color:#7A5240;
+}
+.publish-status.is-error{color:var(--kumkum)}
+.publish-status.is-warn{color:#8A5A12}
+.publish-ghost{
+  display:block;width:100%;margin-top:12px;font-family:var(--sans);font-size:13px;
+  color:var(--maroon);background:none;border:none;text-decoration:underline;cursor:pointer;
+}
+.wbtn[disabled],.publish-ghost[disabled]{opacity:.55;cursor:default}
+
 /* ============================================================
    EXPIRED
    ============================================================ */

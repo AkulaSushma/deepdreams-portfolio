@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Studio console</title>
+
+<!--
+  The studio console.
+
+  This file is public — anyone who guesses the path can download it. That is
+  fine, and it is why there is nothing in here worth having: no password, no
+  key, no list of activation codes, no customer detail. Every byte of real
+  information arrives from /api/admin/*, and each of those refuses anything
+  without a valid session cookie. What a stranger loading this page sees is a
+  password box and, behind it, four 401s.
+
+  Written as one file with no build step and no dependency, to match the rest
+  of the site.
+-->
+
+<style>
+  :root{
+    --ink:#F6EFE6; --muted:#B9A78F; --line:rgba(214,178,110,.22);
+    --bg:#140A10; --panel:#1D0F16; --gold:#D9B15F; --bad:#F0A9A9; --good:#9BD3A2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+    padding:24px 16px 64px;
+  }
+  main{max-width:900px;margin:0 auto}
+  h1{font-size:20px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 28px;font-size:13px}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 14px}
+  label{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+  input,select,textarea{
+    width:100%;font:inherit;font-size:16px;color:var(--ink);background:#0E0509;
+    border:1px solid var(--line);border-radius:9px;padding:10px 11px;margin-bottom:12px;
+  }
+  button{
+    font:inherit;font-size:14px;letter-spacing:.06em;cursor:pointer;
+    background:var(--gold);color:#22131A;border:0;border-radius:9px;padding:10px 16px;
+  }
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button[disabled]{opacity:.5;cursor:default}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  @media (max-width:620px){.grid2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  .pill{font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+  .pill.issued{color:var(--gold)} .pill.consumed{color:var(--good)}
+  .pill.revoked,.pill.disabled{color:var(--bad)} .pill.live{color:var(--good)}
+  .note{color:var(--muted);font-size:12px;margin:10px 0 0}
+  .msg{margin:10px 0 0;font-size:13px;min-height:19px}
+  .msg.err{color:var(--bad)} .msg.ok{color:var(--good)}
+  .code{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.04em;
+    background:#0E0509;border:1px solid var(--gold);border-radius:9px;padding:11px;margin:8px 0;
+    user-select:all;word-break:break-all;
+  }
+  a{color:var(--gold)}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Studio console</h1>
+  <p class="sub">Activation codes and published invitations.</p>
+
+  <!-- ── Sign in ─────────────────────────────────────────────────────── -->
+  <section id="gate">
+    <h2>Sign in</h2>
+    <label for="pw">Studio password</label>
+    <input id="pw" type="password" autocomplete="current-password" spellcheck="false">
+    <button id="btn-in">Sign in</button>
+    <p id="gate-msg" class="msg"></p>
+  </section>
+
+  <!-- ── Console ─────────────────────────────────────────────────────── -->
+  <div id="console" hidden>
+
+    <section>
+      <h2>New activation code</h2>
+      <div class="grid2">
+        <div>
+          <label for="t-label">Who is it for</label>
+          <input id="t-label" placeholder="Priya &amp; Karthik — paid 28 Jul" maxlength="80">
+        </div>
+        <div>
+          <label for="t-template">Invitation design</label>
+          <select id="t-template">
+            <option value="sample1">Sample 1 — classic card</option>
+            <option value="sample2">Sample 2 — royal 3D</option>
+          </select>
+        </div>
+      </div>
+      <label for="t-notes">Private note (never shown to anyone else)</label>
+      <input id="t-notes" placeholder="UPI ref, phone number, agreed date" maxlength="300">
+      <div class="row">
+        <button id="btn-mint">Create code</button>
+        <span class="note">One code activates one website, once.</span>
+      </div>
+      <div id="minted" hidden>
+        <p class="note">Copy this now — it is not stored anywhere and cannot be shown again.</p>
+        <div id="minted-list"></div>
+      </div>
+      <p id="mint-msg" class="msg"></p>
+    </section>
+
+    <section>
+      <h2>Codes</h2>
+      <div id="tokens">Loading…</div>
+      <p id="tok-msg" class="msg"></p>
+    </section>
+
+    <section>
+      <h2>Published invitations</h2>
+      <div id="sites">Loading…</div>
+      <p id="site-msg" class="msg"></p>
+    </section>
+
+    <section>
+      <div class="row">
+        <button id="btn-refresh" class="ghost">Refresh</button>
+        <button id="btn-out" class="ghost">Sign out</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+
+  const say = (el, text, kind) => { el.textContent = text || ""; el.className = "msg" + (kind ? " " + kind : ""); };
+
+  /* Every call goes through here so the 401 rule lives in one place: the
+     moment a session expires, the console closes rather than showing stale
+     rows next to buttons that no longer work. */
+  async function api(path, options) {
+    const res = await fetch(path, Object.assign({
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      cache: "no-store",
+    }, options || {}));
+
+    let body = null;
+    try { body = await res.json(); } catch { /* an empty or non-JSON reply */ }
+
+    if (res.status === 401) { showGate("Session ended. Please sign in again."); throw new Error("401"); }
+    if (!res.ok) throw new Error((body && body.message) || "That did not work. Please try again.");
+    return body;
+  }
+
+  function showGate(message) {
+    $("#console").hidden = true;
+    $("#gate").hidden = false;
+    say($("#gate-msg"), message || "", message ? "err" : "");
+  }
+
+  function showConsole() {
+    $("#gate").hidden = true;
+    $("#console").hidden = false;
+    $("#pw").value = "";          // never leave the password sitting in the DOM
+    refresh();
+  }
+
+  /* ── Sign in / out ─────────────────────────────────────────────────── */
+  $("#btn-in").addEventListener("click", async () => {
+    const btn = $("#btn-in");
+    btn.disabled = true;
+    say($("#gate-msg"), "Checking…");
+    try {
+      await api("/api/admin/login", { method: "POST", body: JSON.stringify({ password: $("#pw").value }) });
+      showConsole();
+    } catch (e) {
+      say($("#gate-msg"), e.message === "401" ? "That password was not accepted." : e.message, "err");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("#pw").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#btn-in").click(); });
+
+  $("#btn-out").addEventListener("click", async () => {
+    try { await api("/api/admin/login", { method: "POST", body: JSON.stringify({ action: "logout" }) }); } catch {}
+    showGate("Signed out.");
+  });
+
+  $("#btn-refresh").addEventListener("click", () => refresh());
+
+  /* ── Rendering ─────────────────────────────────────────────────────────
+     Built with createElement and textContent throughout. Labels and private
+     notes are typed by a human and stored verbatim; dropping them into
+     innerHTML would make the console the one page on this site where typed
+     text becomes markup. */
+  function el(tag, text, cls) {
+    const n = document.createElement(tag);
+    if (text != null) n.textContent = String(text);
+    if (cls) n.className = cls;
+    return n;
+  }
+
+  function table(head, rows) {
+    const t = el("table");
+    const thead = el("thead"), tr = el("tr");
+    head.forEach((h) => tr.appendChild(el("th", h)));
+    thead.appendChild(tr);
+    t.appendChild(thead);
+    const tb = el("tbody");
+    rows.forEach((cells) => {
+      const r = el("tr");
+      cells.forEach((c) => {
+        const td = el("td");
+        if (c instanceof Node) td.appendChild(c); else td.textContent = c == null ? "—" : String(c);
+        r.appendChild(td);
+      });
+      tb.appendChild(r);
+    });
+    t.appendChild(tb);
+    return t;
+  }
+
+  const day = (iso) => (iso ? String(iso).slice(0, 10) : "—");
+
+  /* ── Codes ─────────────────────────────────────────────────────────── */
+  $("#btn-mint").addEventListener("click", async () => {
+    const btn = $("#btn-mint");
+    const label = $("#t-label").value.trim();
+    if (!label) return say($("#mint-msg"), "Please say who the code is for.", "err");
+
+    btn.disabled = true;
+    say($("#mint-msg"), "Creating…");
+    try {
+      const out = await api("/api/admin/tokens", {
+        method: "POST",
+        body: JSON.stringify({
+          label,
+          template: $("#t-template").value,
+          notes: $("#t-notes").value.trim() || null,
+        }),
+      });
+
+      const list = $("#minted-list");
+      list.textContent = "";
+      (out.minted || []).forEach((m) => {
+        list.appendChild(el("div", m.label, "note"));
+        list.appendChild(el("div", m.code, "code"));
+      });
+      $("#minted").hidden = false;
+
+      $("#t-label").value = "";
+      $("#t-notes").value = "";
+      say($("#mint-msg"), "Created. Send this code to the customer yourself — it is not emailed.", "ok");
+      loadTokens();
+    } catch (e) {
+      say($("#mint-msg"), e.message, "err");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  async function loadTokens() {
+    const box = $("#tokens");
+    try {
+      const out = await api("/api/admin/tokens");
+      const rows = (out.tokens || []).map((t) => {
+        const status = el("span", t.status, "pill " + t.status);
+
+        let action = "—";
+        if (t.status === "issued") {
+          const b = el("button", "Revoke", "ghost");
+          b.addEventListener("click", async () => {
+            b.disabled = true;
+            try {
+              await api("/api/admin/tokens", { method: "POST", body: JSON.stringify({ action: "revoke", id: t.id }) });
+              say($("#tok-msg"), "Code withdrawn.", "ok");
+              loadTokens();
+            } catch (e) { say($("#tok-msg"), e.message, "err"); b.disabled = false; }
+          });
+          action = b;
+        }
+
+        return [t.label, t.template, status, day(t.issued_at), day(t.consumed_at), action];
+      });
+
+      box.textContent = "";
+      box.appendChild(rows.length
+        ? table(["For", "Design", "State", "Created", "Used"," "], rows)
+        : el("p", "No codes yet.", "note"));
+    } catch (e) {
+      box.textContent = "";
+      box.appendChild(el("p", e.message, "note"));
+    }
+  }
+
+  /* ── Published invitations ─────────────────────────────────────────── */
+  async function loadSites() {
+    const box = $("#sites");
+    try {
+      const out = await api("/api/admin/site");
+      const rows = (out.sites || []).map((s) => {
+        const link = el("a", s.slug);
+        link.href = s.url;
+        link.target = "_blank";
+        link.rel = "noopener";
+
+        const next = s.status === "live" ? "disabled" : "live";
+        const b = el("button", next === "disabled" ? "Take offline" : "Put back online", "ghost");
+        b.addEventListener("click", async () => {
+          b.disabled = true;
+          try {
+            await api("/api/admin/site", { method: "POST", body: JSON.stringify({ action: "status", id: s.id, status: next }) });
+            say($("#site-msg"), next === "live" ? "Back online." : "Taken offline.", "ok");
+            loadSites();
+          } catch (e) { say($("#site-msg"), e.message, "err"); b.disabled = false; }
+        });
+
+        return [link, s.template, el("span", s.status, "pill " + s.status), day(s.wedding_date), day(s.published_at), b];
+      });
+
+      box.textContent = "";
+      box.appendChild(rows.length
+        ? table(["Link", "Design", "State", "Wedding", "Published", " "], rows)
+        : el("p", "Nothing published yet.", "note"));
+    } catch (e) {
+      box.textContent = "";
+      box.appendChild(el("p", e.message, "note"));
+    }
+  }
+
+  function refresh() { loadTokens(); loadSites(); }
+
+  /* Is there already a session? The cookie is HttpOnly, so the only way to
+     find out is to ask the server — a cheap GET that either fills the console
+     or bounces straight back to the password box. */
+  api("/api/admin/tokens").then(showConsole).catch(() => showGate());
+})();
+</script>
+</body>
+</html>
