@@ -1,2 +1,5 @@
 .vercel
 dist
+
+# Local Netlify folder
+.netlify

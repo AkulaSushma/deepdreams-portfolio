@@ -9,4 +9,4 @@ Disallow: /3D%20Wedding%20Invitation%20Sample%202/create.html
 # a search result is an invitation to try.
 Disallow: /admin
 
-Sitemap: https://fluffy-gaufre-c412ed.netlify.app/sitemap.xml
+Sitemap: https://courageous-taiyaki-8c1286.netlify.app/sitemap.xml
