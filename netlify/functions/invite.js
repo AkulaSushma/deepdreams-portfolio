@@ -9,15 +9,28 @@
 const { bridge } = require("../lib/bridge");
 const invite = require("../../api/invite");
 
-function slugFromPath(path) {
-  const m = /^\/invite\/([^/?#]+)/.exec(String(path || ""));
-  if (!m) return undefined;
-  /* A guest's link can be pasted anywhere and arrive percent-encoded. The
-     handler validates the shape afterwards, so a bad decode is refused, not
-     trusted. */
-  try { return decodeURIComponent(m[1]); } catch { return m[1]; }
+function extractSlug(event) {
+  if (event && event.queryStringParameters && event.queryStringParameters.slug) {
+    return event.queryStringParameters.slug;
+  }
+  if (event && event.queryStringParameters && event.queryStringParameters.splat) {
+    return event.queryStringParameters.splat.replace(/^\/+/, "");
+  }
+  const sources = [
+    event && event.path,
+    event && event.rawUrl,
+    event && event.headers && (event.headers["x-nf-original-path"] || event.headers["x-original-url"] || event.headers["x-forwarded-uri"] || event.headers["x-rewrite-url"])
+  ];
+  for (const src of sources) {
+    if (!src) continue;
+    const m = /\/invite\/([^/?#]+)/i.exec(String(src));
+    if (m) {
+      try { return decodeURIComponent(m[1]); } catch { return m[1]; }
+    }
+  }
+  return undefined;
 }
 
 exports.handler = bridge(invite, {
-  query: (event) => ({ slug: slugFromPath(event.path) }),
+  query: (event) => ({ slug: extractSlug(event) }),
 });

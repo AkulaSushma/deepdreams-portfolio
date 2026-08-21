@@ -93,7 +93,12 @@ function safeJson(value) {
 function absolutise(html, baseDir) {
   const skip = /^(https?:|\/\/|\/|#|data:|mailto:|tel:|javascript:|blob:)/i;
 
-  const fixOne = (url) => (skip.test(url.trim()) ? url : baseDir + encodeURI(url.trim()));
+  const fixOne = (url) => {
+    const trimmed = (url || "").trim();
+    if (skip.test(trimmed)) return trimmed;
+    const clean = trimmed.replace(/^\.?\//, "");
+    return baseDir + encodeURI(clean);
+  };
 
   let out = html.replace(
     /\b(src|href|poster|data-src|data-poster)\s*=\s*"([^"]*)"/gi,

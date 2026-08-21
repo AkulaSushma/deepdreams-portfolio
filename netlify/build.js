@@ -98,6 +98,13 @@ function copyDir(from, to) {
 fs.rmSync(DIST, { recursive: true, force: true });
 copyDir(ROOT, DIST);
 
+/* Mirror the 3D world to dist/world so direct routes (/world/...) always resolve natively */
+const worldSrc = path.join(DIST, "3D Wedding Invitation Sample 2", "world");
+const worldDst = path.join(DIST, "world");
+if (fs.existsSync(worldSrc) && !fs.existsSync(worldDst)) {
+  copyDir(worldSrc, worldDst);
+}
+
 /* The functions need one thing from outside their own folder: shared/, which
    the browser also loads. It is copied above as part of the site, so the
    editor and the server are guaranteed to be reading the same limits. */

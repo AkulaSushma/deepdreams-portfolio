@@ -1617,22 +1617,27 @@ const finale = (() => {
      card hands over nothing, so the world keeps its own demo couple. */
   (() => {
     try {
-      const baseDir = (typeof window.getSample2BaseUrl === "function" ? window.getSample2BaseUrl() : "") || "";
+      const baseDir = (typeof window.getSample2BaseUrl === "function" ? window.getSample2BaseUrl() : "") || "/3D%20Wedding%20Invitation%20Sample%202/";
       const rawHref = link.getAttribute("href") || "world/index.html";
-      const targetHref = (baseDir && !rawHref.startsWith(baseDir) && !/^https?:\/\//i.test(rawHref))
-        ? baseDir + rawHref.replace(/^\.?\//, "")
-        : rawHref;
+      let targetHref;
+      if (/^https?:\/\//i.test(rawHref)) {
+        targetHref = rawHref;
+      } else if (rawHref.startsWith("/")) {
+        targetHref = rawHref;
+      } else {
+        targetHref = baseDir + rawHref.replace(/^\.?\//, "");
+      }
       const here = new URLSearchParams(location.search);
-      const u = new URL(targetHref, location.href);
+      const u = new URL(targetHref, location.origin || location.href);
       if (here.get("c")) {
         u.searchParams.set("c", here.get("c"));
       } else if (here.has("draft")) {
         u.searchParams.set("draft", "1");
       } else {
-        u.searchParams.set("b", CFG.couple.bride || "");
-        u.searchParams.set("g", CFG.couple.groom || "");
+        u.searchParams.set("b", (CFG && CFG.couple && CFG.couple.bride) || "");
+        u.searchParams.set("g", (CFG && CFG.couple && CFG.couple.groom) || "");
       }
-      if (CFG.couple && CFG.couple.side) {
+      if (CFG && CFG.couple && CFG.couple.side) {
         u.searchParams.set("side", CFG.couple.side);
       }
       link.href = u.href;
