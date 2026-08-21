@@ -1,0 +1,1 @@
+Vanilla HTML/CSS/JS with no framework; LZ-String for URL-hashed data compression loaded from jsDelivr CDN; Web Audio API for synthesized dhol thump and temple bell sounds; Canvas 2D for rub-to-reveal and trace-heart gestures; IntersectionObserver for scroll reveals; Google Fonts (Cormorant Garamond, Great Vibes, Playfair Display, Inter).

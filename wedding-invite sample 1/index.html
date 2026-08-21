@@ -655,6 +655,10 @@
             rCtx.textAlign = 'center'; rCtx.textBaseline = 'middle';
             rCtx.fillText('\u270b Rub here', rubC.width/2, rubC.height/2);
             rCtx.globalCompositeOperation = 'destination-out';
+            /* Erase with a fixed 50% alpha so the turmeric thins away gradually
+               and soft-edged like the original — the original's leftover random
+               fillStyle made some loads impossible to clear. */
+            rCtx.fillStyle = 'rgba(0,0,0,0.5)';
           }
           var pg2 = document.getElementById('demo-page-2');
           if (pg2) new MutationObserver(function() { if (pg2.classList.contains('demo-page-active')) rubSetup(); }).observe(pg2, {attributes:true,attributeFilter:['class']});

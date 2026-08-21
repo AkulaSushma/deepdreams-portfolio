@@ -1,0 +1,4 @@
+- Each invitation product is isolated in its own top-level directory with its own `index.html`, `css/`, and `js/` but shares the `/invite/:slug` URL contract routed through the common `api/` handlers.
+- Serverless handlers under `api/` are written once and executed identically on both Vercel and Netlify via per-platform routing configuration rather than platform-specific code paths.
+- Public assets use immutable cache headers while HTML pages are set to `must-revalidate`, applied consistently in both `vercel.json` and `netlify.toml`.
+- Admin routes under `/api/admin/*` are protected by token-based auth and excluded from search indexing via `X-Robots-Tag: noindex, nofollow` on both platforms.

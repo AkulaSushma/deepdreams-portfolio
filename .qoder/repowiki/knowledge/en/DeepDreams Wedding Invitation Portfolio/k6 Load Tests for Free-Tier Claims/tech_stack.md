@@ -1,0 +1,1 @@
+k6 load-testing framework (HTTP executor, custom metrics, scenarios, thresholds, handleSummary); targets a Vercel-hosted Next.js API backed by Supabase Postgres on staging.

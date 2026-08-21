@@ -1,0 +1,1 @@
+Hosts the shared Node.js HTTP handlers under api/ and exposes them as Netlify serverless functions via a thin bridge that translates Netlify events into the same req/res shape used on Vercel.

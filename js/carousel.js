@@ -1,7 +1,7 @@
 /* ============================================================
    DEEPDREAMS — CAROUSEL & VIDEO SECTIONS
    Native scroll-snap carousels (tribute & name reveal), vertical
-   invitation videos, wedding site posters, and AI builds.
+   invitation videos, and wedding site posters.
 
    Carousels use CSS scroll-snap + native touch scrolling — the same
    pattern Netflix / YouTube / Apple use for horizontal rails. This
@@ -463,7 +463,7 @@
   }
 
   /* ------------------------------------------------------------
-     Poster-card renderer for live site showcases (wedding & AI).
+     Poster-card renderer for live wedding site showcases.
      Renders a real screenshot poster inside a device frame with an
      "Open Site" CTA — never a broken/blank iframe.
      ------------------------------------------------------------ */
@@ -531,31 +531,12 @@
     });
   }
 
-  // Load AI builds grid
-  function loadAIBuilds() {
-    const grid = document.getElementById('aiBuildsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-    CFG.AI_BUILDS.forEach(build => {
-      grid.appendChild(sitePosterCard({
-        label: 'AI Solution',
-        title: build.title,
-        note: build.note,
-        url: build.url,
-        poster: build.poster,
-        kind: 'ai'
-      }));
-    });
-  }
-
   // Initialize everything
   function init() {
     loadTributeCarousel();
     loadInvitationVideos();
     loadNameRevealCarousel();
     loadWeddingSites();
-    loadAIBuilds();
   }
 
   // Wait for DOM and config

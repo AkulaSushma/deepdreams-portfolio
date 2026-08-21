@@ -1,0 +1,6 @@
+- Every script wraps its factory in an IIFE `(function(root, factory){ ... })(typeof self !== undefined ? self : globalThis, factory)` that exposes either `module.exports` or a `window.DD_*` global depending on environment.
+- Shared numeric caps are never duplicated — consumers read them from `window.DD_LIMITS` (or fall back to an inline literal when running without the limits script loaded).
+- Errors are thrown as `Error` objects augmented with a machine-readable `code` property and a human-friendly `userMessage` string, produced by a local `reason(code, message)` helper.
+- Network calls go through a single `once(url, opts, timeoutMs)` wrapper that enforces per-request timeouts via `AbortController` and converts failures into typed error codes (`NETWORK`, `TIMEOUT`).
+- Asynchronous work is chained sequentially with `Promise.resolve().then(...)` chains rather than `Promise.all`, explicitly to avoid spawning too many canvas/buffer operations on low-memory devices.
+- User-facing messages are centralized in a `MESSAGES` map keyed by error code and resolved via a `friendly(code)` lookup, so UI code never hardcodes strings.

@@ -1,0 +1,1 @@
+Deploy by copying the folder to any static host (Netlify, Vercel, GitHub Pages, S3). To enable AI prompt generation, set `window.STUDIO_AI_KEY` before loading `app.js`; otherwise the AI buttons show a 'no key' error. Shareable invitations are created by appending `#d=<compressed>` to the URL — no database or build step required.

@@ -1,0 +1,1 @@
+Vanilla ES modules with IIFE scoping, CSS custom properties for live theme switching, Canvas text measurement for dynamic name sizing, IntersectionObserver for reveal animations, and a server-side publishing API exposed through `window.DDD_PUBLISH`.

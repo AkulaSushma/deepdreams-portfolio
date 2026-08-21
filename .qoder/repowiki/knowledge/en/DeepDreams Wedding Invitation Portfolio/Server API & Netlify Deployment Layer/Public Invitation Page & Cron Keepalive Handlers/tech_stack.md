@@ -1,0 +1,1 @@
+Node.js serverless functions on both Netlify Functions and Vercel Edge/Serverless; PostgREST for database access (no DB pool); in-process `Map` template cache scoped to each warm instance.

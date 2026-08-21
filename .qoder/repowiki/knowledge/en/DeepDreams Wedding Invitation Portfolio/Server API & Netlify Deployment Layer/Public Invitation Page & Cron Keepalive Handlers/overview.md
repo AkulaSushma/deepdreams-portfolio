@@ -1,0 +1,1 @@
+Netlify and Vercel serverless entry points that render public invitation pages by slug and expose a secret-gated cron keepalive endpoint for scheduled housekeeping.

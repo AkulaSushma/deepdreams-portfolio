@@ -200,7 +200,8 @@ const audio = (() => {
   /* Background score — the real instrument, started inside the tap gesture */
   const startBgm = () => {
     if (bgm) return;
-    bgm = new Audio("assets/audio/bgm.m4a");
+    const baseDir = (window.getSample2BaseUrl ? window.getSample2BaseUrl() : "") || "";
+    bgm = new Audio(baseDir + "assets/audio/bgm.m4a");
     bgm.preload = "metadata";
     bgm.loop = true;
     bgm.playsInline = true;
@@ -781,19 +782,26 @@ const nameBoard = (() => {
         word.appendChild(sp);
       }
     });
+    const isGroomSide = (c.side === "groom");
+    const first = isGroomSide ? groom : bride;
+    const second = isGroomSide ? bride : groom;
+
     const amp = el.querySelector(".amp");
     if (amp) { amp.classList.add("ltr"); amp.style.setProperty("--li", li++); amp.setAttribute("aria-hidden", "true"); }
-    el.setAttribute("aria-label", `${bride} and ${groom}`);
+    el.setAttribute("aria-label", `${first} and ${second}`);
   };
 
   const render = (stacked) => {
-    /* Stacked reads top-down: groom, heart, bride. */
+    const isGroomSide = (c.side === "groom");
+    const first = isGroomSide ? groom : bride;
+    const second = isGroomSide ? bride : groom;
+
     el.innerHTML = stacked
-      ? `<span class="name-word">${esc(groom)}</span>` +
+      ? `<span class="name-word">${esc(first)}</span>` +
         `<span class="amp">\u2665</span>` +
-        `<span class="name-word">${esc(bride)}</span>`
-      : `<span class="name-word">${esc(bride)}</span> <span class="amp">\u2665</span> ` +
-        `<span class="name-word">${esc(groom)}</span>`;
+        `<span class="name-word">${esc(second)}</span>`
+      : `<span class="name-word">${esc(first)}</span> <span class="amp">\u2665</span> ` +
+        `<span class="name-word">${esc(second)}</span>`;
     el.classList.toggle("names--stacked", stacked);
     card.classList.toggle("hero-copy-glass--stacked", stacked);
     cascade();
@@ -1602,20 +1610,32 @@ const finale = (() => {
 
   /* Carry this invitation's identity into the world on the link itself, rather
      than leaving the world to guess from localStorage. A personalised card
-     (?c=… or ?draft) hands its couple over explicitly; the plain demo card
-     hands over nothing, so the world keeps its own demo couple. */
+     (?c=… or ?draft) hands its couple over explicitly; a published invitation
+     has neither parameter, so its couple is passed as plain b/g values —
+     without them the world's title card, arrival card and plane banner fall
+     back to the demo couple on the one link that was paid for. The plain demo
+     card hands over nothing, so the world keeps its own demo couple. */
   (() => {
     try {
+      const baseDir = (typeof window.getSample2BaseUrl === "function" ? window.getSample2BaseUrl() : "") || "";
+      const rawHref = link.getAttribute("href") || "world/index.html";
+      const targetHref = (baseDir && !rawHref.startsWith(baseDir) && !/^https?:\/\//i.test(rawHref))
+        ? baseDir + rawHref.replace(/^\.?\//, "")
+        : rawHref;
       const here = new URLSearchParams(location.search);
+      const u = new URL(targetHref, location.href);
       if (here.get("c")) {
-        const u = new URL(link.getAttribute("href"), location.href);
         u.searchParams.set("c", here.get("c"));
-        link.href = u.pathname + u.search;
       } else if (here.has("draft")) {
-        const u = new URL(link.getAttribute("href"), location.href);
         u.searchParams.set("draft", "1");
-        link.href = u.pathname + u.search;
+      } else {
+        u.searchParams.set("b", CFG.couple.bride || "");
+        u.searchParams.set("g", CFG.couple.groom || "");
       }
+      if (CFG.couple && CFG.couple.side) {
+        u.searchParams.set("side", CFG.couple.side);
+      }
+      link.href = u.href;
     } catch { /* a malformed link must never block the portal */ }
   })();
 

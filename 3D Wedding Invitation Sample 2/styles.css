@@ -1900,10 +1900,18 @@ body.portal-opening .portal-transition-copy {
 .finale-credit:hover{color:var(--gold-soft)}
 
 #draft-badge{
-  position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:85;
-  padding:9px 15px;border:1px solid rgba(229,200,120,.6);border-radius:999px;
-  background:rgba(46,8,22,.82);color:var(--gold-soft);text-decoration:none;
-  font:600 10.5px/1 var(--serif-display);letter-spacing:.18em;text-transform:uppercase;
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:999;
+  padding:10px 20px;border:1px solid rgba(229,200,120,.65);border-radius:999px;
+  background:rgba(28,4,9,.88);color:var(--gold-soft);text-decoration:none;
+  font-family:var(--sans, -apple-system, BlinkMacSystemFont, sans-serif);font-size:12.5px;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 8px 32px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  transition:all .25s ease;
+}
+#draft-badge:hover{
+  background:rgba(201,162,75,.2);border-color:var(--gold);color:#FFF;transform:translateX(-50%) translateY(-1px);
 }
 
 /* ═══════════════ EXPIRED SCREEN ═══════════════ */

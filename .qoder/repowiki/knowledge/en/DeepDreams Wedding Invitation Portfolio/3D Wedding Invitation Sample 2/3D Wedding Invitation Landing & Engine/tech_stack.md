@@ -1,0 +1,1 @@
+Vanilla HTML/CSS/JS with no framework; Web Audio API for synthesized temple bells and background score; Canvas 2D for frame-scrub cinema and petal particles; `createImageBitmap` for off-main-thread image decoding; IntersectionObserver for visibility gating; CSS custom properties driven from config.

@@ -1,0 +1,45 @@
+schema_version: 1
+module_path: ""
+title: DeepDreams Wedding Invitation Portfolio
+scope:
+    - README.md
+    - .gitignore
+    - .vercelignore
+    - 404.html
+    - manifest.json
+    - robots.txt
+    - sitemap.xml
+    - serve.json
+    - netlify.toml
+    - vercel.json
+    - _deploy-direct.js
+    - _audit.js
+    - _optimize-images.js
+    - _routecheck.js
+    - _weight.js
+    - capture-invite.js
+    - capture-invites.js
+    - capture-sample1-phone.js
+    - capture-sample2-phone.js
+    - scratch-probe.js
+    - scratch-rendertest.js
+    - scratch-urls.js
+    - _previous-design/
+    - admin/
+    - css/
+    - js/
+    - supabase/
+    - _nav-fixed.png
+    - _phone-fixed.png
+    - _shot-cover.png
+    - _shot-landing-top.png
+    - firebase-debug.log
+    - index.html
+    - serve.log
+    - verify-cover-after.png
+    - verify-landing-nav-after.png
+    - verify-phone-after.png
+    - wedding_qr.png
+source_files: []
+depends_on: []
+related_to: []

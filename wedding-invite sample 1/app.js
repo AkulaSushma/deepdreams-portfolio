@@ -25,7 +25,31 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const STUDIO_WA = "919010901232";
 const STORE_KEY = "dd_wedding_draft";
 
-const isDefaultImage = url => !url || url.startsWith("posters/");
+const getSample1BaseUrl = () => {
+  if (window.DD_SAMPLE1_BASE) return window.DD_SAMPLE1_BASE;
+  const scripts = document.querySelectorAll('script[src*="app.js"], script[src*="script.js"]');
+  for (const s of scripts) {
+    const src = s.getAttribute("src") || s.src || "";
+    const idx = src.lastIndexOf("/");
+    if (idx >= 0) {
+      const base = src.slice(0, idx + 1);
+      if (base && base !== "./" && base !== "/") return base;
+    }
+  }
+  if (window.DD_PUBLISHED || (typeof location !== "undefined" && /^\/invite\//i.test(location.pathname))) {
+    return "/wedding-invite%20sample%201/";
+  }
+  return "";
+};
+const fixSample1Img = (src) => {
+  if (!src) return "";
+  if (/^https?:\/\//i.test(src) || src.startsWith("data:") || src.startsWith("blob:")) return src;
+  const base = getSample1BaseUrl();
+  if (base && !src.startsWith(base)) return base + src.replace(/^\.?\//, "");
+  return src;
+};
+
+const isDefaultImage = url => !url || url.startsWith("posters/") || url.includes("/posters/");
 
 /* ---------- default (sample) invitation ---------- */
 const DEFAULTS = {
@@ -144,6 +168,16 @@ const fmtTime = t => {
   const [h, m] = (t || "9:00").split(":").map(Number);
   const am = h < 12 ? "AM" : "PM";
   return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${am}`;
+};
+const addDays = (ds, days) => {
+  try {
+    const d = new Date((ds || "2024-12-11") + "T12:00");
+    if (isNaN(d)) return ds;
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  } catch {
+    return ds;
+  }
 };
 
 /* ---------- expiry: the link retires the day after the wedding ---------- */
@@ -284,6 +318,14 @@ function render() {
   updateRsvp();
 
   /* welcome poster — full-frame standing couple artwork shown after doors part */
+  const isGroomSide = (DATA.side === "groom");
+  const first = isGroomSide ? (DATA.groom || "Vihaan") : (DATA.bride || "Saanvi");
+  const second = isGroomSide ? (DATA.bride || "Saanvi") : (DATA.groom || "Vihaan");
+  const firstParents = isGroomSide ? (DATA.groomParents || "Medha and Ram Reddy") : (DATA.brideParents || "Adira and Sai Nadha");
+  const secondParents = isGroomSide ? (DATA.brideParents || "Adira and Sai Nadha") : (DATA.groomParents || "Medha and Ram Reddy");
+  const firstLabel = isGroomSide ? "Son of" : "Daughter of";
+  const secondLabel = isGroomSide ? "Daughter of" : "Son of";
+
   const wp = $("#welcomePoster");
   if (wp) {
     const wImg = DATA.welcomeImg || "posters/welcome_clean.jpg";
@@ -292,16 +334,16 @@ function render() {
     wp.innerHTML = `
       <div class="poster-card-container hero-poster-art">
         <div class="poster-img-wrap">
-          <img class="poster-card-img" src="${wImg}" alt="Wedding Invitation" onerror="this.onerror=null;this.src='posters/welcome_clean.jpg'" />
+          <img class="poster-card-img" src="${fixSample1Img(wImg)}" alt="Wedding Invitation" onerror="this.onerror=null;this.src=fixSample1Img('posters/welcome_clean.jpg')" />
           ${isDefaultWelcome ? `<div class="poster-overlay ov-welcome">
             <p class="ov-line ov-together">Together with</p>
             <p class="ov-line ov-lovefam">love &amp; families,</p>
             <p class="ov-line ov-request">Request the honor of your presence</p>
-            <h2 class="ov-line ov-bride" style="--name-len:${(DATA.bride || "Saanvi").length}">${esc(DATA.bride || "Saanvi")}</h2>
-            <p class="ov-line ov-bride-parents" style="--parent-len:${("Daughter of " + (DATA.brideParents || "")).length}">Daughter of ${esc(DATA.brideParents || "Adira and Sai Nadha")}</p>
+            <h2 class="ov-line ov-bride" style="--name-len:${first.length}">${esc(first)}</h2>
+            <p class="ov-line ov-bride-parents" style="--parent-len:${(firstLabel + " " + firstParents).length}">${firstLabel} ${esc(firstParents)}</p>
             <p class="ov-line ov-amp">&amp;</p>
-            <h2 class="ov-line ov-groom" style="--name-len:${(DATA.groom || "Vihaan").length}">${esc(DATA.groom || "Vihaan")}</h2>
-            <p class="ov-line ov-groom-parents" style="--parent-len:${("Son of " + (DATA.groomParents || "")).length}">Son of ${esc(DATA.groomParents || "Medha and Ram Reddy")}</p>
+            <h2 class="ov-line ov-groom" style="--name-len:${second.length}">${esc(second)}</h2>
+            <p class="ov-line ov-groom-parents" style="--parent-len:${(secondLabel + " " + secondParents).length}">${secondLabel} ${esc(secondParents)}</p>
             <p class="ov-line ov-celebration">at their wedding celebration</p>
             <p class="ov-line ov-time">Time: ${esc(fmtTime(DATA.time) || "6:00 PM onwards")}</p>
             <p class="ov-line ov-date">${esc(fmtLong(DATA.date) || "Saturday, 11 December 2024")}</p>
@@ -310,7 +352,7 @@ function render() {
             <div class="ov-banner">YOU ARE WARMLY INVITED</div>
           </div>` : ""}
         </div>
-        <div class="poster-card-actions">
+        <div class="poster-card-actions"${EDITING ? "" : " hidden"}>
           <button class="pca-btn primary" type="button" onclick="openEditorDrawer('welcome')">✎ Edit Names &amp; Details</button>
           <button class="pca-btn" type="button" onclick="triggerPhotoUpload('welcome')">📷 Replace Couple Photo</button>
           <button class="pca-btn" type="button" onclick="openAIPromptModal('welcome')">✨ AI Prompt Generator</button>
@@ -325,11 +367,47 @@ function render() {
     if (cp) { sealImg.src = cp; sealImg.hidden = false; sealMono.hidden = true; }
     else {
       sealImg.hidden = true; sealMono.hidden = false;
-      sealMono.textContent = `${(DATA.bride || "S")[0]} ♥ ${(DATA.groom || "V")[0]}`;
+      sealMono.textContent = isGroomSide
+        ? `${(DATA.groom || "V")[0]} ♥ ${(DATA.bride || "S")[0]}`
+        : `${(DATA.bride || "S")[0]} ♥ ${(DATA.groom || "V")[0]}`;
     }
   }
 
-  document.title = `${DATA.bride} & ${DATA.groom} — Wedding Invitation`;
+  const coverNamesEl = document.querySelector(".cover-names");
+  if (coverNamesEl) {
+    coverNamesEl.innerHTML = isGroomSide
+      ? `<span>${esc(DATA.groom || "Vihaan")}</span> <em>&amp;</em> <span>${esc(DATA.bride || "Saanvi")}</span>`
+      : `<span>${esc(DATA.bride || "Saanvi")}</span> <em>&amp;</em> <span>${esc(DATA.groom || "Vihaan")}</span>`;
+  }
+
+  /* Re-order families grid if groom side */
+  const famGrid = document.querySelector(".fam-grid");
+  if (famGrid) {
+    const brideHtml = `
+      <div class="fam reveal in">
+        <span class="fam-flower" aria-hidden="true">✿</span>
+        <h2 class="fam-name">${esc(DATA.bride || "Priya")}</h2>
+        <p class="fam-daughter">daughter of</p>
+        <p class="fam-parents">${esc(DATA.brideParents || "Smt. Lakshmi & Sri. Venkateswara Rao")}</p>
+        <p class="fam-city">${esc(DATA.brideCity || "Hyderabad")}</p>
+      </div>`;
+    const knotHtml = `<span class="fam-knot" aria-hidden="true"><i class="knot-ring"></i></span>`;
+    const groomHtml = `
+      <div class="fam reveal in">
+        <span class="fam-flower" aria-hidden="true">✿</span>
+        <h2 class="fam-name">${esc(DATA.groom || "Karthik")}</h2>
+        <p class="fam-daughter">son of</p>
+        <p class="fam-parents">${esc(DATA.groomParents || "Smt. Saraswathi & Sri. Raghunatha Reddy")}</p>
+        <p class="fam-city">${esc(DATA.groomCity || "Vijayawada")}</p>
+      </div>`;
+    famGrid.innerHTML = isGroomSide
+      ? (groomHtml + knotHtml + brideHtml)
+      : (brideHtml + knotHtml + groomHtml);
+  }
+
+  document.title = isGroomSide
+    ? `${DATA.groom} & ${DATA.bride} — Wedding Invitation`
+    : `${DATA.bride} & ${DATA.groom} — Wedding Invitation`;
 }
 const esc = s => ("" + (s ?? "")).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
@@ -431,11 +509,11 @@ function openFest(i) {
   paper.innerHTML = `
     <div class="poster-card-container">
       <div class="poster-img-wrap">
-        <img class="fp-art poster-card-img" src="${imgSrc}" alt="${esc(ev.name)} ceremony poster" onerror="this.onerror=null;this.src='posters/welcome_clean.jpg'" />
+        <img class="fp-art poster-card-img" src="${fixSample1Img(imgSrc)}" alt="${esc(ev.name)} ceremony poster" onerror="this.onerror=null;this.src=fixSample1Img('posters/welcome_clean.jpg')" />
         ${isDefaultPoster ? buildPosterOverlay(mk, ev) : ""}
         <div class="fest-overlay" id="festOverlay"></div>
       </div>
-      <div class="poster-card-actions">
+      <div class="poster-card-actions"${EDITING ? "" : " hidden"}>
         <button class="pca-btn primary" type="button" onclick="openEditorDrawer('event', ${i})">✎ Edit Details</button>
         <button class="pca-btn" type="button" onclick="triggerPhotoUpload('event', ${i})">📷 Replace Photo</button>
         <button class="pca-btn" type="button" onclick="openAIPromptModal('${mk}')">✨ AI Prompt Generator</button>
@@ -506,6 +584,15 @@ function mountRub(ov, m, done) {
     ctx.fill();
   }
   ctx.globalCompositeOperation = "destination-out";
+  /* destination-out erases by the fill's alpha. The original effect rubbed
+     with a translucent fill — the turmeric thins away gradually, soft-edged,
+     which is exactly the realistic look we want. But that fill was a random
+     leftover from the speckle loop above (alpha anywhere from 0 to 0.4), so
+     on some loads each pass barely thinned the layer and the card never
+     cleared. A fixed 50% alpha keeps the same gradual, soft rub and makes it
+     clear reliably: one pass fades it, two fade it further, three wipe it
+     away — just like rubbing powder off by hand. */
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
 
   let drawing = false, moves = 0, finished = false;
   const rubAt = (x, y) => {
@@ -581,14 +668,11 @@ function mountTrace(ov, m, done) {
   hint.className = "ov-hint"; hint.textContent = m.hint;
   ov.appendChild(hint);
 
-  let tracing = false, finished = false;
-  const mark = e => {
-    const r = svg.getBoundingClientRect();
-    const mx = (e.clientX - r.left) / r.width * SIZE;
-    const my = (e.clientY - r.top) / r.height * SIZE;
+  let tracing = false, finished = false, lastMark = null;
+  const markAt = (mx, my) => {
     let doneCount = 0;
     for (let i = 0; i < N; i++) {
-      if (!covered[i] && Math.hypot(pts[i].x - mx, pts[i].y - my) < 14) {
+      if (!covered[i] && Math.hypot(pts[i].x - mx, pts[i].y - my) < 20) {
         covered[i] = true;
         lines[i].setAttribute("stroke", "#6B2B1A");
         lines[i].setAttribute("stroke-width", "4");
@@ -598,10 +682,27 @@ function mountTrace(ov, m, done) {
       }
       if (covered[i]) doneCount++;
     }
-    if (!finished && doneCount / N > 0.75) { finished = true; done(); }
+    if (!finished && doneCount / N > 0.7) { finished = true; done(); }
+  };
+  const mark = e => {
+    const r = svg.getBoundingClientRect();
+    const mx = (e.clientX - r.left) / r.width * SIZE;
+    const my = (e.clientY - r.top) / r.height * SIZE;
+    /* Fast swipes deliver sparse pointer events; walk the gap from the last
+       point so a quick circle still covers the whole heart. */
+    if (lastMark) {
+      const dist = Math.hypot(mx - lastMark.x, my - lastMark.y);
+      const steps = Math.min(24, Math.floor(dist / 6));
+      for (let s = 1; s <= steps; s++) {
+        markAt(lastMark.x + (mx - lastMark.x) * s / steps, lastMark.y + (my - lastMark.y) * s / steps);
+      }
+    }
+    markAt(mx, my);
+    lastMark = { x: mx, y: my };
   };
   svg.addEventListener("pointerdown", e => {
     tracing = true;
+    lastMark = null;
     svg.setPointerCapture(e.pointerId);
     mark(e);
   });
@@ -610,7 +711,7 @@ function mountTrace(ov, m, done) {
     e.preventDefault();
     mark(e);
   });
-  const end = () => { tracing = false; };
+  const end = () => { tracing = false; lastMark = null; };
   svg.addEventListener("pointerup", end);
   svg.addEventListener("pointercancel", end);
 }
@@ -646,7 +747,8 @@ function mountTap(ov, m, done) {
   let taps = 0, finished = false;
   btn.addEventListener("click", () => {
     if (finished) return;
-    thump();
+    dhol();
+    buzz(18);   /* haptic: a short punch, the closest a phone gets to a drum head */
     btn.classList.add("hit");
     setTimeout(() => btn.classList.remove("hit"), 150);
     if (taps < NEED) dotEls[taps].classList.add("on");
@@ -701,19 +803,91 @@ function ac() {
   if (AC.state === "suspended") AC.resume();
   return AC;
 }
-function thump() {
+/* A dhol hit has three parts: the deep resonant body of the drum, the
+   paper-fast "snap" of skin meeting skin, and a short burst of high-frequency
+   noise (the crack). Synthesized so no audio file needs to ship. */
+function dhol() {
   try {
     const ctx = ac(), t = ctx.currentTime;
+
+    /* 1 · deep drum body — sine pitch drop */
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = "sine";
-    o.frequency.setValueAtTime(120, t);
-    o.frequency.exponentialRampToValueAtTime(60, t + 0.15);
-    g.gain.setValueAtTime(0.35, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(48, t + 0.16);
+    g.gain.setValueAtTime(0.6, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
     o.connect(g).connect(ctx.destination);
-    o.start(t); o.stop(t + 0.22);
+    o.start(t); o.stop(t + 0.24);
+
+    /* 2 · the "crack" — a short burst of filtered noise */
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.07, ctx.sampleRate);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / ch.length, 2);
+    const n = ctx.createBufferSource(); n.buffer = buf;
+    const f = ctx.createBiquadFilter();
+    f.type = "bandpass"; f.frequency.value = 2600; f.Q.value = 0.9;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.14, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+    n.connect(f).connect(ng).connect(ctx.destination);
+    n.start(t); n.stop(t + 0.1);
+
+    /* 3 · a click transient so the drum head "speaks" */
+    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+    o2.type = "triangle";
+    o2.frequency.setValueAtTime(260, t);
+    o2.frequency.exponentialRampToValueAtTime(90, t + 0.09);
+    g2.gain.setValueAtTime(0.24, t);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    o2.connect(g2).connect(ctx.destination);
+    o2.start(t); o2.stop(t + 0.12);
   } catch (e) {}
 }
+
+/** A knock on a heavy wooden temple door: the hard knuckle impact (a burst of
+   noise), then the door's own low resonance ringing out, then silence. Played
+   twice, quick, the way you would actually rap on wood. */
+function knock() {
+  try {
+    const ctx = ac();
+    const one = t => {
+      /* the impact — a few milliseconds of noise through a bandpass at the
+         wood's "tok" frequency */
+      const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.03), ctx.sampleRate);
+      const ch = buf.getChannelData(0);
+      for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / ch.length, 1.6);
+      const n = ctx.createBufferSource(); n.buffer = buf;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1800; bp.Q.value = 1.2;
+      const ng = ctx.createGain();
+      ng.gain.setValueAtTime(0.5, t);
+      ng.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      n.connect(bp).connect(ng).connect(ctx.destination);
+      n.start(t); n.stop(t + 0.06);
+
+      /* the door itself — low resonances, fast decay */
+      [[110, 0.5], [210, 0.22], [330, 0.1]].forEach(([f, v]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(f * 1.04, t);
+        o.frequency.exponentialRampToValueAtTime(f * 0.92, t + 0.18);
+        g.gain.setValueAtTime(v, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+        o.connect(g).connect(ctx.destination);
+        o.start(t); o.stop(t + 0.3);
+      });
+    };
+    const t0 = ctx.currentTime;
+    one(t0);
+    one(t0 + 0.14);   /* tok … tok */
+  } catch (e) {}
+}
+
+/** Haptic feedback where the device supports it; a no-op everywhere else. */
+function buzz(pattern) {
+  try { navigator.vibrate && navigator.vibrate(pattern); } catch (e) {}
+}
+
 function bellRing() {
   try {
     const ctx = ac(), t = ctx.currentTime;
@@ -990,9 +1164,153 @@ const FIELDS = [
   ["phone", "WhatsApp number for RSVPs (with country code, e.g. 91XXXXXXXXXX)", "input"]
 ];
 
+/* ── Intelligent Pre-Fill & Cascading State for Sample 1 ── */
+const sample1UserEdited = {
+  story: false,
+  mapUrl: false,
+  brideCity: false,
+  groomCity: false,
+  events: {},
+};
+
+function autoFillSample1() {
+  const bride = ($("#f_bride")?.value || DATA.bride || "").trim();
+  const groom = ($("#f_groom")?.value || DATA.groom || "").trim();
+  const dateStr = $("#f_date")?.value || DATA.date || "";
+  const timeStr = $("#f_time")?.value || DATA.time || "18:00";
+  const venueName = ($("#f_venueName")?.value || DATA.venueName || "").trim();
+  const venueAddr = ($("#f_venueAddr")?.value || DATA.venueAddr || "").trim();
+
+  // 1. City extraction & Maps URL
+  if (venueAddr) {
+    const parts = venueAddr.split(",");
+    const city = (parts[1] || parts[0] || "").trim();
+    if (city) {
+      if (!sample1UserEdited.brideCity && $("#f_brideCity") && (!$("#f_brideCity").value || $("#f_brideCity").value === "Hyderabad")) {
+        $("#f_brideCity").value = city;
+        DATA.brideCity = city;
+      }
+      if (!sample1UserEdited.groomCity && $("#f_groomCity") && (!$("#f_groomCity").value || $("#f_groomCity").value === "Hyderabad")) {
+        $("#f_groomCity").value = city;
+        DATA.groomCity = city;
+      }
+    }
+  }
+
+  if (venueName && !sample1UserEdited.mapUrl && $("#f_mapUrl")) {
+    const query = `${venueName}, ${DATA.brideCity || ""}`.replace(/^,\s*|,\s*$/g, "").trim();
+    if (!$("#f_mapUrl").value || $("#f_mapUrl").value.includes("Google Maps") || $("#f_mapUrl").value === "The Grand Pavilion, Hyderabad") {
+      $("#f_mapUrl").value = query;
+      DATA.mapUrl = query;
+    }
+    const isGroom = (DATA.side === "groom");
+    const coupleStr = isGroom ? `${groom} & ${bride}` : `${bride} & ${groom}`;
+    const coupleWeds = isGroom ? `${groom} and ${bride}` : `${bride} and ${groom}`;
+
+    // 2. Cascade Celebrations
+    if (Array.isArray(DATA.events)) {
+      DATA.events.forEach((ev, i) => {
+        sample1UserEdited.events[i] ??= {};
+        const evEdited = sample1UserEdited.events[i];
+        const name = (ev.name || "").toLowerCase();
+        const mode = ev.mode || "";
+
+        // Wedding / Shubha Muhurtam
+        if (name.includes("muhurtam") || name.includes("wedding") || mode === "light") {
+          if (!evEdited.when && dateStr) {
+            ev.when = `Wedding Day · ${fmtLong(dateStr)} · ${fmtTime(timeStr)}`;
+          }
+          if (!evEdited.where && venueName) {
+            ev.where = venueName;
+          }
+          if (!evEdited.note && bride && groom) {
+            ev.note = `The tying of Mangalyam — ${coupleWeds} unite as one`;
+          }
+        }
+        // Grand Reception (SAME DAY & SAME VENUE AS WEDDING!)
+        else if (name.includes("reception") || mode === "tap") {
+          if (!evEdited.when && dateStr) {
+            ev.when = `Reception Evening · ${fmtLong(dateStr)} · 7:00 PM Onwards`; // SAME DAY!
+          }
+          if (!evEdited.where && venueName) {
+            ev.where = venueName; // SAME VENUE!
+          }
+          if (!evEdited.note && bride && groom) {
+            ev.note = `Dinner, Music and Your Blessings for ${coupleStr}`;
+          }
+        }
+        // Haldi Ceremony
+        else if (name.includes("haldi") || mode === "rub") {
+          if (!evEdited.when && dateStr) {
+            ev.when = `Haldi Day · ${fmtLong(addDays(dateStr, -1))} · 6:00 PM`;
+          }
+          if (!evEdited.where && venueName) {
+            ev.where = `${venueName} (Courtyard)`;
+          }
+          if (!evEdited.note && bride && groom) {
+            ev.note = `Turmeric, laughter, and golden blessings for ${coupleStr}`;
+          }
+        }
+        // Nichitartam (Engagement)
+        else if (name.includes("nichitartam") || name.includes("engagement") || mode === "trace") {
+          if (!evEdited.when && dateStr) {
+            ev.when = `Engagement Day · ${fmtLong(addDays(dateStr, -2))} · 10:30 AM`;
+          }
+          if (!evEdited.where && venueName) {
+            ev.where = `${venueName} (Main Mandapam)`;
+          }
+          if (!evEdited.note && bride && groom) {
+            ev.note = `The formal engagement with the exchange of Thambulams`;
+          }
+        }
+      });
+
+      // Update live input fields in DOM
+      $$("#evEditors .event-editor").forEach((box, i) => {
+        const ev = DATA.events[i];
+        if (!ev) return;
+        const whenInp = box.querySelector('[data-evf="when"]');
+        const whereInp = box.querySelector('[data-evf="where"]');
+        const noteInp = box.querySelector('[data-evf="note"]');
+        if (whenInp && !sample1UserEdited.events[i]?.when) whenInp.value = ev.when || "";
+        if (whereInp && !sample1UserEdited.events[i]?.where) whereInp.value = ev.where || "";
+        if (noteInp && !sample1UserEdited.events[i]?.note) noteInp.value = ev.note || "";
+      });
+    }
+  }
+
+  // 3. Update story if untouched
+  if (!sample1UserEdited.story && $("#f_story") && bride && groom) {
+    const isGroom = (DATA.side === "groom");
+    const coupleWeds = isGroom ? `${groom} and ${bride}` : `${bride} and ${groom}`;
+    const curStory = $("#f_story").value;
+    const isDefaultStory = !curStory || curStory.includes("chance meeting") || curStory.includes("Saanvi") || curStory.includes("Vihaan");
+    if (isDefaultStory) {
+      const s = `What began as a chance meeting between ${coupleWeds} blossomed — with the blessings of both families — into a love written in the stars. Now, we begin our forever, and we want you beside us when we do.`;
+      $("#f_story").value = s;
+      DATA.story = s;
+    }
+  }
+
+  if (typeof updateMasterPrompt === "function") updateMasterPrompt();
+}
+
 function buildForm() {
   const body = $("#panelBody");
-  let html = "";
+  let html = `
+    <div class="fgroup" style="margin-bottom:20px">
+      <label>Invitation Created For</label>
+      <div class="side-pills">
+        <button type="button" class="side-pill ${(DATA.side !== "groom") ? "is-active" : ""}" data-side="bride">
+          👰 <b>Bride's Side</b>
+        </button>
+        <button type="button" class="side-pill ${(DATA.side === "groom") ? "is-active" : ""}" data-side="groom">
+          🤵 <b>Groom's Side</b>
+        </button>
+      </div>
+      <p class="fhint" style="margin:4px 0 0">Puts Bride first or Groom first across all cards, posters, cover, and link.</p>
+    </div>`;
+
   FIELDS.forEach(f => {
     if (f.length === 1) { html += `<h3 class="fsection">${f[0]}</h3>`; return; }
     const [key, label, type] = f;
@@ -1030,6 +1348,31 @@ function buildForm() {
            <button class="ai-btn ghost" id="copyPrompt" type="button">Copy prompt</button>`;
   body.innerHTML = html;
   renderEventEditors();
+
+  // Side selector wiring
+  $$(".side-pills [data-side]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      DATA.side = btn.dataset.side;
+      $$(".side-pills [data-side]").forEach(b => b.classList.toggle("is-active", b.dataset.side === DATA.side));
+      autoFillSample1();
+      save(); render();
+    });
+  });
+
+  // Attach intelligent auto-fill input listeners across all form fields
+  ["f_bride", "f_groom", "f_date", "f_time", "f_venueName", "f_venueAddr", "f_brideCity", "f_groomCity", "f_story", "f_mapUrl"].forEach(id => {
+    const el = $("#" + id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      if (id === "f_story") sample1UserEdited.story = true;
+      if (id === "f_mapUrl") sample1UserEdited.mapUrl = true;
+      if (id === "f_brideCity") sample1UserEdited.brideCity = true;
+      if (id === "f_groomCity") sample1UserEdited.groomCity = true;
+      harvestForm();
+      autoFillSample1();
+    });
+  });
+
   $("#addEvent").addEventListener("click", () => {
     DATA.events.push({ name: "New celebration", when: "", where: "", note: "", mode: "", dress: "" });
     renderEventEditors();
@@ -1058,6 +1401,8 @@ function buildForm() {
         (formVal("story") ? ` For inspiration, their current draft: "${formVal("story")}"` : "")
       );
       $("#f_story").value = story;
+      sample1UserEdited.story = true;
+      DATA.story = story;
       msg.textContent = "Done — edit any line you like, then Save & preview.";
     } catch (err) {
       msg.textContent = err.code === "no-key"
@@ -1132,6 +1477,19 @@ function renderEventEditors() {
           : "No poster? The classic written card (always up to date with your names) is shown instead."}</p>
       </div>
     </div>`).join("");
+
+  // Track manual edits on specific event fields
+  $$("#evEditors .event-editor").forEach((box, i) => {
+    $$("[data-evf]", box).forEach(inp => {
+      inp.addEventListener("input", () => {
+        const field = inp.dataset.evf;
+        sample1UserEdited.events[i] ??= {};
+        sample1UserEdited.events[i][field] = true;
+        if (DATA.events[i]) DATA.events[i][field] = inp.value.trim();
+      });
+    });
+  });
+
   $$(".ev-del", wrap).forEach(b => b.addEventListener("click", () => {
     DATA.events.splice(+b.dataset.del, 1);
     renderEventEditors();
@@ -1283,7 +1641,9 @@ function pubDone(url) {
   const box = $("#publishLink");
   if (box) box.value = url;
 
-  const waText = `🌺 With the blessings of our families —\nYou are lovingly invited to the wedding of ${DATA.bride} & ${DATA.groom}!\nOpen our invitation: ${url}`;
+  const isGroom = (DATA.side === "groom");
+  const coupleName = isGroom ? `${DATA.groom} & ${DATA.bride}` : `${DATA.bride} & ${DATA.groom}`;
+  const waText = `🌺 With the blessings of our families —\nYou are lovingly invited to the wedding of ${coupleName}!\nOpen our invitation: ${url}`;
   const wa = $("#publishWa");
   if (wa) wa.href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
 
@@ -1434,22 +1794,42 @@ function mountCover() {
   if (!((VIEWING && !expired()) || DEMO || EDITING)) return;
   cover.hidden = false;
   document.body.style.overflow = "hidden";
-  let opened = false;
+  let opened = false, knocked = false;
   const open = () => {
     if (opened) return;
     opened = true;
     bellRing();
+    buzz([12, 40, 24]);   /* doors parting — a longer, softer pulse */
     document.body.classList.add("opened"); /* the hero glides in behind the parting doors */
     if (REDUCED) { cover.hidden = true; document.body.style.overflow = ""; return; }
     cover.classList.add("opening");
     setTimeout(() => { cover.hidden = true; document.body.style.overflow = ""; }, 3000);
   };
+  /* The first tap is a knock: a real wooden-door sound, a haptic pulse, and
+     the doors shudder as if struck. The second tap opens them. Guests who
+     just want in can tap twice quickly; nobody is trapped by it. */
+  const tap = () => {
+    if (opened) return;
+    if (!knocked) {
+      knocked = true;
+      knock();
+      buzz(25);
+      if (!REDUCED) {
+        cover.classList.add("knocked");
+        setTimeout(() => cover.classList.remove("knocked"), 420);
+      }
+      const hint = $(".cover-open", cover);
+      if (hint) hint.textContent = "• TAP AGAIN TO OPEN •";
+      return;
+    }
+    open();
+  };
   cover.addEventListener("click", e => {
     if (e.target.closest("#sealEdit")) return; /* replacing the photo, not opening */
-    open();
+    tap();
   });
   $(".cover-center", cover).addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tap(); }
   });
   if (EDITING) {
     const chip = $("#sealEdit");
@@ -1462,19 +1842,21 @@ function mountCover() {
   }
 }
 
-/* ---------- demo posters: auto-loaded from wedding/posters/ ----------
-   Drop poster images into that folder (welcome.jpg, nichayathartham.jpg,
-   haldi.jpg, muhurtham.jpg, reception.jpg) and the live demo shows the
-   full poster experience. Missing files fall back to the written cards. */
-/* ---------- demo posters: auto-loaded from wedding/posters/ ---------- */
+/* Demo poster artwork for the canned celebrations. This must NOT run for a
+   published invitation: a couple who uploaded their own welcome poster had it
+   replaced by the sample on every load, and an event's own poster was the one
+   thing that made their card personal. The editor's openFest already falls back
+   to these same posters, so nothing else needs them. */
 const DEFAULT_POSTERS = {
   trace: "posters/nichayathartham_clean.jpg",
   rub: "posters/haldi_clean.jpg",
   light: "posters/muhurtham_clean.jpg",
   tap: "posters/reception_clean.jpg"
 };
-DATA.welcomeImg = "posters/welcome_clean.jpg";
-DATA.events.forEach((ev, i) => { if (!ev.img || ev.img.endsWith('.jpg.jpeg')) ev.img = DEFAULT_POSTERS[modeFor(ev, i)] || "posters/welcome_clean.jpg"; });
+if (DEMO) {
+  DATA.welcomeImg = "posters/welcome_clean.jpg";
+  DATA.events.forEach((ev, i) => { ev.img = DEFAULT_POSTERS[modeFor(ev, i)] || "posters/welcome_clean.jpg"; });
+}
 
 /* Global helpers for poster cards */
 window.openEditorDrawer = function(type, idx) {
@@ -1500,24 +1882,10 @@ window.triggerPhotoUpload = function(type, idx) {
   if (pin) pin.click();
 };
 
-/* Photo input listener for all modes */
-$("#photoInput")?.addEventListener("change", async e => {
-  const file = e.target.files[0]; e.target.value = "";
-  if (!file) return;
-  const maxSide = photoSlot === -1 ? 700 : photoSlot >= 100 ? 900 : 1100;
-  const url = await compressImage(file, maxSide, .78);
-  if (url) {
-    if (photoSlot === -1) DATA.cover = url;
-    else if (photoSlot === 999) DATA.welcomeImg = url;
-    else if (photoSlot >= 100) {
-      const ev = DATA.events[photoSlot - 100];
-      if (ev) ev.img = url;
-      if (!$("#editorPanel")?.hidden) renderEventEditors();
-    }
-    else DATA.photos[photoSlot] = url;
-    save(); render();
-  }
-});
+/* The #photoInput change handler lives in the EDITING block above — it is the
+   only one. (A second, unconditional copy used to sit here; in edit mode both
+   fired for every pick, and in guest mode it waited for a click that could
+   never come.) */
 
 /* Smart AI Prompt Generator Modal Logic */
 let activePromptCeremony = "welcome";

@@ -1,0 +1,1 @@
+Monorepo hosting multiple wedding invitation frontends that share one serverless API, Supabase schema, and browser runtime while deploying identically to Vercel and Netlify.

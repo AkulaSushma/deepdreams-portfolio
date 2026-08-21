@@ -197,10 +197,9 @@ $('#upiId').addEventListener('click', () => { navigator.clipboard?.writeText(CFG
 
 /* ---------- marquee ---------- */
 (() => {
-  /* Kept in the same plain wording as the section headings. "AI Cinematics"
-     and "AI Agents" were jargon that appeared nowhere else on the page. */
+  /* Kept in the same plain wording as the section headings. */
   const words = ['AI Tribute Films', 'Remembrance Videos', 'Wedding Invitation Videos',
-                 'Baby Name Reveals', 'Wedding Websites', 'Business Websites', 'AI Solutions'];
+                 'Baby Name Reveals', 'Wedding Websites'];
   const set = `<span>${words.join('</span><span>')}</span>`;
   $('#marquee').innerHTML = set + set;
 })();

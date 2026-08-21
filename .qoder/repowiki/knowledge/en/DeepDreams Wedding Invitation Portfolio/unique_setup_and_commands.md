@@ -1,0 +1,1 @@
+Dual-platform deployment from the same source tree: `vercel.json` configures Vercel rewrites and headers, while `netlify.toml` builds into `dist/` and maps `/api/*` routes to `netlify/functions/` via a bridge; both platforms serve the same `api/` handlers without code changes. Scheduled keepalive runs at `17 2 * * *` on both platforms to keep free-tier instances warm.

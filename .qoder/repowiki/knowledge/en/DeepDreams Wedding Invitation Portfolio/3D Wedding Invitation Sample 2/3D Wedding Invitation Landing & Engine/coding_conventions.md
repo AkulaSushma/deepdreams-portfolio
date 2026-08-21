@@ -1,0 +1,6 @@
+- Runtime configuration is centralized in a single `window.WEDDING_CONFIG` object consumed by all subsystems rather than scattered constants.
+- Each major feature (audio, frames, scrub, nameBoard, petals, etc.) is encapsulated as a self-invoking function returning a small public API surface, keeping internal state private.
+- DOM hydration uses a tiny helper pattern (`set(sel, txt)` / `meta(prop, txt)`) that checks element existence before mutating, so missing nodes are silently ignored.
+- Performance-sensitive loops use a `RAF` abstraction that falls back to `setTimeout` when `requestAnimationFrame` is unavailable, enabling headless testing.
+- Visual resources are addressed through path templates built from config (frame prefix/ext, film src/poster, sanctum path) instead of hard-coded filenames.
+- User preferences (mute state, draft mode) are persisted in `localStorage` with try/catch guards so storage failures never break the experience.

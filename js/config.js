@@ -32,7 +32,6 @@ window.DD_CONFIG = {
         · Invitations tab  →  Title | YouTube
         · NameReveals tab  →  Title | YouTube
         · Websites tab     →  Couple | Website | Note
-        · AIBuilds tab     →  Title | Website | Note
      Any tab missing → that collection falls back to the inline
      arrays in this file.                                          */
   SHEET_ID: "1cMGf0VJRPTwHoUmlmw-XPfRvO6jmudz6QtBMS-saNtk",
@@ -105,24 +104,16 @@ window.DD_CONFIG = {
     { couple: "Harshitha & Sai Charan", note: "Interactive 3D wedding invitation experience", url: "3D%20Wedding%20Invitation%20Sample%202/index.html", poster: "site-invite2.jpg" }
   ],
 
-  /* ---- 8. AI BUILDS / AI AGENT & WORKFLOW WEBSITES ----
-     Google Sheet tab name:  AIBuilds   (headers: Title | Website | Note)
-     Same shape as WEDDING_SITES.                                    */
-  AI_BUILDS: [
-    { title: "AI Lead Enquiry Assistant", note: "Collects and organises customer enquiries through a simple WhatsApp-based process.", url: "", poster: "ai-lead-intake.jpg" },
-    { title: "AI Content Workflow",       note: "Helps businesses create, review and manage content from one simple dashboard.",     url: "", poster: "ai-content-engine.jpg" }
-  ],
-
-  /* ---- 9. CONTACT ---- */
+  /* ---- 8. CONTACT ---- */
   WHATSAPP: "919010901232",          // country code + number, no + or spaces
   WHATSAPP_MSG: "Hi DeepDreams, I'd like to know about tribute AI videos.",
   EMAIL: "k78491809@gmail.com",
 
-  /* ---- 10. SOCIAL ---- */
+  /* ---- 9. SOCIAL ---- */
   INSTAGRAM: "https://www.instagram.com/deepdreams_lateperson_death_ai?igsh=YTJ3bnNmMzVnYnh0",
   YOUTUBE:   "https://youtube.com/@deepdreamsaistudio?si=q9JqnwZsCsjD4GE1",
 
-  /* ---- 11. UPI (Indian payments) ---- */
+  /* ---- 10. UPI (Indian payments) ---- */
   UPI_ID: "9010901232@ybl",
   UPI_NAME: "DeepDreams AI Studio",
 };

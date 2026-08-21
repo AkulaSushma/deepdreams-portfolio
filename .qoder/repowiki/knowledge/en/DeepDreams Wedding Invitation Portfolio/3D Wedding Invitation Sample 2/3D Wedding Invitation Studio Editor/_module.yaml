@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: wedding_3d_world/editor_studio
+title: 3D Wedding Invitation Studio Editor
+scope:
+    - 3D Wedding Invitation Sample 2/editor.js
+    - 3D Wedding Invitation Sample 2/studio.js
+    - 3D Wedding Invitation Sample 2/create.html
+source_files: []
+depends_on: []
+related_to: []

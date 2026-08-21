@@ -1,0 +1,1 @@
+Five k6 scripts that stress-test the staging Deep Dreams site to verify free-tier claims: CDN caching, concurrent publish uniqueness, upload bypassing Vercel Functions, and single-code concurrency.

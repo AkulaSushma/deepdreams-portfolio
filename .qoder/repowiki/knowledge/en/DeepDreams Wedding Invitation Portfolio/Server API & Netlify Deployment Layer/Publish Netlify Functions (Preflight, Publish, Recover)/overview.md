@@ -1,0 +1,1 @@
+Netlify serverless function entry points that expose POST endpoints for publishing a wedding website, preflighting code uploads, and recovering a previously published site link.

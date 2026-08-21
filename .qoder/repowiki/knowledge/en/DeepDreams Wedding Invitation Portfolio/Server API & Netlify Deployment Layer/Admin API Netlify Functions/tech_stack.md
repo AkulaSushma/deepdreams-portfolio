@@ -1,0 +1,1 @@
+Netlify Functions with Node.js; uses a custom `bridge` adapter to convert between Netlify's function signature and the internal `api/admin` handlers.

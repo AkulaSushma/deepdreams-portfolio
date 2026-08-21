@@ -1,0 +1,3 @@
+- Each function file is a 7-line stub that exports a single `handler` created by wrapping the real handler with `require('../lib/bridge')`.
+- Files begin with a one-line comment describing the HTTP route and purpose, followed by `'use strict';`.
+- Business logic is kept out of the function files and imported from sibling modules under `../../api/admin/`.

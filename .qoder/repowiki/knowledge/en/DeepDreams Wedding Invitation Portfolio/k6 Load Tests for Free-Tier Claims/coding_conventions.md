@@ -1,0 +1,6 @@
+- Every script imports shared configuration and fixtures from `./_shared.js` rather than duplicating env parsing or header constants.
+- Scenarios are declared in each file's `options` block using explicit executors (`ramping-vus` for traffic spikes, `per-vu-iterations` for true simultaneous bursts) with staged VU ramps and `maxDuration` caps.
+- Pass/fail criteria are expressed as k6 `thresholds` on custom metrics or HTTP stats, and reinforced by a `handleSummary` function that prints a concise PASS/FAIL verdict.
+- Test inputs (slugs, codes, templates) are read exclusively from environment variables (`__ENV.SLUGS`, `__ENV.CODES`, `__ENV.CODE`, `__ENV.TEMPLATE`, `__ENV.RUN`) with validation that throws if required values are missing.
+- Safety checks guard against accidental production runs: hostname regex rejection of known production domains and assertions that responses never leak tokens, private fields, stack traces, or service-role secrets.
+- Concurrent publish tests use per-VU unique `idempotencyKey` values (prefixed by `RUN` and `__VU`) so the database lock — not idempotent replay — determines the winner.

@@ -39,6 +39,23 @@
   to = "/.netlify/functions/invite"
   status = 200
 
+# Preview links for the 3D invitation carry the couple's whole design in
+# ?c=… . WhatsApp and Google read a link card from the raw HTML and never run
+# JavaScript, so those requests are served by a function that puts the
+# couple's own names into the <head> — otherwise every preview link a couple
+# shares shows the demo couple's names.
+#
+# The link uses share.html, which has NO static file behind it, so this
+# rewrite always fires (exactly like /invite/* above). Routing through the
+# real invitation.html instead would lose the race to the static file, which
+# a rewrite only wins with force=true — and that is not honoured the same way
+# in `netlify dev` as on the production edge. The function reads ?c= itself
+# and answers a calm 404 card if it is missing or unreadable.
+[[redirects]]
+  from = "/3D Wedding Invitation Sample 2/share.html"
+  to = "/.netlify/functions/card?template=sample2"
+  status = 200
+
 # Longest paths first — Netlify takes the first match, so /api/publish placed
 # above /api/publish/preflight would swallow it.
 [[redirects]]

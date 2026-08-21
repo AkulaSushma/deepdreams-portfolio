@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: server_api/publish_functions
+title: Publish Netlify Functions (Preflight, Publish, Recover)
+scope:
+    - netlify/functions/publish-preflight.js
+    - netlify/functions/publish-recover.js
+    - netlify/functions/publish.js
+source_files: []
+depends_on: []
+related_to: []

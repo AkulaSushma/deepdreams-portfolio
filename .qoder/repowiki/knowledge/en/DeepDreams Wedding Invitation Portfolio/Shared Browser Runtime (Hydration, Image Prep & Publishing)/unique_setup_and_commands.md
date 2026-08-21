@@ -1,0 +1,1 @@
+Each file must be served at `/shared/<name>.js` so the page can load it as a script tag; `limits.js` is intentionally dual-loaded (browser via `<script src=...>` exposing `window.DD_LIMITS`, Node via `require(...)`) so both sides share the same numeric caps.

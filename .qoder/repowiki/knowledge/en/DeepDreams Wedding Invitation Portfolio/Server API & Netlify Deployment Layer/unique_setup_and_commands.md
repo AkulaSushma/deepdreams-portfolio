@@ -1,0 +1,1 @@
+`node netlify/build.js` copies the repository root into `dist/` while dropping `api/`, `netlify/`, `node_modules`, `.git`, markdown files, and other non-public artifacts, then verifies that `shared/limits.js` and `index.html` are present before publishing.

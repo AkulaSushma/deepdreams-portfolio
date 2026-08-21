@@ -1,0 +1,166 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: main
+nodes_managed: true
+exported_at: "2026-08-20T06:39:39Z"
+modules:
+    "":
+        dir_name: DeepDreams Wedding Invitation Portfolio
+        title: DeepDreams Wedding Invitation Portfolio
+        scope:
+            - README.md
+            - .gitignore
+            - .vercelignore
+            - 404.html
+            - manifest.json
+            - robots.txt
+            - sitemap.xml
+            - serve.json
+            - netlify.toml
+            - vercel.json
+            - _deploy-direct.js
+            - _audit.js
+            - _optimize-images.js
+            - _routecheck.js
+            - _weight.js
+            - capture-invite.js
+            - capture-invites.js
+            - capture-sample1-phone.js
+            - capture-sample2-phone.js
+            - scratch-probe.js
+            - scratch-rendertest.js
+            - scratch-urls.js
+            - _previous-design/
+            - admin/
+            - css/
+            - js/
+            - supabase/
+            - _nav-fixed.png
+            - _phone-fixed.png
+            - _shot-cover.png
+            - _shot-landing-top.png
+            - firebase-debug.log
+            - index.html
+            - serve.log
+            - verify-cover-after.png
+            - verify-landing-nav-after.png
+            - verify-phone-after.png
+            - wedding_qr.png
+        source_files: []
+        children:
+            - load_testing
+            - server_api
+            - shared_runtime
+            - static_invites
+            - wedding_3d_world
+        depends_on: []
+        related_to: []
+    load_testing:
+        dir_name: k6 Load Tests for Free-Tier Claims
+        title: k6 Load Tests for Free-Tier Claims
+        scope:
+            - loadtest/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    server_api:
+        dir_name: Server API & Netlify Deployment Layer
+        title: Server API & Netlify Deployment Layer
+        scope:
+            - api/
+            - netlify/
+        source_files: []
+        children:
+            - server_api/admin_functions
+            - server_api/invite_cron_functions
+            - server_api/publish_functions
+        depends_on: []
+        related_to: []
+    server_api/admin_functions:
+        dir_name: Admin API Netlify Functions
+        title: Admin API Netlify Functions
+        scope:
+            - netlify/functions/admin-login.js
+            - netlify/functions/admin-site.js
+            - netlify/functions/admin-tokens.js
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    server_api/invite_cron_functions:
+        dir_name: Public Invitation Page & Cron Keepalive Handlers
+        title: Public Invitation Page & Cron Keepalive Handlers
+        scope:
+            - api/invite.js
+            - netlify/functions/invite.js
+            - netlify/functions/cron-keepalive.js
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    server_api/publish_functions:
+        dir_name: Publish Netlify Functions (Preflight, Publish, Recover)
+        title: Publish Netlify Functions (Preflight, Publish, Recover)
+        scope:
+            - netlify/functions/publish-preflight.js
+            - netlify/functions/publish-recover.js
+            - netlify/functions/publish.js
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    shared_runtime:
+        dir_name: Shared Browser Runtime (Hydration, Image Prep & Publishing)
+        title: Shared Browser Runtime (Hydration, Image Prep & Publishing)
+        scope:
+            - shared/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    static_invites:
+        dir_name: DeepDreams AI Wedding Invitation (Static Frontend)
+        title: DeepDreams AI Wedding Invitation (Static Frontend)
+        scope:
+            - wedding/
+            - wedding-invite/
+            - wedding-invite sample 1/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    wedding_3d_world:
+        dir_name: 3D Wedding Invitation Sample 2
+        title: 3D Wedding Invitation Sample 2
+        scope:
+            - 3D Wedding Invitation Sample 2/
+        source_files: []
+        children:
+            - wedding_3d_world/editor_studio
+            - wedding_3d_world/invitation_app
+        depends_on: []
+        related_to: []
+    wedding_3d_world/editor_studio:
+        dir_name: 3D Wedding Invitation Studio Editor
+        title: 3D Wedding Invitation Studio Editor
+        scope:
+            - 3D Wedding Invitation Sample 2/editor.js
+            - 3D Wedding Invitation Sample 2/studio.js
+            - 3D Wedding Invitation Sample 2/create.html
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    wedding_3d_world/invitation_app:
+        dir_name: 3D Wedding Invitation Landing & Engine
+        title: 3D Wedding Invitation Landing & Engine
+        scope:
+            - 3D Wedding Invitation Sample 2/app.js
+            - 3D Wedding Invitation Sample 2/config.js
+            - 3D Wedding Invitation Sample 2/index.html
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []

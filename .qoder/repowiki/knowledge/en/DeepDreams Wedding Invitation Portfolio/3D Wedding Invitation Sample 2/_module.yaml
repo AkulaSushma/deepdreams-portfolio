@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: wedding_3d_world
+title: 3D Wedding Invitation Sample 2
+scope:
+    - 3D Wedding Invitation Sample 2/
+source_files: []
+depends_on: []
+related_to: []

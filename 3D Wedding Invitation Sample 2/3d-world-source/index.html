@@ -208,16 +208,18 @@
           for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
           cfg = JSON.parse(new TextDecoder().decode(bytes));
         } else if (p.has("draft")) {
-          // Only an explicit ?draft asks for the local draft. Reading it
-          // unconditionally made this sticky: any device that had ever opened
-          // the editor or a ?c= link kept that couple in localStorage, and the
-          // *demo* world then silently showed those names in the title card,
-          // the arrival card and the plane banner. Same convention as config.js.
           var raw = localStorage.getItem("wedding-studio-draft");
           if (raw) cfg = JSON.parse(raw);
+        } else if (p.get("b") || p.get("g")) {
+          cfg = { couple: { bride: (p.get("b") || "").trim(), groom: (p.get("g") || "").trim(), side: (p.get("side") || "bride").trim() } };
         }
-        if (cfg && cfg.couple && cfg.couple.bride && cfg.couple.groom) {
-          window.WEDDING_COUPLE = { bride: cfg.couple.bride, groom: cfg.couple.groom };
+        if (cfg && cfg.couple && (cfg.couple.bride || cfg.couple.groom)) {
+          var side = (cfg.couple.side || p.get("side") || "bride").toLowerCase();
+          window.WEDDING_COUPLE = {
+            bride: cfg.couple.bride || "Bride",
+            groom: cfg.couple.groom || "Groom",
+            side: side
+          };
         }
       } catch(e) {}
     })();
@@ -260,22 +262,46 @@
     <!-- Hydrate static UI elements in 3D world -->
     <script>
     (function() {
-      try {
-        var c = window.WEDDING_COUPLE;
-        if (!c || !c.bride || !c.groom) return;
-        var b = c.bride, g = c.groom;
-        var h1 = document.querySelector("#titlecard h1");
-        if (h1) {
-          h1.innerHTML = b + ' <span class="weds">weds</span> ' + g;
-          var len = (b + g).length;
-          if (len > 20) {
-            h1.style.fontSize = len > 30 ? "clamp(18px, 4vw, 32px)" : len > 24 ? "clamp(22px, 5vw, 38px)" : "clamp(26px, 5.5vw, 42px)";
+      function applyNames() {
+        try {
+          var c = window.WEDDING_COUPLE;
+          if (!c && typeof URLSearchParams !== "undefined") {
+            var p = new URLSearchParams(location.search);
+            if (p.has("draft")) {
+              try {
+                var d = JSON.parse(localStorage.getItem("wedding-studio-draft") || "null");
+                if (d && d.couple) c = d.couple;
+              } catch(e) {}
+            }
+            if (!c && (p.get("b") || p.get("g"))) {
+              c = { bride: p.get("b") || "", groom: p.get("g") || "", side: p.get("side") || "bride" };
+            }
           }
-        }
-        var arr = document.querySelector(".arrival-title");
-        if (arr) arr.textContent = b + " & " + g;
-        document.title = b + " weds " + g;
-      } catch(e) {}
+          if (!c || (!c.bride && !c.groom)) return;
+          var isGroom = (c.side === "groom");
+          var first = isGroom ? c.groom : c.bride;
+          var second = isGroom ? c.bride : c.groom;
+          var esc = function(s) {
+            return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+          };
+          var h1 = document.querySelector("#titlecard h1");
+          if (h1) {
+            h1.innerHTML = esc(first) + ' <span class="weds">weds</span> ' + esc(second);
+            var len = (first + second).length;
+            if (len > 20) {
+              h1.style.fontSize = len > 30 ? "clamp(18px, 4vw, 32px)" : len > 24 ? "clamp(22px, 5vw, 38px)" : "clamp(26px, 5.5vw, 42px)";
+            }
+          }
+          var arr = document.querySelector(".arrival-title");
+          if (arr) arr.textContent = first + " & " + second;
+          document.title = first + " weds " + second;
+        } catch(e) {}
+      }
+      applyNames();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyNames);
+      }
     })();
     </script>
   </body>

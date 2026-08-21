@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: shared_runtime
+title: Shared Browser Runtime (Hydration, Image Prep & Publishing)
+scope:
+    - shared/
+source_files: []
+depends_on: []
+related_to: []

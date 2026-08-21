@@ -68,23 +68,35 @@ if (location.protocol === "file:") {
       <h2 class="ed-h">The couple</h2>
       <p class="ed-p">These names appear on the seal, the hero film, the countdown and the finale.</p>
 
+      <div class="side-selector-group">
+        <label class="side-selector-label">Who is creating this invitation?</label>
+        <div class="side-toggle" id="side-toggle" role="radiogroup" aria-label="Invitation Side">
+          <button type="button" class="side-btn is-active" data-side="bride" role="radio" aria-checked="true">
+            <span class="side-icon">👰</span> <b>Bride's Side</b> <small>(Bride first)</small>
+          </button>
+          <button type="button" class="side-btn" data-side="groom" role="radio" aria-checked="false">
+            <span class="side-icon">🤵</span> <b>Groom's Side</b> <small>(Groom first)</small>
+          </button>
+        </div>
+      </div>
+
       <div class="ed-row">
-        <label class="fld"><span>Bride's name <em>(shown first)</em></span>
-          <input id="f-bride" type="text" maxlength="22" placeholder="Harshitha"></label>
-        <label class="fld"><span>Groom's name</span>
-          <input id="f-groom" type="text" maxlength="22" placeholder="Sai Charan"></label>
+        <label class="fld" id="lbl-bride"><span>Bride's name <em id="lbl-bride-note">(shown first)</em></span>
+          <input id="f-bride" type="text" maxlength="22" placeholder="e.g. Harshitha"></label>
+        <label class="fld" id="lbl-groom"><span>Groom's name <em id="lbl-groom-note" hidden>(shown first)</em></span>
+          <input id="f-groom" type="text" maxlength="22" placeholder="e.g. Sai Charan"></label>
       </div>
       <div class="ed-row">
         <label class="fld"><span>Bride's full name</span>
-          <input id="f-brideFull" type="text" placeholder="Harshitha Chowdary"></label>
+          <input id="f-brideFull" type="text" placeholder="Bride's full name"></label>
         <label class="fld"><span>Groom's full name</span>
-          <input id="f-groomFull" type="text" placeholder="Sai Charan Reddy"></label>
+          <input id="f-groomFull" type="text" placeholder="Groom's full name"></label>
       </div>
       <div class="ed-row">
         <label class="fld"><span>Monogram <em>(wax seal)</em></span>
-          <input id="f-monogram" type="text" maxlength="9" placeholder="M · M"></label>
+          <input id="f-monogram" type="text" maxlength="9" placeholder="Auto (e.g. H · S)"></label>
         <label class="fld"><span>Wedding hashtag</span>
-          <input id="f-hashtag" type="text" maxlength="34" placeholder="#HarshithaWedsSaiCharan"></label>
+          <input id="f-hashtag" type="text" maxlength="34" placeholder="Auto (#BrideWedsGroom)"></label>
       </div>
       <label class="fld"><span>Tagline <em>(under the names)</em></span>
         <input id="f-tagline" type="text" maxlength="64" placeholder="Two souls · Seven vows · One forever"></label>
@@ -108,7 +120,7 @@ if (location.protocol === "file:") {
         <input id="f-muhurat" type="text" placeholder="Shubh Muhurat · 7:08 PM"></label>
       <p class="ed-hint">Live countdown target: <b id="ed-iso">—</b></p>
 
-      <div class="ed-nav"><button class="btn btn-gold" data-next="events" type="button">Next · Functions</button></div>
+      <div class="ed-nav"><button class="btn btn-gold" data-next="events" type="button">Next: Functions →</button></div>
     </div>
 
     <!-- 2 · EVENTS -->
@@ -118,8 +130,8 @@ if (location.protocol === "file:") {
       <div id="ev-list" class="ev-list"></div>
       <button class="btn btn-ghost btn-block" id="ev-add" type="button">+ Add a function</button>
       <div class="ed-nav">
-        <button class="btn btn-quiet" data-next="couple" type="button">Back</button>
-        <button class="btn btn-gold" data-next="venue" type="button">Next · Venue</button>
+        <button class="btn btn-quiet" data-next="couple" type="button">← Back</button>
+        <button class="btn btn-gold" data-next="venue" type="button">Next: Venue &amp; RSVP →</button>
       </div>
     </div>
 
@@ -145,8 +157,8 @@ if (location.protocol === "file:") {
         <input id="f-deadline" type="text" placeholder="Please respond by 1 November 2026"></label>
 
       <div class="ed-nav">
-        <button class="btn btn-quiet" data-next="events" type="button">Back</button>
-        <button class="btn btn-gold" data-next="videos" type="button">Next · Videos</button>
+        <button class="btn btn-quiet" data-next="events" type="button">← Back</button>
+        <button class="btn btn-gold" data-next="videos" type="button">Next: Wedding Films →</button>
       </div>
     </div>
 
@@ -216,8 +228,8 @@ if (location.protocol === "file:") {
       </div>
 
       <div class="ed-nav">
-        <button class="btn btn-quiet" data-next="venue" type="button">Back</button>
-        <button class="btn btn-gold" data-next="blessing" type="button">Next · Blessing</button>
+        <button class="btn btn-quiet" data-next="venue" type="button">← Back</button>
+        <button class="btn btn-gold" data-next="blessing" type="button">Next: Blessing →</button>
       </div>
     </div>
 
@@ -234,8 +246,8 @@ if (location.protocol === "file:") {
       <label class="fld"><span>Hidden-moment hint</span>
         <input id="f-sanctumHint" type="text" maxlength="70" placeholder="Scroll gently to unfold this hidden moment"></label>
       <div class="ed-nav">
-        <button class="btn btn-quiet" data-next="venue" type="button">Back</button>
-        <button class="btn btn-gold" data-next="theme" type="button">Next · Palette</button>
+        <button class="btn btn-quiet" data-next="videos" type="button">← Back</button>
+        <button class="btn btn-gold" data-next="theme" type="button">Next: Palette →</button>
       </div>
     </div>
 
@@ -253,24 +265,36 @@ if (location.protocol === "file:") {
         <label class="sw"><input id="f-inkOnIvory" type="color"><span>Ink</span></label>
       </div>
       <div class="ed-nav">
-        <button class="btn btn-quiet" data-next="blessing" type="button">Back</button>
-        <button class="btn btn-gold" data-next="launch" type="button">Next · Launch</button>
+        <button class="btn btn-quiet" data-next="blessing" type="button">← Back</button>
+        <button class="btn btn-gold" data-next="launch" type="button">Next: Launch &amp; Publish →</button>
       </div>
     </div>
 
     <!-- 6 · LAUNCH -->
     <div class="ed-panel" data-panel="launch">
       <h2 class="ed-h">Launch</h2>
-      <p class="ed-p">Your draft lives on this device. Preview it as a real invitation as often as you like — designing and previewing are free. When you are happy with it, publish it with your activation code and you will get one permanent link for your guests.</p>
+      <p class="ed-p">Your draft lives on this device. Preview it as a real invitation as often as you like — designing and previewing are free. You can share a preview link with family right away, or publish with your activation code for the permanent guest link.</p>
 
       <ul class="checklist" id="checklist"></ul>
 
       <div class="launch-grid">
         <a class="btn btn-gold btn-block" id="btn-open" href="invitation.html?draft=1" target="_blank" rel="noopener">Open my invitation ↗</a>
+        <button class="btn btn-ghost btn-block" id="btn-share" type="button">Share a preview link</button>
         <button class="btn btn-ghost btn-block" id="btn-publish" type="button">Publish my invitation</button>
         <button class="btn btn-ghost btn-block" id="btn-config" type="button">Download config.js</button>
         <button class="btn btn-ghost btn-block" id="btn-json" type="button">Download brief (.json)</button>
         <a class="btn btn-quiet btn-block" id="btn-send" href="#">Email the brief to the studio</a>
+      </div>
+
+      <!-- SHARE PREVIEW — carries the whole design inside the link itself, so
+           it opens the couple's own invitation on any device and shows their
+           names in the WhatsApp preview card. Nothing is stored anywhere. -->
+      <div class="publish-box" id="share-box" hidden>
+        <p class="publish-done-h">Your preview link is ready 🎉</p>
+        <p class="ed-hint">Anyone with this link sees your invitation with your names — no activation code needed. It stays free and works on every device.</p>
+        <div class="publish-linkbox"><input id="share-link" readonly><button class="btn btn-quiet" id="btn-share-copy" type="button">Copy</button></div>
+        <a class="btn btn-gold btn-block" id="btn-share-wa" target="_blank" rel="noopener">Share on WhatsApp</a>
+        <p class="ed-hint">Want the permanent link with your own photographs and films? Publish it with your activation code below.</p>
       </div>
 
       <!-- PUBLISH — the paid step.

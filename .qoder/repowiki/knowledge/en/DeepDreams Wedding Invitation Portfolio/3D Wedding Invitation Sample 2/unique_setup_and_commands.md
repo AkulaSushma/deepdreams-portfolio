@@ -1,0 +1,1 @@
+Serve the entire module root with `npx --yes http-server . -p 4173 -c-1`; the four entry points are `/` (studio landing), `/invitation.html`, `/create.html` and `/world/`. Rebuild the 3D world inside `3d-world-source/` and replace the contents of this project's `world/` folder while keeping relative asset paths.

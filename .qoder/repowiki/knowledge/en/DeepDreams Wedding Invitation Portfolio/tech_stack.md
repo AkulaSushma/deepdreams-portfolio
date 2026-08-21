@@ -1,0 +1,1 @@
+Node.js serverless functions running on both Vercel and Netlify with a shared `api/` codebase, Supabase for persistence, k6 for load testing, and a shared browser runtime (`shared/`) consumed by all static frontend products.

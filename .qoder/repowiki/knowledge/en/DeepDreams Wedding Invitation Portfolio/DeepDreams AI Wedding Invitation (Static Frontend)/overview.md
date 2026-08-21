@@ -1,0 +1,1 @@
+A zero-backend, single-page Indian wedding invitation site that lets couples edit details and share a self-contained link carrying all data via URL hash compression.

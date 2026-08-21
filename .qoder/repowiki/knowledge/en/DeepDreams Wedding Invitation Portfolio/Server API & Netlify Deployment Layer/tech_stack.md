@@ -1,0 +1,1 @@
+Node.js with no runtime dependencies; Netlify Functions for serverless execution; a custom bridge adapter decouples handlers from Netlify's event format.

@@ -1,0 +1,1 @@
+Static HTML/CSS/JS served by any static server (http-server); the invitation and editor use vanilla JS with no framework, while the 3D world is a separate Vite + Three.js project built into `world/`. Media assets are WebP frames, MP4 films and M4A audio.

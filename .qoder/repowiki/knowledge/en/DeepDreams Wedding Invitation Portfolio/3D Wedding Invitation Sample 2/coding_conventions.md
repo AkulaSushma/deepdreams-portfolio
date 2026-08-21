@@ -1,0 +1,4 @@
+- All mutable client data flows through `window.WEDDING_CONFIG`, produced by merging sample defaults with an optional override (published payload, `?c=` link, or `?draft=1` localStorage draft).
+- The editor keeps a deep clone of the sample defaults as `window.WEDDING_DEFAULTS` so Reset returns to the original demo rather than a previous share link.
+- Heavy media (3D scene, WebGL context, soundtrack) is deferred until the user explicitly navigates to `world/index.html`, keeping the invitation lightweight.
+- Frame-based animations are driven by numeric prefixes (`f_001.webp`, `s_001.webp`) whose count and path are declared once in `config.js` and consumed by both the invitation engine and the editor preview.

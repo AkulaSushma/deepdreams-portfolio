@@ -1,0 +1,1 @@
+Opening the file via `file://` protocol triggers an inline script that strips `?v=…` cache-busting query strings from all linked assets so they resolve correctly without a web server. A `?tick` query parameter swaps `requestAnimationFrame` for a `setTimeout` loop to support hidden-tab automated testing.

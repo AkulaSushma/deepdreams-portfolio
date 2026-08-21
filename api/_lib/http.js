@@ -187,7 +187,16 @@ function publicOrigin(req) {
 
   const host =
     (req && req.headers && (req.headers["x-forwarded-host"] || req.headers.host)) || "";
-  const proto = (req && req.headers && req.headers["x-forwarded-proto"]) || "https";
+  /* Netlify's edge always sends x-forwarded-proto, so its absence means the
+     request arrived directly — local development. There the server speaks
+     plain http, and a function's self-fetch of a template over https would
+     fail. Only loopback hosts get this treatment: a real deployment host
+     keeps https even if a proxy forgot the header. */
+  const isLoopback =
+    /^(localhost|127\.[\d.]+|\[::1\]|::1|0\.0\.0\.0)(:\d+)?$/.test(host);
+  const proto =
+    (req && req.headers && req.headers["x-forwarded-proto"]) ||
+    (isLoopback ? "http" : "https");
   return host ? `${proto}://${host}` : "";
 }
 

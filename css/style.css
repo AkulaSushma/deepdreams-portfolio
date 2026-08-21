@@ -511,7 +511,7 @@ footer b{color:var(--gold-soft)}
 /* ============================================================
    WEDDING SITES GRID & AI BUILDS GRID
    ============================================================ */
-.wedding-sites-grid,.ai-builds-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.wedding-sites-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .site-card,.ai-build-card{display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;
   border:1px solid var(--border);background:var(--card);transition:transform .5s var(--ease),box-shadow .5s}
 .site-card:hover,.ai-build-card:hover{transform:translateY(-4px);
@@ -573,7 +573,7 @@ footer b{color:var(--gold-soft)}
 .mock-note{font-size:12.5px;color:var(--muted);max-width:260px;margin-top:3px;line-height:1.5}
 
 @media(max-width:560px){
-  .wedding-sites-grid,.ai-builds-grid{grid-template-columns:1fr}
+  .wedding-sites-grid{grid-template-columns:1fr}
 }
    HORIZONTAL 9:16 INVITATION CAROUSEL
    Arranged horizontally like tribute videos, but with 9:16 frame ratio

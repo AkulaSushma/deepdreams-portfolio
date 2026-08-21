@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: server_api/admin_functions
+title: Admin API Netlify Functions
+scope:
+    - netlify/functions/admin-login.js
+    - netlify/functions/admin-site.js
+    - netlify/functions/admin-tokens.js
+source_files: []
+depends_on: []
+related_to: []

@@ -1,0 +1,2 @@
+- Each function file is a one-line adapter that loads `../lib/bridge` and assigns `bridge(require('../../api/publish/<route>.js'))` to `exports.handler`.
+- Files begin with a single-line comment describing the route path and purpose before the `use strict` directive.

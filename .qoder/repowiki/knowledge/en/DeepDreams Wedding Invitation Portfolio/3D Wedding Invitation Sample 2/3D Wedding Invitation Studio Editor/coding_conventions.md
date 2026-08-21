@@ -1,0 +1,6 @@
+- Editor inputs are bound declaratively via a shared `bind(id, getter, setter, event)` helper that wires value sync, `sync()`, and debounced `save()` on every change.
+- State mutations go through a single plain-object store `S` initialized from defaults and merged with a saved draft using a shallow-object `soak` helper that preserves unknown fields across schema versions.
+- Live preview updates are centralized in one `sync()` function that reads `S` and writes DOM text/content plus CSS custom properties, keeping the preview in lockstep with the form.
+- Step navigation uses `data-panel` attributes on both step buttons and panels, with a single handler toggling `is-on` classes and updating a progress bar.
+- User-facing strings and IDs use a consistent `f-` prefix for form inputs and `pv-` prefix for preview elements, making selector-based binding predictable.
+- Publishing payloads are sanitized by stripping any `blob:`/`data:`/`file:` video sources before being sent to the server, ensuring guests never receive device-local URLs.

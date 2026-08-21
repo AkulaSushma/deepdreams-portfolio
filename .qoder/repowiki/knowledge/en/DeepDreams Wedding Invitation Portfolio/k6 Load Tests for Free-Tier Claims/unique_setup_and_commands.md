@@ -1,0 +1,1 @@
+Requires `k6 run -e BASE_URL=<staging-url>` plus scenario-specific env vars: `SLUGS` (comma-separated published slugs) for `view-one.js`/`view-many.js`, `CODES` for `publish.js`, and `CODE` for `upload.js`/`one-token.js`. An optional `RUN` env var seeds idempotency keys and fake hashes so re-runs do not reuse prior artifacts. Production is blocked unless `I_MEAN_IT=1` is set.

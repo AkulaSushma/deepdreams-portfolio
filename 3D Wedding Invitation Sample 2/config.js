@@ -57,9 +57,9 @@ window.WEDDING_CONFIG = {
       id: "reception",
       name: "Reception",
       icon: "reception",
-      date: "Fri, 27 Nov 2026",
+      date: "Thu, 26 Nov 2026",
       time: "7:30 PM onwards",
-      venue: "Durbar Hall",
+      venue: "The Royal Palace Gardens",
       line: "An evening of royal festivity",
       accent: "#B08A3E",
     },
@@ -122,6 +122,24 @@ window.WEDDING_CONFIG = {
   ],
 };
 
+/* Helper to resolve template assets whether on root, subfolder, preview link, or /invite/{slug} */
+window.getSample2BaseUrl = function () {
+  if (window.DD_SAMPLE2_BASE) return window.DD_SAMPLE2_BASE;
+  const scripts = document.querySelectorAll('script[src*="config.js"], script[src*="app.js"]');
+  for (const s of scripts) {
+    const src = s.getAttribute("src") || s.src || "";
+    const idx = src.lastIndexOf("/");
+    if (idx >= 0) {
+      const base = src.slice(0, idx + 1);
+      if (base && base !== "./" && base !== "/") return base;
+    }
+  }
+  if (window.DD_PUBLISHED || (typeof location !== "undefined" && /^\/invite\//i.test(location.pathname))) {
+    return "/3D%20Wedding%20Invitation%20Sample%202/";
+  }
+  return "";
+};
+
 /* ============================================================
    STUDIO BRIDGE — lets the editor, or the server, drive this invitation.
 
@@ -142,23 +160,76 @@ window.WEDDING_CONFIG = {
   // B1: Save a clean copy before any merge — editor.js uses this for Reset
   window.WEDDING_DEFAULTS = JSON.parse(JSON.stringify(base));
 
-  /* Sensible defaults for the three fields nobody types: a hashtag, the city and
-     the short date. Each is derived from a field the couple *did* fill in.
-
-     This runs on the FINAL configuration, after any merge — never on the sample
-     before it. Derive first and the sample's own hashtag is already sitting in
-     the object when the couple's design merges over it, so an invitation for
-     Meera and Arjun goes out reading #HarshithaWedsSaiCharan and dated Udaipur.
-     `||=` cannot help there: the field is not empty, it is simply someone
-     else's. Anything the couple actually filled in still wins — it arrives in
-     the override and is left alone here. */
-  /* Names may contain spaces ("Sai Charan"); a hashtag may not. */
   const tag = (n) => String(n || "").replace(/\s+/g, "");
+  const initial = (n) => {
+    const s = String(n || "").trim();
+    return s ? s[0].toUpperCase() : "";
+  };
+
   const derive = (c) => {
-    c.couple.hashtag ||= "#" + tag(c.couple.bride) + "Weds" + tag(c.couple.groom);
+    if (!c.couple) c.couple = {};
+    if (!c.wedding) c.wedding = {};
+    if (!c.venue) c.venue = {};
+    if (!c.frames) c.frames = JSON.parse(JSON.stringify(base.frames));
+    if (!c.sanctum) c.sanctum = JSON.parse(JSON.stringify(base.sanctum));
+
+    const b = c.couple.bride || "";
+    const g = c.couple.groom || "";
+    const isGroomSide = (c.couple.side === "groom");
+    const isDemoCouple = (b === "Harshitha" && g === "Sai Charan");
+
+    // Monogram: auto-derive if empty or still holding demo monogram for a non-demo couple
+    if (!c.couple.monogram || (!isDemoCouple && (c.couple.monogram === "S · H" || c.couple.monogram === "H · S" || c.couple.monogram === "M · M"))) {
+      const bi = initial(b), gi = initial(g);
+      c.couple.monogram = isGroomSide
+        ? ((gi && bi) ? `${gi} · ${bi}` : (gi || bi || "♥"))
+        : ((bi && gi) ? `${bi} · ${gi}` : (bi || gi || "♥"));
+    }
+
+    // Hashtag: auto-derive if empty or holding demo hashtag for a non-demo couple
+    if (!c.couple.hashtag || (!isDemoCouple && (c.couple.hashtag === "#HarshithaWedsSaiCharan" || c.couple.hashtag === "#SaiCharanWedsHarshitha" || c.couple.hashtag === "#MishiWedsMrigank"))) {
+      c.couple.hashtag = (b && g)
+        ? (isGroomSide ? "#" + tag(g) + "Weds" + tag(b) : "#" + tag(b) + "Weds" + tag(g))
+        : "";
+    }
+
+    // Full names: auto-derive if empty or holding demo full names for a non-demo couple
+    if (!c.couple.brideFull || (!isDemoCouple && (c.couple.brideFull === "Harshitha Chowdary" || c.couple.brideFull === "Mishi Agarwal"))) {
+      c.couple.brideFull = b;
+    }
+    if (!c.couple.groomFull || (!isDemoCouple && (c.couple.groomFull === "Sai Charan Reddy" || c.couple.groomFull === "Mrigank Singh Rathore"))) {
+      c.couple.groomFull = g;
+    }
+
     c.venue.city ||= (String(c.venue.address || "").split(",")[1] || "").trim();
     c.wedding.dateShort ||= String(c.wedding.dateDisplay || "").replace(/^[A-Za-z]+,\s*/, "") +
       (c.venue.city ? " · " + c.venue.city : "");
+
+    // Resolve asset base paths so 3D frames, middle animation, audio & films never 404
+    const baseDir = (typeof window.getSample2BaseUrl === "function" ? window.getSample2BaseUrl() : "") || "";
+    if (baseDir) {
+      if (c.frames) {
+        if (!c.frames.loPath.startsWith(baseDir) && !/^https?:\/\//i.test(c.frames.loPath)) {
+          c.frames.loPath = baseDir + c.frames.loPath.replace(/^\.?\//, "");
+        }
+        if (!c.frames.hiPath.startsWith(baseDir) && !/^https?:\/\//i.test(c.frames.hiPath)) {
+          c.frames.hiPath = baseDir + c.frames.hiPath.replace(/^\.?\//, "");
+        }
+      }
+      if (c.sanctum && !c.sanctum.path.startsWith(baseDir) && !/^https?:\/\//i.test(c.sanctum.path)) {
+        c.sanctum.path = baseDir + c.sanctum.path.replace(/^\.?\//, "");
+      }
+      if (Array.isArray(c.films)) {
+        c.films.forEach(f => {
+          if (f && f.src && !f.src.startsWith(baseDir) && !/^https?:\/\//i.test(f.src)) {
+            f.src = baseDir + f.src.replace(/^\.?\//, "");
+          }
+          if (f && f.poster && !f.poster.startsWith(baseDir) && !/^https?:\/\//i.test(f.poster)) {
+            f.poster = baseDir + f.poster.replace(/^\.?\//, "");
+          }
+        });
+      }
+    }
     return c;
   };
 
@@ -199,12 +270,6 @@ window.WEDDING_CONFIG = {
        which is exactly what a published invitation is not. Setting it here
        would put the editor's own controls on a guest's screen. */
     if (!published) document.documentElement.dataset.studioDraft = "1";
-    /* Deliberately does NOT write back to localStorage. This used to persist the
-       override "so the 3D world picks up the same names", but that made a guest's
-       device remember whichever couple's ?c= link they opened last — and the demo
-       world then showed those names in its title card and plane banner. The world
-       now receives the couple on the portal link itself (see app.js), so the
-       device-wide draft can stay private to whoever actually used the editor. */
   } else {
     derive(base);
   }

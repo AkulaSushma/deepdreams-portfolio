@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: server_api/invite_cron_functions
+title: Public Invitation Page & Cron Keepalive Handlers
+scope:
+    - api/invite.js
+    - netlify/functions/invite.js
+    - netlify/functions/cron-keepalive.js
+source_files: []
+depends_on: []
+related_to: []

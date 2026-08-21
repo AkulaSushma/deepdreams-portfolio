@@ -189,7 +189,7 @@ function page(templateHtml, view, origin) {
     /* The published invitation, inlined. Read by the template's own script,
        which prefers it over anything in the URL — so a guest's page never
        depends on a link parameter, and never on a second request. */
-    `<script>window.DD_SITE=${safeJson(view)};window.DD_PUBLISHED=true;</script>`,
+    `<script>window.DD_SITE=${safeJson(view)};window.DD_PUBLISHED=true;window.DD_SAMPLE2_BASE=${safeJson(baseDir)};window.DD_SAMPLE1_BASE=${safeJson(baseDir)};</script>`,
     /* Photographs come from Supabase's CDN; warming the connection early
        saves a DNS lookup and a TLS handshake on the critical path. */
     supabaseOrigin() ? `<link rel="preconnect" href="${escapeHtml(supabaseOrigin())}" crossorigin>` : "",
@@ -285,5 +285,5 @@ function maintenancePage(origin) {
 module.exports = {
   TEMPLATE_SOURCE, baseDirFor, page,
   notFoundPage, maintenancePage,
-  escapeHtml, safeJson, absolutise, stripHead,
+  escapeHtml, safeJson, absolutise, stripHead, fallbackImage,
 };

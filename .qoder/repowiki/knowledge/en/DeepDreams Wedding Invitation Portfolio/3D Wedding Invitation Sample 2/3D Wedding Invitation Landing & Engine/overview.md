@@ -1,0 +1,1 @@
+Client-side landing page and interactive engine that renders a scroll-driven frame cinema, petals, scratch card, countdown, RSVP, and a portal into the separate 3D baraat world.

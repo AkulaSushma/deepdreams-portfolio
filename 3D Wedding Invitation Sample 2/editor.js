@@ -57,7 +57,7 @@ const splitISO = (iso) => {
            : { date: "2026-11-26", time: "19:08", tz: "+05:30" };
 };
 const partsOf = (ymd) => {
-  const [y, mo, d] = ymd.split("-").map(Number);
+  const [y, mo, d] = (ymd || "2026-11-26").split("-").map(Number);
   return { y, mo, d, dow: new Date(Date.UTC(y, mo - 1, d)).getUTCDay() };
 };
 const longDate = (ymd) => { const p = partsOf(ymd); return `${DAYS[p.dow]}, ${p.d} ${MONTHS[p.mo - 1]} ${p.y}`; };
@@ -68,6 +68,27 @@ const toYMD = (txt) => {
   if (!m) return "";
   const mi = MONTHS.findIndex(x => x.toLowerCase().startsWith(m[2].toLowerCase()));
   return mi < 0 ? "" : `${m[3]}-${String(mi + 1).padStart(2,"0")}-${String(+m[1]).padStart(2,"0")}`;
+};
+
+// 12-hour AM/PM formatter
+const fmtTime12 = (tStr) => {
+  if (!tStr) return "7:08 PM";
+  const [h, m] = tStr.split(":").map(Number);
+  if (isNaN(h)) return tStr;
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(isNaN(m) ? 0 : m).padStart(2, "0")} ${ampm}`;
+};
+
+// Date arithmetic helper (+/- days from YYYY-MM-DD)
+const addDaysYMD = (ymd, days) => {
+  try {
+    const [y, mo, d] = (ymd || "2026-11-26").split("-").map(Number);
+    const dt = new Date(Date.UTC(y, mo - 1, d + days));
+    return dt.toISOString().slice(0, 10);
+  } catch {
+    return ymd || "2026-11-26";
+  }
 };
 
 /* ── persistence ── */
@@ -81,7 +102,253 @@ const save = () => {
   }, 260);
 };
 
-/* ── binding ── */
+const tag = (n) => String(n || "").replace(/\s+/g, "");
+const initial = (n) => {
+  const s = String(n || "").trim();
+  return s ? s[0].toUpperCase() : "";
+};
+
+/* ── User Edit Tracking ──
+   Fields auto-fill intelligently, but if the user explicitly types
+   their own custom value, we respect their edit and preserve it. */
+const userEdited = {
+  monogram: false,
+  hashtag: false,
+  brideFull: false,
+  groomFull: false,
+  muhurat: false,
+  deadline: false,
+  city: false,
+  mapsQuery: false,
+  scratchHeading: false,
+  scratchMessage: false,
+  sanctumHeading: false,
+  film1Eyebrow: false,
+  film2Eyebrow: false,
+  film3Eyebrow: false,
+  events: {},
+};
+
+/* ── 1. Couple Name Auto-Fill Engine ── */
+const syncCoupleAutoFill = () => {
+  const isGroomSide = (S.couple.side === "groom");
+  const b = (S.couple.bride || "").trim();
+  const g = (S.couple.groom || "").trim();
+  const bi = initial(b), gi = initial(g);
+  const isDemo = (b === "Harshitha" && g === "Sai Charan");
+  const first = isGroomSide ? g : b;
+  const second = isGroomSide ? b : g;
+  const coupleOrder = (b && g) ? `${first} & ${second}` : (first || second || "");
+  const coupleWeds = (b && g) ? `${first} weds ${second}` : (first || second || "");
+
+  // Update UI Labels / notes
+  const brideNote = $("#lbl-bride-note");
+  const groomNote = $("#lbl-groom-note");
+  if (brideNote) brideNote.hidden = isGroomSide;
+  if (groomNote) groomNote.hidden = !isGroomSide;
+
+  // Monogram
+  if (!userEdited.monogram || !S.couple.monogram || (!isDemo && (S.couple.monogram === "S · H" || S.couple.monogram === "H · S" || S.couple.monogram === "M · M"))) {
+    const m = isGroomSide
+      ? ((gi && bi) ? `${gi} · ${bi}` : (gi || bi || "♥"))
+      : ((bi && gi) ? `${bi} · ${gi}` : (bi || gi || "♥"));
+    S.couple.monogram = m;
+    const el = $("#f-monogram");
+    if (el) el.value = m;
+  }
+
+  // Hashtag
+  if (!userEdited.hashtag || !S.couple.hashtag || (!isDemo && (S.couple.hashtag === "#HarshithaWedsSaiCharan" || S.couple.hashtag === "#SaiCharanWedsHarshitha" || S.couple.hashtag === "#MishiWedsMrigank"))) {
+    const ht = (b && g)
+      ? (isGroomSide ? "#" + tag(g) + "Weds" + tag(b) : "#" + tag(b) + "Weds" + tag(g))
+      : "";
+    S.couple.hashtag = ht;
+    const el = $("#f-hashtag");
+    if (el) el.value = ht;
+  }
+
+  // Full names
+  if (!userEdited.brideFull || !S.couple.brideFull || (!isDemo && (S.couple.brideFull === "Harshitha Chowdary" || S.couple.brideFull === "Mishi Agarwal"))) {
+    S.couple.brideFull = b;
+    const el = $("#f-brideFull");
+    if (el && !userEdited.brideFull) {
+      el.value = (S.couple.brideFull && S.couple.brideFull !== "Harshitha Chowdary") ? S.couple.brideFull : "";
+      el.placeholder = b ? `${b} (e.g. ${b} Reddy)` : "Bride's full name";
+    }
+  }
+
+  if (!userEdited.groomFull || !S.couple.groomFull || (!isDemo && (S.couple.groomFull === "Sai Charan Reddy" || S.couple.groomFull === "Mrigank Singh Rathore"))) {
+    S.couple.groomFull = g;
+    const el = $("#f-groomFull");
+    if (el && !userEdited.groomFull) {
+      el.value = (S.couple.groomFull && S.couple.groomFull !== "Sai Charan Reddy") ? S.couple.groomFull : "";
+      el.placeholder = g ? `${g} (e.g. ${g} Rao)` : "Groom's full name";
+    }
+  }
+
+  // Scratch card secret message & sanctum heading
+  if (!userEdited.scratchHeading && b && g) {
+    S.scratch.heading = `A little secret from ${coupleOrder}, just for you`;
+    const el = $("#f-scratchHeading");
+    if (el) el.value = S.scratch.heading;
+  }
+  if (!userEdited.scratchMessage && b && g) {
+    S.scratch.message = `You hold a special place in our story — join us to celebrate our wedding! With love, ${coupleOrder}. Shhh! 🤫`;
+    const el = $("#f-scratchMessage");
+    if (el) el.value = S.scratch.message;
+  }
+  if (!userEdited.sanctumHeading && b && g) {
+    S.sanctum.heading = `The Sacred Moment · ${coupleOrder}`;
+    const el = $("#f-sanctumHeading");
+    if (el) el.value = S.sanctum.heading;
+  }
+
+  // Film titles / eyebrows
+  if (Array.isArray(S.films)) {
+    if (!userEdited.film1Eyebrow && S.films[0] && b && g) {
+      S.films[0].eyebrow = `${coupleOrder} · The Wedding Film`;
+      const el = $("#f-film1-eyebrow");
+      if (el) el.value = S.films[0].eyebrow;
+    }
+    if (!userEdited.film2Eyebrow && S.films[1] && b && g) {
+      S.films[1].eyebrow = `A Royal Affair · ${coupleOrder}`;
+      const el = $("#f-film2-eyebrow");
+      if (el) el.value = S.films[1].eyebrow;
+    }
+  }
+
+  // Update celebration event descriptions if matching couple
+  if (Array.isArray(S.events) && b && g) {
+    S.events.forEach(ev => {
+      const isWedding = ev.icon === "wedding" || /wedding|pheras|muhurat/i.test(ev.name);
+      if (isWedding && (!userEdited.events[ev.id]?.line || ev.line.includes("Seven vows"))) {
+        ev.line = `Seven vows around the sacred fire — ${coupleWeds}`;
+      }
+    });
+    renderEvents();
+  }
+};
+
+/* ── 2. Date & Muhurtham Cascading Auto-Fill Engine ── */
+const iso = splitISO(S.wedding.dateISO);
+
+const syncDateAutoFill = () => {
+  const d = $("#f-date").value || iso.date;
+  const t = $("#f-time").value || iso.time;
+  const z = $("#f-tz").value || iso.tz;
+
+  S.wedding.dateISO = `${d}T${t}:00${z}`;
+  S.wedding.dateDisplay = longDate(d);
+  S.wedding.dateShort = `${finaleDate(d)} · ${S.venue.city}`;
+
+  const isoEl = $("#ed-iso");
+  if (isoEl) isoEl.textContent = S.wedding.dateDisplay;
+
+  // Auto-format Muhurat Line in 12-hour format
+  if (!userEdited.muhurat || S.wedding.muhurat === "Shubh Muhurat · 7:08 PM") {
+    S.wedding.muhurat = `Shubh Muhurat · ${fmtTime12(t)}`;
+    const el = $("#f-muhurat");
+    if (el) el.value = S.wedding.muhurat;
+  }
+
+  // Auto-calculate RSVP Deadline to 15 days before the wedding
+  if (!userEdited.deadline || S.rsvp.deadline === "Please respond by 1 November 2026") {
+    const rsvpYMD = addDaysYMD(d, -15);
+    const [ry, rmo, rd] = rsvpYMD.split("-").map(Number);
+    S.rsvp.deadline = `Please respond by ${rd} ${MONTHS[rmo - 1]} ${ry}`;
+    const el = $("#f-deadline");
+    if (el) el.value = S.rsvp.deadline;
+  }
+
+  // Cascade dates to all functions in S.events
+  if (Array.isArray(S.events)) {
+    S.events.forEach(ev => {
+      const evEdited = userEdited.events[ev.id] || {};
+      const name = (ev.name || "").toLowerCase();
+      const icon = ev.icon || "";
+
+      if (icon === "haldi" || name.includes("haldi")) {
+        if (!evEdited.date) ev.date = shortDate(addDaysYMD(d, -2));
+      } else if (icon === "sangeet" || name.includes("sangeet") || name.includes("mehendi")) {
+        if (!evEdited.date) ev.date = shortDate(addDaysYMD(d, -1));
+      } else if (icon === "wedding" || name.includes("wedding") || name.includes("muhurat") || name.includes("pheras")) {
+        if (!evEdited.date) ev.date = shortDate(d);
+        if (!evEdited.time) ev.time = `Baraat 5:30 PM · Pheras ${fmtTime12(t)}`;
+      } else if (icon === "reception" || name.includes("reception")) {
+        if (!evEdited.date) ev.date = shortDate(d); // Same day as wedding
+        if (!evEdited.time) ev.time = "7:30 PM onwards";
+      }
+    });
+    renderEvents();
+  }
+};
+
+/* ── 3. Venue & Maps Cascading Auto-Fill Engine ── */
+const syncVenueAutoFill = () => {
+  const vName = (S.venue.name || "").trim();
+  const vAddr = (S.venue.address || "").trim();
+
+  // Extract City
+  if (!userEdited.city || !S.venue.city || S.venue.city === "Udaipur") {
+    const parts = vAddr.split(",");
+    const extractedCity = (parts[1] || parts[0] || "Udaipur").trim();
+    if (extractedCity) {
+      S.venue.city = extractedCity;
+      const el = $("#f-city");
+      if (el) el.value = S.venue.city;
+      S.wedding.dateShort = `${finaleDate($("#f-date").value || iso.date)} · ${S.venue.city}`;
+    }
+  }
+
+  // Google Maps Search Query
+  if (!userEdited.mapsQuery || !S.venue.mapsQuery || S.venue.mapsQuery === "The Oberoi Udaivilas, Udaipur") {
+    S.venue.mapsQuery = `${vName}, ${S.venue.city}`.replace(/^,\s*|,\s*$/g, "");
+    const el = $("#f-mapsQuery");
+    if (el) el.value = S.venue.mapsQuery;
+  }
+
+  // Pre-fill Function Locations (Wedding and Reception share the same main venue)
+  if (Array.isArray(S.events) && vName) {
+    S.events.forEach(ev => {
+      const evEdited = userEdited.events[ev.id] || {};
+      const name = (ev.name || "").toLowerCase();
+      const icon = ev.icon || "";
+
+      if (icon === "wedding" || name.includes("wedding")) {
+        if (!evEdited.venue) ev.venue = vName;
+      } else if (icon === "reception" || name.includes("reception")) {
+        if (!evEdited.venue) ev.venue = vName; // Same venue as wedding
+      } else if (icon === "haldi" || name.includes("haldi")) {
+        if (!evEdited.venue) ev.venue = `${vName} Courtyard`;
+      } else if (icon === "sangeet" || name.includes("sangeet")) {
+        if (!evEdited.venue) ev.venue = `${vName} Lawns`;
+      }
+    });
+    renderEvents();
+  }
+};
+
+/* ── Side Selector (Bride's Side vs Groom's Side) ── */
+S.couple.side ??= "bride";
+const updateSideToggleUI = () => {
+  $$("#side-toggle .side-btn").forEach(b => {
+    const active = (b.dataset.side === S.couple.side);
+    b.classList.toggle("is-active", active);
+    b.setAttribute("aria-checked", active ? "true" : "false");
+  });
+};
+updateSideToggleUI();
+
+$$("#side-toggle .side-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    S.couple.side = btn.dataset.side;
+    updateSideToggleUI();
+    syncCoupleAutoFill();
+    sync(); save();
+  });
+});
+
+/* ── Form Bindings ── */
 const bind = (id, get, set, evt = "input") => {
   const el = $(id);
   if (!el) return;
@@ -89,45 +356,35 @@ const bind = (id, get, set, evt = "input") => {
   el.addEventListener(evt, () => { set(el.value); sync(); save(); });
 };
 
-const iso = splitISO(S.wedding.dateISO);
-
-bind("#f-bride", () => S.couple.bride, v => S.couple.bride = v);
-bind("#f-groom", () => S.couple.groom, v => S.couple.groom = v);
-bind("#f-brideFull", () => S.couple.brideFull, v => S.couple.brideFull = v);
-bind("#f-groomFull", () => S.couple.groomFull, v => S.couple.groomFull = v);
-bind("#f-monogram", () => S.couple.monogram, v => S.couple.monogram = v);
-bind("#f-hashtag", () => S.couple.hashtag, v => S.couple.hashtag = v);
+bind("#f-bride", () => S.couple.bride, v => { S.couple.bride = v; syncCoupleAutoFill(); });
+bind("#f-groom", () => S.couple.groom, v => { S.couple.groom = v; syncCoupleAutoFill(); });
+bind("#f-brideFull", () => S.couple.brideFull, v => { S.couple.brideFull = v; userEdited.brideFull = !!v; });
+bind("#f-groomFull", () => S.couple.groomFull, v => { S.couple.groomFull = v; userEdited.groomFull = !!v; });
+bind("#f-monogram", () => S.couple.monogram, v => { S.couple.monogram = v; userEdited.monogram = !!v; });
+bind("#f-hashtag", () => S.couple.hashtag, v => { S.couple.hashtag = v; userEdited.hashtag = !!v; });
 bind("#f-tagline", () => S.couple.tagline, v => S.couple.tagline = v);
-bind("#f-muhurat", () => S.wedding.muhurat, v => S.wedding.muhurat = v);
+bind("#f-muhurat", () => S.wedding.muhurat, v => { S.wedding.muhurat = v; userEdited.muhurat = !!v; });
 
-const rebuildDate = () => {
-  const d = $("#f-date").value || iso.date;
-  const t = $("#f-time").value || iso.time;
-  const z = $("#f-tz").value || iso.tz;
-  S.wedding.dateISO = `${d}T${t}:00${z}`;
-  S.wedding.dateDisplay = longDate(d);
-  S.wedding.dateShort = `${finaleDate(d)} · ${S.venue.city}`;
-};
-$("#f-date").value = iso.date; $("#f-time").value = iso.time;
-/* B2: Handle unlisted timezones */
+$("#f-date").value = iso.date;
+$("#f-time").value = iso.time;
 const tzSel = $("#f-tz");
 if (![...tzSel.options].some(o => o.value === iso.tz))
   tzSel.add(new Option("Custom " + iso.tz, iso.tz), 0);
 tzSel.value = iso.tz;
-["#f-date", "#f-time", "#f-tz"].forEach(sel =>
-  $(sel).addEventListener("change", () => { rebuildDate(); sync(); save(); }));
 
-bind("#f-venueName", () => S.venue.name, v => S.venue.name = v);
-bind("#f-venueAddress", () => S.venue.address, v => S.venue.address = v);
-bind("#f-city", () => S.venue.city, v => { S.venue.city = v; rebuildDate(); });
-bind("#f-mapsQuery", () => S.venue.mapsQuery, v => S.venue.mapsQuery = v);
+["#f-date", "#f-time", "#f-tz"].forEach(sel =>
+  $(sel).addEventListener("change", () => { syncDateAutoFill(); sync(); save(); }));
+
+bind("#f-venueName", () => S.venue.name, v => { S.venue.name = v; syncVenueAutoFill(); });
+bind("#f-venueAddress", () => S.venue.address, v => { S.venue.address = v; syncVenueAutoFill(); });
+bind("#f-city", () => S.venue.city, v => { S.venue.city = v; userEdited.city = !!v; syncDateAutoFill(); });
+bind("#f-mapsQuery", () => S.venue.mapsQuery, v => { S.venue.mapsQuery = v; userEdited.mapsQuery = !!v; });
 bind("#f-formUrl", () => (/PLACEHOLDER/i.test(S.rsvp.formUrl) ? "" : S.rsvp.formUrl),
      v => S.rsvp.formUrl = v.trim());
-bind("#f-deadline", () => S.rsvp.deadline, v => S.rsvp.deadline = v);
-bind("#f-scratchHeading", () => S.scratch.heading, v => S.scratch.heading = v);
-bind("#f-scratchMessage", () => S.scratch.message, v => S.scratch.message = v);
-bind("#f-sanctumHeading", () => S.sanctum.heading, v => S.sanctum.heading = v);
-/* B6: No veilText side-effect — just set the hint */
+bind("#f-deadline", () => S.rsvp.deadline, v => { S.rsvp.deadline = v; userEdited.deadline = !!v; });
+bind("#f-scratchHeading", () => S.scratch.heading, v => { S.scratch.heading = v; userEdited.scratchHeading = !!v; });
+bind("#f-scratchMessage", () => S.scratch.message, v => { S.scratch.message = v; userEdited.scratchMessage = !!v; });
+bind("#f-sanctumHeading", () => S.sanctum.heading, v => { S.sanctum.heading = v; userEdited.sanctumHeading = !!v; });
 bind("#f-sanctumHint", () => S.sanctum.hint, v => S.sanctum.hint = v);
 
 /* ── film video clips ── */
@@ -140,7 +397,10 @@ S.films ??= [
 [0, 1, 2].forEach(idx => {
   const num = idx + 1;
   S.films[idx] ??= { id: "film" + num, eyebrow: "", line: "", src: "", poster: "" };
-  bind(`#f-film${num}-eyebrow`, () => S.films[idx].eyebrow, v => S.films[idx].eyebrow = v);
+  bind(`#f-film${num}-eyebrow`, () => S.films[idx].eyebrow, v => {
+    S.films[idx].eyebrow = v;
+    userEdited[`film${num}Eyebrow`] = !!v;
+  });
   bind(`#f-film${num}-line`, () => S.films[idx].line, v => S.films[idx].line = v);
   bind(`#f-film${num}-src`, () => S.films[idx].src, v => {
     S.films[idx].src = v;
@@ -252,8 +512,15 @@ const renderEvents = () => {
     row.querySelectorAll("[data-k]").forEach(inp => {
       inp.addEventListener("input", () => {
         const k = inp.dataset.k;
-        if (k === "_date") S.events[i].date = shortDate(inp.value);
-        else S.events[i][k] = inp.value;
+        const evId = S.events[i].id || ("ev" + i);
+        userEdited.events[evId] ??= {};
+        if (k === "_date") {
+          S.events[i].date = shortDate(inp.value);
+          userEdited.events[evId].date = true;
+        } else {
+          S.events[i][k] = inp.value;
+          userEdited.events[evId][k] = true;
+        }
         if (k === "name") row.querySelector(".ev-name").textContent = inp.value || "Untitled function";
         if (k === "accent") row.querySelector(".ev-dot").style.background = inp.value;
         sync(); save();
@@ -328,17 +595,44 @@ const setScene = (name) => {
 
 /* ── step navigation ── */
 const showPanel = (name) => {
-  $$(".ed-panel").forEach(p => p.classList.toggle("is-on", p.dataset.panel === name));
-  $$(".ed-step").forEach(b => b.classList.toggle("is-on", b.dataset.panel === name));
+  if (!name) return;
   const order = ["couple","events","venue","videos","blessing","theme","launch"];
-  $("#ed-progress-fill").style.width = ((order.indexOf(name) + 1) / order.length * 100) + "%";
+  if (!order.includes(name)) return;
+
+  $$(".ed-panel").forEach(p => {
+    const isOn = p.dataset.panel === name;
+    p.classList.toggle("is-on", isOn);
+  });
+  $$(".ed-step").forEach(b => {
+    const isOn = b.dataset.panel === name;
+    b.classList.toggle("is-on", isOn);
+    if (isOn) {
+      try { b.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); } catch {}
+    }
+  });
+
+  const fill = $("#ed-progress-fill");
+  if (fill) {
+    fill.style.width = ((order.indexOf(name) + 1) / order.length * 100) + "%";
+  }
+
   setScene(name);
-  scrollTo({ top: 0, behavior: "smooth" });
+
+  // Smoothly scroll window and form container to top
+  try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+  try {
+    const formEl = $(".ed-form");
+    if (formEl) formEl.scrollTo({ top: 0, behavior: "smooth" });
+  } catch {}
 };
+
 $$(".ed-step").forEach(b => b.addEventListener("click", () => showPanel(b.dataset.panel)));
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-next]");
-  if (t) showPanel(t.dataset.next);
+  if (t && t.dataset.next) {
+    e.preventDefault();
+    showPanel(t.dataset.next);
+  }
 });
 
 /* ── live preview ── */
@@ -353,12 +647,16 @@ const fitPvNames = () => {
   if (!el) return;
   const wrap = el.closest(".pv-glass");
   const card = $("#pv-card");
+  const isGroomSide = (S.couple.side === "groom");
   const [b, g] = [String(S.couple.bride || "").trim(), String(S.couple.groom || "").trim()];
+  const first = isGroomSide ? g : b;
+  const second = isGroomSide ? b : g;
+
   const draw = (stacked) => {
     el.classList.toggle("pv-names--stacked", stacked);
     el.innerHTML = stacked
-      ? `<b>${esc(g)}</b><i>♥</i><b>${esc(b)}</b>`
-      : `<b>${esc(b)}</b> <i>♥</i> <b>${esc(g)}</b>`;
+      ? `<b>${esc(first)}</b><i>♥</i><b>${esc(second)}</b>`
+      : `<b>${esc(first)}</b> <i>♥</i> <b>${esc(second)}</b>`;
   };
   const gauge = (() => { try { const c = document.createElement("canvas").getContext("2d"); return c; } catch { return null; } })();
   const REF = 100, clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -382,11 +680,11 @@ const fitPvNames = () => {
   const setPx = (v) => document.documentElement.style
     .setProperty("--pv-names-fs", Math.round(v * 100) / 100 + "px");
   /* Measure first, draw after — same pattern as app.js. */
-  const oneLinePx = sizeFor(`${b} ♥ ${g}`);
+  const oneLinePx = sizeFor(`${first} ♥ ${second}`);
   const stacked = oneLinePx < PV_NAMES.oneLineMinPx;
   draw(stacked);
   const px = stacked
-    ? Math.max(PV_NAMES.comfortPx, Math.min(sizeFor(b), sizeFor(g)))
+    ? Math.max(PV_NAMES.comfortPx, Math.min(sizeFor(first), sizeFor(second)))
     : oneLinePx;
   setPx(px);
 };
@@ -562,7 +860,11 @@ const pubDone = (url) => {
   $("#publish-form").hidden = true;
   $("#publish-done").hidden = false;
   $("#publish-link").value = url;
-  const text = `You are royally invited to the wedding of ${S.couple.bride} & ${S.couple.groom}!\nOpen our invitation: ${url}`;
+  const isGroom = (S.couple && S.couple.side === "groom");
+  const who = isGroom
+    ? [S.couple.groom, S.couple.bride].filter(Boolean).join(" & ")
+    : [S.couple.bride, S.couple.groom].filter(Boolean).join(" & ");
+  const text = `You are royally invited to the wedding of ${who}!\nOpen our invitation: ${url}`;
   $("#btn-publish-wa").href = "https://wa.me/?text=" + encodeURIComponent(text);
   try { localStorage.removeItem(DRAFT_KEY); } catch {}
 };
@@ -629,6 +931,59 @@ $("#btn-publish-copy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(url); toast("Link copied."); }
   catch { $("#publish-link").select(); }
 });
+
+/* ═══════════ SHARE A PREVIEW LINK ═══════════
+   A ?c= link carries the whole design inside the URL itself, so it opens
+   this exact invitation on any device — the reading half already lives in
+   config.js, app.js and the 3D world. The payload is trimmed to what the
+   invitation actually renders: the frames/sanctum asset settings never
+   change per couple and would only bloat the URL. */
+const b64url = (s) => {
+  const bin = Array.from(new TextEncoder().encode(s), b => String.fromCharCode(b)).join("");
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+const sharePayload = () => {
+  const out = publishPayload();
+  delete out.frames;
+  if (out.sanctum) out.sanctum = { heading: out.sanctum.heading, hint: out.sanctum.hint };
+  return out;
+};
+const shareUrl = () => {
+  /* share.html has no static file behind it, so the server rewrite to the
+     link-card renderer always fires — in `netlify dev` and on the live edge
+     alike. Routing through invitation.html would lose that race to the real
+     file, and the couple's names would never reach the WhatsApp preview.
+     The browser half is unchanged: config.js still decodes ?c= from the URL. */
+  const u = new URL("share.html", location.href);
+  u.searchParams.set("c", b64url(JSON.stringify(sharePayload())));
+  return u.toString();
+};
+const shareDone = (url) => {
+  const isGroomSide = (S.couple.side === "groom");
+  const who = isGroomSide
+    ? [S.couple.groom, S.couple.bride].filter(Boolean).join(" & ")
+    : [S.couple.bride, S.couple.groom].filter(Boolean).join(" & ");
+  $("#share-box").hidden = false;
+  $("#share-link").value = url;
+  const text = who
+    ? `You are royally invited to the wedding of ${who}!\nOpen our invitation: ${url}`
+    : `Open our wedding invitation: ${url}`;
+  $("#btn-share-wa").href = "https://wa.me/?text=" + encodeURIComponent(text);
+};
+$("#btn-share").addEventListener("click", () => {
+  const box = $("#share-box");
+  const opening = box.hidden;
+  box.hidden = !opening;
+  if (opening) {
+    shareDone(shareUrl());
+    setTimeout(() => $("#share-link").select(), 60);
+  }
+});
+$("#btn-share-copy").addEventListener("click", async () => {
+  const url = $("#share-link").value;
+  try { await navigator.clipboard.writeText(url); toast("Preview link copied."); }
+  catch { $("#share-link").select(); }
+});
 $("#btn-send").addEventListener("click", (e) => {
   e.preventDefault();
   const body = encodeURIComponent(
@@ -646,7 +1001,9 @@ $("#btn-reset").addEventListener("click", () => {
   location.href = "create.html";
 });
 
-rebuildDate();
+syncCoupleAutoFill();
+syncDateAutoFill();
+syncVenueAutoFill();
 sync();
 setScene("couple");   /* preview starts on the step the editor opens on */
 save();

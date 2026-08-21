@@ -1,0 +1,4 @@
+- Netlify Functions act as thin adapters that parse the incoming event and delegate to shared handlers under `api/` using the `../lib/bridge` helper rather than implementing logic inline.
+- Public-facing responses set explicit `Cache-Control` directives (`CACHE_LIVE` for valid invites, `CACHE_MISS` for invalid slugs) plus `X-Robots-Tag: noindex, nofollow` to prevent search indexing of invitation pages.
+- Database or template fetch failures are handled gracefully by returning a maintenance page with `no-store` caching instead of propagating errors to the client.
+- Incoming slugs are validated against token rules before any database lookup, rejecting malformed paths early to protect the backend from scanner traffic.

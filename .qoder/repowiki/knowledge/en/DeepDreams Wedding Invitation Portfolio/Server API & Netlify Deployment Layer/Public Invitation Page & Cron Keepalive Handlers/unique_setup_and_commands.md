@@ -1,0 +1,1 @@
+`cron-keepalive` requires the `CRON_SECRET` environment variable; without it the endpoint returns 404, so the scheduled Netlify cron job must supply it while manual debugging calls must also include it.

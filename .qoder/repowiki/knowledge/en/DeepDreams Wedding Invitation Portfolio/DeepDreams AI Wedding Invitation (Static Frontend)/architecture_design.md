@@ -1,0 +1,9 @@
+Three sibling static sites (`wedding/`, `wedding-invite/`, `wedding-invite sample 1/`) ship the same application with minor asset variations. Each site is a plain HTML/CSS/JS bundle served from any static host:
+- `index.html` is the marketing/landing page with an embedded in-page demo modal; `invite.html` is the actual invitation rendered by `app.js`.
+- `app.js` is the single runtime: it detects mode from URL (`?edit` for the couple's editor, `#d=...` compressed guest link, or bare/demo), loads default/sample data, then renders DOM via `data-bind` attributes and event-driven listeners. Guest links are encoded/decoded through LZ-String (loaded from CDN) so no server storage is needed.
+- The app exposes four 'ritual' gesture modes (`rub`, `trace`, `tap`, `light`) defined in a `MODES` map; each has a `mountXxx` function that builds its own canvas/SVG overlay inside a shared `festDialog` modal, and a `MOUNT` registry dispatches to the right one.
+- Poster artwork lives under `posters/` (with `_clean.jpg` variants used as reveal images); default posters are detected via `isDefaultImage()` and get CSS text overlays built by `buildPosterOverlay`.
+- RSVP is a WhatsApp deep link (`wa.me/...`) constructed from the couple's phone number plus a templated message; an `.ics` calendar file is generated client-side via Blob.
+- An optional OpenRouter chat call (`aiChat`) generates copy/image prompts when a backend-provided `STUDIO_AI_KEY` is present; otherwise the prompt generator UI still works but returns a no-key error.
+- Expiry logic (`expired()`) hides the invitation after the wedding date + 1 day and shows an `expiredScreen` instead of the content.
+- Styles are split across `style.css` (invitation theme) and `styles.css` (marketing page theme); `script.js` handles the landing-page demo modal separately from `app.js`.

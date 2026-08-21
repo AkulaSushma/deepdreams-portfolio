@@ -1,0 +1,3 @@
+- Every Netlify function entry point delegates entirely to an `api/` handler via `bridge(fn, options)`, never implementing request parsing or response formatting itself.
+- Handlers are written against a minimal `(req, res)` contract — method, url, headers, async-iterable body, statusCode, setHeader/getHeader, end — so they remain portable across Vercel, Netlify, and a plain Node server.
+- Cross-cutting concerns (auth, rate limiting, DB, storage, token hashing, rendering) live in `api/_lib/` and are imported by both admin and publish handlers rather than duplicated.

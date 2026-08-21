@@ -1,0 +1,1 @@
+Netlify Functions with CommonJS entry modules (`exports.handler`) and the project's internal `lib/bridge` adapter.

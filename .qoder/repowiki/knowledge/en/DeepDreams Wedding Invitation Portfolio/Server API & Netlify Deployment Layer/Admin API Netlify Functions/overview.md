@@ -1,0 +1,1 @@
+Netlify serverless function entry points that expose the admin REST endpoints for login, site management, and activation token operations via a shared bridge adapter.

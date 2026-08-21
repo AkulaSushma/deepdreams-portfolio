@@ -123,6 +123,7 @@ const SAMPLE1 = {
   mapUrl: text,              // a full Maps link OR a typed place name
   phone: text,               // the couple's RSVP number — see note above
   story: text,
+  side: text,                // "bride" | "groom"
   cover: mediaRef,
   welcomeImg: mediaRef,
   photos: [mediaRef],
@@ -142,6 +143,7 @@ const SAMPLE2 = {
     groom: text, bride: text,
     groomFull: text, brideFull: text,
     monogram: text, tagline: text, hashtag: text,
+    side: text,              // "bride" | "groom"
   },
   wedding: {
     dateISO: text, dateDisplay: text, dateShort: text, muhurat: text,
@@ -270,11 +272,17 @@ function coupleLine(view) {
 
   if (view && view.template === "sample2") {
     const cp = c.couple || {};
-    if (cp.bride && cp.groom) return `${cp.bride} & ${cp.groom}`;
+    const isGroom = (cp.side === "groom");
+    if (cp.bride && cp.groom) {
+      return isGroom ? `${cp.groom} & ${cp.bride}` : `${cp.bride} & ${cp.groom}`;
+    }
     return cp.bride || cp.groom || "Our Wedding";
   }
 
-  if (c.bride && c.groom) return `${c.bride} & ${c.groom}`;
+  const isGroom = (c.side === "groom");
+  if (c.bride && c.groom) {
+    return isGroom ? `${c.groom} & ${c.bride}` : `${c.bride} & ${c.groom}`;
+  }
   return c.bride || c.groom || "Our Wedding";
 }
 
@@ -312,9 +320,15 @@ function namesOf(template, content) {
   const c = content || {};
   if (template === "sample2") {
     const cp = c.couple || {};
-    return [text(cp.bride) || "", text(cp.groom) || ""];
+    const isGroom = (cp.side === "groom");
+    return isGroom
+      ? [text(cp.groom) || "", text(cp.bride) || ""]
+      : [text(cp.bride) || "", text(cp.groom) || ""];
   }
-  return [text(c.bride) || "", text(c.groom) || ""];
+  const isGroom = (c.side === "groom");
+  return isGroom
+    ? [text(c.groom) || "", text(c.bride) || ""]
+    : [text(c.bride) || "", text(c.groom) || ""];
 }
 
 /* Sample 1 keeps a plain "2026-11-14"; Sample 2 keeps a full ISO instant with

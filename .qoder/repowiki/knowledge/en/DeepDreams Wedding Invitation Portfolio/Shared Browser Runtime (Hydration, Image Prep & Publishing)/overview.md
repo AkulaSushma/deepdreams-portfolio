@@ -1,0 +1,1 @@
+Browser-side runtime that hydrates published invitation content, compresses photographs into responsive variants, and drives the idempotent publish flow from activation code to live site.

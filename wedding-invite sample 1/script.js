@@ -153,6 +153,10 @@ function initRubToReveal() {
         ctx.fillText('✋ Rub here to reveal', canvas.width / 2, canvas.height / 2);
 
         ctx.globalCompositeOperation = 'destination-out';
+        /* Erase with a fixed 50% alpha: the turmeric thins away gradually and
+           soft-edged, like the original — but the original's leftover random
+           fillStyle (alpha 0–0.4) made some loads impossible to clear. */
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
     }
     setupCanvas();
 

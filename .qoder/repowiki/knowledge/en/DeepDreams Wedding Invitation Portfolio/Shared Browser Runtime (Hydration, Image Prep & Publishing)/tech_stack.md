@@ -1,0 +1,1 @@
+Plain ES5 JavaScript loaded as a script tag; uses Canvas API (`createImageBitmap` with `<img>` fallback) for decoding, `canvas.toBlob` for WebP/JPEG encoding, `crypto.subtle` SHA-256 for content hashing and idempotency keys, and `fetch` with `AbortController` for HTTP with timeout/retry backoff.
