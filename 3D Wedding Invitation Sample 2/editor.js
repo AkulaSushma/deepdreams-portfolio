@@ -479,10 +479,19 @@ const ICONS = ["haldi", "sangeet", "wedding", "reception"];
 const evList = $("#ev-list");
 
 const renderEvents = () => {
+  const openIndices = new Set();
+  evList.querySelectorAll(".ev.open").forEach(el => {
+    const idx = Array.prototype.indexOf.call(evList.children, el);
+    if (idx >= 0) openIndices.add(idx);
+  });
+  if (openIndices.size === 0 && S.events.length > 0) {
+    openIndices.add(0); // keep first event open by default so prefilled fields are immediately visible
+  }
+
   evList.innerHTML = "";
   S.events.forEach((ev, i) => {
     const row = document.createElement("div");
-    row.className = "ev";
+    row.className = "ev" + (openIndices.has(i) ? " open" : "");
     row.innerHTML = `
       <div class="ev-head">
         <span class="ev-dot" style="background:${ev.accent}"></span>
