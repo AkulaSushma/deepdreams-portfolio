@@ -105,6 +105,44 @@ if (fs.existsSync(worldSrc) && !fs.existsSync(worldDst)) {
   copyDir(worldSrc, worldDst);
 }
 
+/* Write Cloudflare Pages & Netlify route mapping */
+const redirectsContent = `# Cloudflare Pages & Netlify route mapping
+/invite/:slug   /.netlify/functions/invite?slug=:slug  200
+/invite/*       /.netlify/functions/invite?slug=:splat 200
+/world/*        /3D%20Wedding%20Invitation%20Sample%202/world/:splat 200
+/world          /3D%20Wedding%20Invitation%20Sample%202/world/index.html 200
+/3d%20wedding%20invitation%20sample%202/*  /3D%20Wedding%20Invitation%20Sample%202/:splat 200
+/3d-wedding-invitation-sample-2/*  /3D%20Wedding%20Invitation%20Sample%202/:splat 200
+/wedding-invite-sample-1/*  /wedding-invite%20sample%201/:splat 200
+/3D%20Wedding%20Invitation%20Sample%202/share.html  /.netlify/functions/card?template=sample2 200
+/3d%20wedding%20invitation%20sample%202/share.html  /.netlify/functions/card?template=sample2 200
+/3d-wedding-invitation-sample-2/share.html  /.netlify/functions/card?template=sample2 200
+`;
+fs.writeFileSync(path.join(DIST, "_redirects"), redirectsContent, "utf8");
+
+/* Write Cloudflare Pages & Netlify immutable asset headers */
+const headersContent = `/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+
+/world/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/3D%20Wedding%20Invitation%20Sample%202/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/wedding-invite%20sample%201/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/posters/*
+  Cache-Control: public, max-age=31536000, immutable
+`;
+fs.writeFileSync(path.join(DIST, "_headers"), headersContent, "utf8");
+
 /* The functions need one thing from outside their own folder: shared/, which
    the browser also loads. It is copied above as part of the site, so the
    editor and the server are guaranteed to be reading the same limits. */
