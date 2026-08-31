@@ -13,6 +13,39 @@ These are settings of the Pages project, not files. They survive every future
 upload, so they only need doing once — but the Functions will not work without
 all of them.
 
+### ⚠️ THE MOST IMPORTANT RULE ON THIS PAGE
+
+Because `wrangler.jsonc` contains `pages_build_output_dir`, Cloudflare treats
+that file as the **source of truth** for the project's plain-text (non-secret)
+settings. **Every `wrangler pages deploy` ERASES any plain-text environment
+variable set in the dashboard that is not declared in the config.** This is
+documented behaviour (cloudflare/workers-sdk#7642) and it cost us a full day of
+"the password was not accepted" that was really "the password was silently
+deleted by the last deploy".
+
+The consequences, in practice:
+
+| Variable | Where it must live | Why |
+|---|---|---|
+| `SUPABASE_URL` | `wrangler.jsonc` → `"vars"` block (already there) | Non-secret; the config file is the only surviving source for these |
+| `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `SUPABASE_SERVICE_KEY`, `TOKEN_PEPPER` | Cloudflare's **encrypted secret store**, set via `wrangler pages secret bulk` | Encrypted secrets SURVIVE every deploy; plain-text dashboard vars do not |
+
+To set or change the secrets (from the repo root):
+
+```bash
+# write a temporary JSON file with the values, then:
+npx wrangler pages secret bulk my-secrets.json --project-name=deepdreams-portfolio
+# (delete the file afterwards; it is plaintext)
+```
+
+Secrets default to the **production** environment (`--env preview` for preview).
+Do NOT also declare the same names as plain `vars` in wrangler.jsonc — the
+plain value would override the secret.
+
+**Never paste environment variables into the Cloudflare dashboard again** for
+this project. They look saved, they even apply — until the next deploy wipes
+them. The dashboard will show these fields as read-only, which is correct.
+
 ### Settings → Functions → Compatibility flags
 
 | Setting | Value | Why |
@@ -20,21 +53,21 @@ all of them.
 | Compatibility date | `2025-01-01` (anything ≥ 2024-09-23) | The functions use `require("crypto")`. Bare Node built-in specifiers only resolve from that date. Below it, the deploy fails with "Could not resolve 'crypto'". |
 | Compatibility flag | `nodejs_compat` | Required for Node built-ins (`crypto`, `Buffer`) inside the Workers runtime. |
 
-`wrangler.jsonc` in the repo root now pins both, and Cloudflare reads it during
-wrangler-based deploys — but for Direct Upload **they must ALSO be set in the
-dashboard**, because a drag-and-drop upload does not read the repo.
+Both are pinned in `wrangler.jsonc`, and Wrangler applies them on every deploy.
+The dashboard may show them read-only — that is the config file being the
+source of truth, which is what we want.
 
-### Settings → Environment variables (Production)
+### The five environment variables (where they actually live)
 
-| Name | Notes |
-|---|---|
-| `SUPABASE_URL` | Your Supabase project URL (`https://xxx.supabase.co`). |
-| `SUPABASE_SERVICE_KEY` | The **service_role** key. Server-side only; never in any browser file. |
-| `TOKEN_PEPPER` | Any long random string. ⚠️ Once set, do not change: every minted activation code is hashed with it, and a new pepper invalidates every unspent code. |
-| `ADMIN_PASSWORD` | The studio admin password (≥ 8 chars). |
-| `ADMIN_SESSION_SECRET` | **Required, and missing from the original setup list.** Any random string ≥ 16 chars. Without it, admin login returns an error: the session cookie is an HMAC signed with this value. |
+| Name | Lives where | Notes |
+|---|---|---|
+| `SUPABASE_URL` | `wrangler.jsonc` vars block | The Supabase project URL (`https://xxx.supabase.co`). |
+| `SUPABASE_SERVICE_KEY` | Encrypted secret store | The **service_role** key. Server-side only; never in any browser file or committed config. |
+| `TOKEN_PEPPER` | Encrypted secret store | ⚠️ Once set, do not change: every minted activation code is hashed with it, and a new pepper invalidates every unspent code. |
+| `ADMIN_PASSWORD` | Encrypted secret store | The studio admin password (≥ 8 chars). |
+| `ADMIN_SESSION_SECRET` | Encrypted secret store | Any random string ≥ 16 chars. Signs the admin session cookie; without it, admin login refuses. |
 
-All five must be set for the full publish flow to work. If any is missing, the
+All five must exist for the full publish flow to work. If any is missing, the
 affected endpoint returns the calm "We could not reach our servers" style
 message — never a stack trace.
 
