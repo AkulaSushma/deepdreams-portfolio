@@ -958,12 +958,15 @@ const sharePayload = () => {
   return out;
 };
 const shareUrl = () => {
-  /* share.html has no static file behind it, so the server rewrite to the
-     link-card renderer always fires — in `netlify dev` and on the live edge
-     alike. Routing through invitation.html would lose that race to the real
-     file, and the couple's names would never reach the WhatsApp preview.
-     The browser half is unchanged: config.js still decodes ?c= from the URL. */
-  const u = new URL("share.html", location.href);
+  /* The link-card renderer is a server function. On Netlify it is reached
+     through a share.html rewrite; on Cloudflare the equivalent /api/card
+     route is the one that reliably matches — the space-containing
+     share.html route does not match on Cloudflare's function router.
+     Both render the same invitation page with the couple's own <head>,
+     which is what WhatsApp and Google read for the preview card. The
+     browser half is unchanged: config.js still decodes ?c= from the URL. */
+  const u = new URL("/api/card", location.origin);
+  u.searchParams.set("template", "sample2");
   u.searchParams.set("c", b64url(JSON.stringify(sharePayload())));
   return u.toString();
 };

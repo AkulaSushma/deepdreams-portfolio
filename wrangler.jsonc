@@ -5,12 +5,19 @@
   // built-ins, which need nodejs_compat and a compatibility date of
   // 2024-09-23 or later (bare "crypto" resolves from that date).
   //
-  // Build command and output directory must ALSO match this file in the Pages
-  // dashboard: Settings → Builds & deployments → Build command "node netlify/build.js",
-  // output directory "dist". The functions directory is auto-detected at the
-  // repo root; do not put one inside dist/.
+  // ⚠️ SOURCE OF TRUTH: because this file contains pages_build_output_dir,
+  // Cloudflare treats it as the ONLY source of plain-text (non-secret)
+  // settings. Every `wrangler pages deploy` ERASES dashboard-set plain-text
+  // variables that are not declared here (encrypted secrets are kept — set
+  // those with `wrangler pages secret bulk`). That is why SUPABASE_URL is
+  // declared below instead of pasted into the dashboard, and why the four
+  // secrets (ADMIN_PASSWORD, ADMIN_SESSION_SECRET, SUPABASE_SERVICE_KEY,
+  // TOKEN_PEPPER) live in Cloudflare's encrypted secret store, not here.
   "name": "deepdreams-portfolio",
   "compatibility_date": "2025-01-01",
   "compatibility_flags": ["nodejs_compat"],
-  "pages_build_output_dir": "dist"
+  "pages_build_output_dir": "dist",
+  "vars": {
+    "SUPABASE_URL": "https://fthrpomwxatxpztfioqc.supabase.co"
+  }
 }
