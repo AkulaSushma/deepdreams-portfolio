@@ -87,7 +87,7 @@ function previewHead(content, origin) {
     "· With love, from our family to yours.",
   ].filter(Boolean).join(" ");
 
-  const image = render.fallbackImage("sample2", origin);
+  const image = render.ogImage(view, origin) || render.fallbackImage("sample2", origin);
 
   const tags = [
     `<title>${render.escapeHtml(title)}</title>`,

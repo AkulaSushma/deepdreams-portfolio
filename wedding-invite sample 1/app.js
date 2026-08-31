@@ -151,10 +151,37 @@ if (PUBLISHED) {
   /* the live demo behaves exactly like a guest view of the sample couple */
   document.body.classList.add("viewing");
 } else if (EDITING) {
+  /* A link (?c=…) always wins: it is the design someone explicitly opened.
+     A saved draft is parked rather than silently restored — this machine is
+     shared by the studio, and a new designer must see the sample couple,
+     not the previous customer's names. The banner offers the draft back. */
   try {
-    const saved = localStorage.getItem(STORE_KEY);
-    if (saved) DATA = { ...DATA, ...JSON.parse(saved) };
-    else if (hashData) { const d = decode(hashData); if (d) DATA = d; }
+    if (hashData) { const d = decode(hashData); if (d) DATA = d; }
+    else {
+      const saved = localStorage.getItem(STORE_KEY);
+      if (saved) {
+        let p = null;
+        try { p = JSON.parse(saved); } catch (e) {}
+        const personalised = p && (p.bride || p.groom) &&
+          !((p.bride === "Saanvi") && (p.groom === "Vihaan"));
+        if (personalised) {
+          window.__PARKED_DRAFT = p;
+          /* Restoring re-renders the whole editor panel from DATA, then the
+             invitation itself — the same path as any edit, so nothing stale
+             survives from the sample design. buildForm/render/openPanel are
+             defined later in this file; the call happens at click time. */
+          window.__RESTORE_DRAFT = () => {
+            DATA = { ...DATA, ...p };
+            try {
+              openPanel();
+              render();
+              tickCountdown();
+            } catch (e) {}
+            window.__PARKED_DRAFT = null;
+          };
+        }
+      }
+    }
   } catch (e) {}
 }
 
@@ -1574,7 +1601,31 @@ if (EDITING) {
 
 /* ---------- editor chrome ---------- */
 const panel = $("#editorPanel"), veil = $("#panelVeil");
-const openPanel = () => { buildForm(); if (panel) panel.hidden = false; if (veil) veil.hidden = false; };
+const openPanel = () => {
+  buildForm();
+  if (panel) panel.hidden = false;
+  if (veil) veil.hidden = false;
+  /* A parked draft is offered back to its owner the moment the editor opens;
+     it never silently becomes the next person's starting point. */
+  const banner = document.querySelector("#draft-banner");
+  const parked = window.__PARKED_DRAFT;
+  if (banner && parked) {
+    document.querySelector("#draft-names").textContent =
+      `${parked.bride || ""} & ${parked.groom || ""}`.trim() || "someone";
+    banner.hidden = false;
+  }
+};
+document.addEventListener("click", (e) => {
+  const t = e.target.closest ? e.target.closest("#draft-restore, #draft-dismiss") : null;
+  if (!t) return;
+  const banner = document.querySelector("#draft-banner");
+  if (t.id === "draft-restore" && window.__RESTORE_DRAFT) {
+    window.__RESTORE_DRAFT();
+    if (banner) banner.hidden = true;
+  } else if (t.id === "draft-dismiss") {
+    if (banner) banner.hidden = true; /* parked, not deleted */
+  }
+});
 const closePanel = () => { if (panel) panel.hidden = true; if (veil) veil.hidden = true; };
 
 if ($("#dockEdit")) $("#dockEdit").addEventListener("click", openPanel);

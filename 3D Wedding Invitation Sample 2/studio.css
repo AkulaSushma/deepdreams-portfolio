@@ -483,3 +483,24 @@ button{font:inherit;cursor:pointer;color:inherit}
   *,*::before,*::after{animation:none!important;transition-duration:.01s!important}
   .reveal{opacity:1;transform:none}
 }
+
+/* ── Draft restore banner ─────────────────────────────────────────────
+   A parked draft belongs to the person who made it. New designers must
+   start from the sample couple, so the draft is offered back explicitly
+   rather than silently becoming someone else's starting point. */
+.draft-banner{
+  display:flex; flex-direction:column; gap:10px;
+  border:1px solid #7a5a28; border-radius:12px;
+  background:linear-gradient(135deg,#241505,#1a0e04);
+  padding:14px 18px; margin:0 0 22px;
+}
+.draft-banner p{margin:0;font-size:14.5px;line-height:1.5;color:#e8dcc0}
+.draft-banner-actions{display:flex;gap:10px;flex-wrap:wrap}
+.db-btn{
+  border:1px solid #d4af6a;background:transparent;color:#d4af6a;
+  border-radius:8px;padding:8px 16px;font:600 14px/1 "Cormorant Garamond",serif;
+  cursor:pointer;letter-spacing:.4px
+}
+.db-btn:hover{background:#d4af6a;color:#1a1005}
+.db-ghost{border-color:#6b6353;color:#b9b0a0}
+.db-ghost:hover{background:#2a261c;color:#e8e2d5;border-color:#8a8069}

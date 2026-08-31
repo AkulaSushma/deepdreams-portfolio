@@ -63,6 +63,18 @@ if (location.protocol === "file:") {
   <!-- ─────────── FORM COLUMN ─────────── -->
   <section class="ed-form" aria-label="Invitation settings">
 
+    <!-- Shown only when a previous designer's unfinished work is parked on
+         this machine. A new person always starts from the sample couple; the
+         draft's owner can bring theirs back with one tap. -->
+    <div id="draft-banner" class="draft-banner" hidden>
+      <p><b>Welcome back?</b> An unfinished design — <span id="draft-names">—</span> — is saved on this device.
+      Starting fresh with the sample names; tap Restore to continue that design.</p>
+      <div class="draft-banner-actions">
+        <button id="draft-restore" class="db-btn" type="button">Restore my design</button>
+        <button id="draft-dismiss" class="db-btn db-ghost" type="button">Start fresh</button>
+      </div>
+    </div>
+
     <!-- 1 · COUPLE -->
     <div class="ed-panel is-on" data-panel="couple">
       <h2 class="ed-h">The couple</h2>

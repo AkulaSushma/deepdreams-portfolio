@@ -1281,3 +1281,22 @@ body.opened .w-hero > :nth-child(8){animation-delay:1.34s}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
 }
+
+/* ── Draft restore banner ─────────────────────────────────────────────
+   A parked draft belongs to whoever made it. New designers start from the
+   sample couple; the draft is offered back explicitly, never silently. */
+.draft-banner{
+  display:flex; flex-direction:column; gap:10px;
+  border:1px solid #b9962f; border-radius:12px;
+  background:#241505; padding:14px 16px; margin:0 0 16px;
+}
+.draft-banner p{margin:0;font-size:14.5px;line-height:1.5;color:#f3e9d2}
+.draft-banner-actions{display:flex;gap:10px;flex-wrap:wrap}
+.db-btn{
+  border:1px solid #c8a253;background:transparent;color:#c8a253;
+  border-radius:8px;padding:8px 16px;font:600 14px/1 Jost,sans-serif;
+  cursor:pointer;letter-spacing:.4px
+}
+.db-btn:hover{background:#c8a253;color:#241505}
+.db-ghost{border-color:#6b6353;color:#b9b0a0}
+.db-ghost:hover{background:#2a261c;color:#e8e2d5;border-color:#8a8069}

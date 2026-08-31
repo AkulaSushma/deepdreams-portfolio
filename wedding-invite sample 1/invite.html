@@ -242,6 +242,16 @@
     <h2>Your wedding details</h2>
     <button class="panel-x" id="panelClose" type="button" aria-label="Close editor">✕</button>
   </header>
+  <!-- Shown only when a previous designer's unfinished work is parked on this
+       machine. A new person always starts from the sample couple; the draft's
+       owner can bring theirs back with one tap. -->
+  <div id="draft-banner" class="draft-banner" hidden>
+    <p><b>Welcome back?</b> An unfinished design — <span id="draft-names">—</span> — is saved on this device.</p>
+    <div class="draft-banner-actions">
+      <button id="draft-restore" class="db-btn" type="button">Restore my design</button>
+      <button id="draft-dismiss" class="db-btn db-ghost" type="button">Start fresh</button>
+    </div>
+  </div>
   <div class="panel-body" id="panelBody"><!-- form rendered by JS --></div>
   <footer class="panel-foot">
     <button class="wbtn wbtn-maroon" id="panelApply" type="button">Save &amp; preview</button>

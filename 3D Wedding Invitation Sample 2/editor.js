@@ -36,12 +36,27 @@ const soak = (into) => {
     else S[k] = v;
   });
 };
+let pendingDraft = null;
 try {
   const params = new URLSearchParams(location.search);
-  if (params.get("c")) soak(JSON.parse(dec64(params.get("c"))));
-  else {
+  if (params.get("c")) {
+    soak(JSON.parse(dec64(params.get("c"))));
+  } else {
     const saved = localStorage.getItem(DRAFT_KEY);
-    if (saved) soak(JSON.parse(saved));
+    if (saved) {
+      /* This machine is shared by the studio: several couples design here,
+         one after another. A saved draft must NOT silently become the next
+         person’s starting point — a new designer would see the previous
+         couple’s names everywhere and could publish them by accident.
+         The draft is parked; a banner offers it back to its owner only. */
+      let parsed = null;
+      try { parsed = JSON.parse(saved); } catch { parsed = null; }
+      const cp = (parsed && parsed.couple) || {};
+      const isDemo = (cp.bride === "Harshitha" && cp.groom === "Sai Charan");
+      /* Real only when the names were personalised: a saved copy of the
+         demo couple is just the starting point, not anyone’s work. */
+      if (!isDemo && (cp.bride || cp.groom)) pendingDraft = parsed;
+    }
   }
 } catch {}
 S.couple.hashtag ??= "#" + S.couple.bride.replace(/\s+/g, "") + "Weds" + S.couple.groom.replace(/\s+/g, "");
@@ -122,12 +137,16 @@ const userEdited = {
   mapsQuery: false,
   scratchHeading: false,
   scratchMessage: false,
+  venueName: false,
   sanctumHeading: false,
   film1Eyebrow: false,
   film2Eyebrow: false,
   film3Eyebrow: false,
   events: {},
 };
+/* Remembers the main venue the last cascade ran with, so a change of mind in
+   the Venue section re-cascades to every event card (see syncVenueAutoFill). */
+let cascadeLocks = { prevMain: "" };
 
 /* ── 1. Couple Name Auto-Fill Engine ── */
 const syncCoupleAutoFill = () => {
@@ -284,6 +303,11 @@ const syncDateAutoFill = () => {
 };
 
 /* ── 3. Venue & Maps Cascading Auto-Fill Engine ── */
+/* The couple types their venue once. Wherever that happens — the main Venue
+   section, or the Wedding card under Celebrations — it becomes the venue for
+   the Reception too (same-day, same-hall is the overwhelmingly common case),
+   and the main Venue section stays in step, because the invitation card and
+   every event card must agree. */
 const syncVenueAutoFill = () => {
   const vName = (S.venue.name || "").trim();
   const vAddr = (S.venue.address || "").trim();
@@ -307,26 +331,116 @@ const syncVenueAutoFill = () => {
     if (el) el.value = S.venue.mapsQuery;
   }
 
-  // Pre-fill Function Locations (Wedding and Reception share the same main venue)
-  if (Array.isArray(S.events) && vName) {
-    S.events.forEach(ev => {
-      const evEdited = userEdited.events[ev.id] || {};
-      const name = (ev.name || "").toLowerCase();
-      const icon = ev.icon || "";
+  // ─ Pre-fill Function Locations (Wedding and Reception share the same main venue) ─
+  // Two-way: a venue typed in the MAIN section flows down to the event cards,
+  // and a venue typed on the WEDDING event card flows up to the main section
+  // and out to Reception — so the couple fills it exactly once, wherever
+  // they happen to be looking. A field the user edited themselves is never
+  // overwritten: it is only filled while empty or still holding a value this
+  // cascade previously put there.
+  if (Array.isArray(S.events)) {
+    const mainV = (S.venue.name || "").trim();
 
-      if (icon === "wedding" || name.includes("wedding")) {
-        if (!evEdited.venue) ev.venue = vName;
-      } else if (icon === "reception" || name.includes("reception")) {
-        if (!evEdited.venue) ev.venue = vName; // Same venue as wedding
-      } else if (icon === "haldi" || name.includes("haldi")) {
-        if (!evEdited.venue) ev.venue = `${vName} Courtyard`;
-      } else if (icon === "sangeet" || name.includes("sangeet")) {
-        if (!evEdited.venue) ev.venue = `${vName} Lawns`;
+    // (a) A venue typed on the Wedding event card adopts as the MAIN venue
+    const weddingEv = S.events.find(ev => ev && (ev.icon === "wedding" || /wedding|pheras|muhurat/i.test(ev.name || "")));
+    if (weddingEv && weddingEv.id) {
+      const wEdited = userEdited.events[weddingEv.id] || {};
+      const wV = (weddingEv.venue || "").trim();
+      if (wV && wEdited.venue && (weddingEv.venue !== weddingEv._cascade)) {
+        // The user edited the Wedding card's venue themselves — adopt it up
+        if (!mainV || S.venue.name === weddingEv._cascade || !userEdited.venueName) {
+          if (S.venue.name !== wV) {
+            S.venue.name = wV;
+            const mainEl = $("#f-venueName");
+            if (mainEl && document.activeElement !== mainEl) mainEl.value = wV;
+          }
+        }
+      } else if (mainV && !wV) {
+        weddingEv.venue = mainV;
       }
-    });
+      if (weddingEv._cascade === undefined) weddingEv._cascade = null;
+      weddingEv._cascade = (wEdited.venue ? weddingEv.venue : mainV);
+    }
+
+    const vNow = (S.venue.name || "").trim();
+    /* A hand-edited event venue keeps its value across unrelated typing,
+       but a NEW venue in the main section means the couple changed their
+       mind: release the lock so the fresh value reaches every card. */
+    if (vNow && cascadeLocks.prevMain && cascadeLocks.prevMain !== vNow) {
+      S.events.forEach(ev => {
+        if (ev && ev.id && userEdited.events[ev.id]) userEdited.events[ev.id].venue = false;
+      });
+    }
+    cascadeLocks.prevMain = vNow;
+    if (vNow) {
+      S.events.forEach(ev => {
+        if (!ev || !ev.id) return;
+        const evEdited = userEdited.events[ev.id] || {};
+        const name = (ev.name || "").toLowerCase();
+        const icon = ev.icon || "";
+        const isWedding = icon === "wedding" || name.includes("wedding") || name.includes("pheras") || name.includes("muhurat");
+        const isReception = icon === "reception" || name.includes("reception");
+        const isHaldi = icon === "haldi" || name.includes("haldi");
+        const isSangeet = icon === "sangeet" || name.includes("sangeet") || name.includes("mehendi");
+
+        // Fill only if untouched by the user, or still holding a value this cascade wrote
+        const fillable = (field) => !evEdited[field] || ev[field] === undefined || ev[field] === ev._cascadeValues?.[field];
+        ev._cascadeValues = ev._cascadeValues || {};
+
+        let newVenue = null;
+        if (isWedding && fillable("venue")) newVenue = vNow;
+        else if (isReception && fillable("venue")) newVenue = vNow; // Reception: same venue as the wedding
+        else if (isHaldi && fillable("venue")) newVenue = `${vNow} Courtyard`;
+        else if (isSangeet && fillable("venue")) newVenue = `${vNow} Lawns`;
+
+        if (newVenue !== null && ev.venue !== newVenue) {
+          ev.venue = newVenue;
+          ev._cascadeValues.venue = newVenue;
+        } else if (newVenue !== null) {
+          ev._cascadeValues.venue = newVenue;
+        }
+      });
+    }
     renderEvents();
   }
 };
+
+/* ── Parked-draft banner ──
+   A draft is parked until its owner asks for it back. While parked, this
+   designer works from the sample couple — exactly what a new person
+   expects to see — and nothing of the previous design is published by
+   accident. Restoring is one tap; dismissing keeps the draft parked for
+   another day and starts this session clean. */
+(() => {
+  const banner = $("#draft-banner");
+  if (!banner || !pendingDraft) return;
+  const cp = pendingDraft.couple || {};
+  const namesEl = $("#draft-names");
+  if (namesEl) namesEl.textContent = `${cp.bride || ""} & ${cp.groom || ""}`.trim() || "someone";
+  banner.hidden = false;
+
+  $("#draft-restore")?.addEventListener("click", () => {
+    soak(pendingDraft);
+    pendingDraft = null;
+    banner.hidden = true;
+    /* Re-sync every derived field and panel to the restored design. */
+    syncCoupleAutoFill();
+    syncDateAutoFill();
+    syncVenueAutoFill();
+    const iso2 = splitISO(S.wedding.dateISO);
+    $("#f-date").value = iso2.date; $("#f-time").value = iso2.time; $("#f-tz").value = iso2.tz;
+    $$(".ed-panel [id^=f-]").forEach(el => {
+      const id = "#" + el.id;
+      const bound = BINDINGS.get(id);
+      if (bound) el.value = bound.get() ?? "";
+    });
+    sync(); save();
+  });
+  $("#draft-dismiss")?.addEventListener("click", () => {
+    banner.hidden = true;
+    /* Parked, not deleted: the owner can still restore it in a later session. */
+  });
+})();
 
 /* ── Side Selector (Bride's Side vs Groom's Side) ── */
 S.couple.side ??= "bride";
@@ -349,9 +463,11 @@ $$("#side-toggle .side-btn").forEach(btn => {
 });
 
 /* ── Form Bindings ── */
+const BINDINGS = new Map();
 const bind = (id, get, set, evt = "input") => {
   const el = $(id);
   if (!el) return;
+  BINDINGS.set(id, { get, set });
   el.value = get() ?? "";
   el.addEventListener(evt, () => { set(el.value); sync(); save(); });
 };
@@ -375,7 +491,7 @@ tzSel.value = iso.tz;
 ["#f-date", "#f-time", "#f-tz"].forEach(sel =>
   $(sel).addEventListener("change", () => { syncDateAutoFill(); sync(); save(); }));
 
-bind("#f-venueName", () => S.venue.name, v => { S.venue.name = v; syncVenueAutoFill(); });
+bind("#f-venueName", () => S.venue.name, v => { S.venue.name = v; userEdited.venueName = !!v.trim(); syncVenueAutoFill(); });
 bind("#f-venueAddress", () => S.venue.address, v => { S.venue.address = v; syncVenueAutoFill(); });
 bind("#f-city", () => S.venue.city, v => { S.venue.city = v; userEdited.city = !!v; syncDateAutoFill(); });
 bind("#f-mapsQuery", () => S.venue.mapsQuery, v => { S.venue.mapsQuery = v; userEdited.mapsQuery = !!v; });
@@ -532,6 +648,10 @@ const renderEvents = () => {
         }
         if (k === "name") row.querySelector(".ev-name").textContent = inp.value || "Untitled function";
         if (k === "accent") row.querySelector(".ev-dot").style.background = inp.value;
+        /* A venue typed on an event card is the same fact as the main venue:
+           let the cascade adopt it (Wedding card) or flow down, so the
+           invitation stays consistent everywhere. */
+        if (k === "venue") syncVenueAutoFill();
         sync(); save();
       });
     });
@@ -837,6 +957,15 @@ $("#btn-json").addEventListener("click", () => {
    lets us say so plainly instead of letting the film band quietly fall back. */
 const publishPayload = () => {
   const out = JSON.parse(JSON.stringify(S));
+  /* Internal cascade markers (— which values the venue engine wrote vs the
+     user) are bookkeeping, never part of the invitation. */
+  if (Array.isArray(out.events)) {
+    out.events.forEach((ev) => {
+      if (!ev) return;
+      delete ev._cascade;
+      delete ev._cascadeValues;
+    });
+  }
   if (Array.isArray(out.films)) {
     out.films.forEach((f) => {
       if (!f) return;

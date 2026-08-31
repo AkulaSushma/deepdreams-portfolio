@@ -46,6 +46,7 @@ function cfBridge(handlerFn, options = {}) {
     const resHeaders = new Headers();
     let resStatus = 200;
     let resBody = "";
+    let resBuffer = null;
 
     const res = {
       get statusCode() { return resStatus; },
@@ -58,7 +59,13 @@ function cfBridge(handlerFn, options = {}) {
       getHeader(name) { return resHeaders.get(name); },
       get headersSent() { return false; },
       end(body) {
-        resBody = body == null ? "" : String(body);
+        /* Binary payloads (the share-card PNG) arrive as a Buffer and must
+           not be stringified: UTF-8 round-tripping corrupts image bytes. */
+        if (Buffer.isBuffer(body)) {
+          resBuffer = body;
+        } else {
+          resBody = body == null ? "" : String(body);
+        }
       }
     };
 
@@ -66,11 +73,12 @@ function cfBridge(handlerFn, options = {}) {
       await handlerFn(req, res);
     } catch (err) {
       resStatus = 500;
+      resBuffer = null;
       resBody = JSON.stringify({ ok: false, code: "SERVER", message: "Internal server error" });
       resHeaders.set("Content-Type", "application/json");
     }
 
-    return new Response(resBody, {
+    return new Response(resBuffer || resBody, {
       status: resStatus,
       headers: resHeaders
     });

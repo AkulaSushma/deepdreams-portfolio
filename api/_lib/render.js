@@ -50,6 +50,32 @@ function fallbackImage(template, origin) {
   return origin + baseDirFor(template) + encodeURI(rel);
 }
 
+/* ── The personalised share-card image ─────────────────────────────────────
+   The static fallback is a screenshot of the demo couple — fine for the
+   demo, wrong for everyone else: a couple who shares their link without a
+   photograph would have the demo couple's initials in their WhatsApp card.
+   The og renderer draws the couple's own two initials on the invitation's
+   maroon-and-gold card instead, in the order the family chose. A couple
+   who did upload a cover photograph keeps their photograph. */
+function ogImage(view, origin) {
+  const cp = (view && view.content && view.content.couple) || {};
+  const b = cp.bride || "";
+  const g = cp.groom || "";
+  if (!origin || !b.trim() || !g.trim()) return null;
+  const side = cp.side === "groom" ? "groom" : "bride";
+  const u = new URL(`${origin}/api/og`);
+  u.searchParams.set("b", b);
+  u.searchParams.set("g", g);
+  u.searchParams.set("side", side);
+  return u.toString();
+}
+
+/* The image a link card shows: the couple's own photograph if they uploaded
+   one, otherwise their initials on the studio card — never the demo couple. */
+function shareImage(view, origin) {
+  return coverImage(view) || ogImage(view, origin) || fallbackImage(view.template, origin);
+}
+
 /* ── Escaping ───────────────────────────────────────────────────────────── */
 
 function escapeHtml(s) {
@@ -157,7 +183,7 @@ function metaBlock(view, origin) {
   ].filter(Boolean).join(" ");
 
   const url = `${origin}/invite/${view.slug}`;
-  const image = coverImage(view) || fallbackImage(view.template, origin);
+  const image = shareImage(view, origin);
 
   const tags = [
     `<title>${escapeHtml(title)}</title>`,
@@ -290,5 +316,5 @@ function maintenancePage(origin) {
 module.exports = {
   TEMPLATE_SOURCE, baseDirFor, page,
   notFoundPage, maintenancePage,
-  escapeHtml, safeJson, absolutise, stripHead, fallbackImage,
+  escapeHtml, safeJson, absolutise, stripHead, fallbackImage, ogImage, shareImage,
 };
