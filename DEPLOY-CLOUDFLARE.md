@@ -62,29 +62,30 @@ and `dist/_redirects` (the static aliases — `/world/*`, the lowercase template
 aliases). `/api/*`, `/invite/:slug` and `share.html` are NOT in `_redirects`:
 Functions run before redirects on Cloudflare, and those routes ARE Functions.
 
-## 2. Upload
+## 2. Upload — Wrangler only
 
-Option A — dashboard (what was used before):
+⚠️ **The dashboard's drag-and-drop cannot deploy Pages Functions.** Cloudflare's
+own docs: "Drag and drop deployments made from the Cloudflare dashboard do not
+currently support compiling a `functions` folder… To deploy a `functions`
+folder, you must use Wrangler." This is very likely why the previous deployment
+had no Functions at all: it was uploaded by drag-and-drop, which silently ships
+static assets only. Never use dashboard upload for this project again.
 
-1. Cloudflare dashboard → Workers & Pages → `deepdreams-portfolio` →
-   **Create deployment** (drag and drop).
-2. Drop the **contents of `dist/`** — select the files and folders *inside*
-   dist, not the dist folder itself (the folder name would become part of the
-   URL paths).
-3. Wait for the deployment to finish. Direct Upload deployments replace the
-   whole site atomically.
-
-Option B — wrangler CLI (recommended once authenticated):
+Run from the repository root (the same directory that holds `wrangler.jsonc`
+and `functions/` — Wrangler looks for `functions/` where the command runs):
 
 ```bash
 npx wrangler login        # once; browser opens
+node netlify/build.js     # rebuild dist/ from the latest source
 npx wrangler pages deploy dist --project-name=deepdreams-portfolio
 ```
 
-Wrangler reads `wrangler.jsonc` and applies the compatibility settings itself,
-which makes it the safer option for the Functions. Note: `wrangler login`
-authenticates the CLI but **does not** connect the project to git — this
-project stays Direct Upload either way.
+If `functions/` exists where the command is run, Wrangler uploads it with the
+project. `wrangler.jsonc` (repo root) pins the compatibility date and
+`nodejs_compat`, and Wrangler applies them automatically.
+
+Note: `wrangler login` authenticates the CLI but **does not** connect the
+project to git — this project stays Direct Upload either way.
 
 ## 3. Verify after every deploy
 
@@ -136,13 +137,35 @@ Cloudflare Pages answers `405 Method Not Allowed` (empty body) when a POST hits
 a path that has only a static asset — i.e. **no Function was mounted for that
 route**. If it reappears after a deploy:
 
-- Was `functions/` present at the **repo root** when you uploaded? (Direct
-  upload of `dist/` alone does not carry Functions — see Option B note.)
+- Was the deploy made by **dashboard drag-and-drop**? Those cannot carry a
+  functions/ folder — re-deploy with Wrangler (section 2).
+- Was the command run from the repository root, where `functions/` and
+  `wrangler.jsonc` live? Wrangler only picks up a functions/ folder from the
+  directory where it runs.
 - Dashboard → Functions: is the compatibility date ≥ 2024-09-23 with
   `nodejs_compat`, or does the deploy log show "Could not resolve 'crypto'"?
+  (`wrangler.jsonc` handles this automatically for Wrangler deploys.)
 
 ## 5. After the dashboard settings are applied
 
 Re-deploy once (any upload re-triggers). Env vars and compatibility flags are
 read per deploy, so a Functions upload made before setting them needs one more
 upload to pick them up.
+
+## 6. Local dress rehearsal (optional, no Cloudflare account needed)
+
+Before every release you can run the whole edge stack locally — static site,
+Functions, routing, immutable headers — exactly as production serves it:
+
+```bash
+node netlify/build.js
+npx wrangler pages dev dist --port 8799
+```
+
+Then check http://localhost:8799. What you should see (verified on this
+machine): `POST /api/admin/login` → **401 Not signed in** (the Function
+running), `/invite/anything` → 503 with `db_unavailable` in the log (the
+Function reached for Supabase; no env vars locally), `/world/` → 200, and
+`/world/assets/*` → `Cache-Control: public, max-age=31536000, immutable`.
+Stop it with `taskkill /F /T /PID <pid>` on the root `bash` process (plain
+kills leave respawning children).
