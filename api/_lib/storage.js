@@ -15,8 +15,14 @@
 
 const { log } = require("./http");
 
-const URL_BASE = process.env.SUPABASE_URL;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+/* Read per call, not at module load: the Cloudflare Pages bridge injects the
+   environment on each request, after this module is first required. */
+function credentials() {
+  return {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_SERVICE_KEY,
+  };
+}
 
 const MEDIA_BUCKET = "wedding-media";
 const BACKUP_BUCKET = "wedding-backups";
@@ -38,6 +44,7 @@ function assertSafePath(path) {
 }
 
 async function api(path, { method = "POST", body, headers, raw, timeoutMs } = {}) {
+  const { url: URL_BASE, key: SERVICE_KEY } = credentials();
   if (!URL_BASE || !SERVICE_KEY) {
     const e = new Error("UPSTREAM");
     e.code = "UPSTREAM";
@@ -104,7 +111,8 @@ async function signUpload(path) {
     e.code = "UPSTREAM";
     throw e;
   }
-  return `${URL_BASE}/storage/v1${rel.startsWith("/") ? "" : "/"}${rel}`;
+  const { url } = credentials();
+  return `${url}/storage/v1${rel.startsWith("/") ? "" : "/"}${rel}`;
 }
 
 /** The permanent address of a photograph. `wedding-media` is a public bucket,
@@ -113,7 +121,7 @@ async function signUpload(path) {
  *  and they hold only photographs the couple is about to send to two hundred
  *  relatives anyway. */
 function publicUrl(path) {
-  return `${URL_BASE}/storage/v1/object/public/${MEDIA_BUCKET}/${path}`;
+  return `${credentials().url}/storage/v1/object/public/${MEDIA_BUCKET}/${path}`;
 }
 
 /** Promote a draft upload to its permanent home once publishing has actually

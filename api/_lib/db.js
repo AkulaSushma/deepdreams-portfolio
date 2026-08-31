@@ -16,15 +16,23 @@
 
 const { log } = require("./http");
 
-const URL_BASE = process.env.SUPABASE_URL;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+/* Read per call, not at module load. Cloudflare Pages injects the environment
+   on each request through the bridge in functions/, after this module is first
+   required; capturing it once here would freeze an empty string on the edge. */
+function credentials() {
+  return {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_SERVICE_KEY,
+  };
+}
 
 /* A serverless function that hangs is worse than one that fails: the customer
    watches a spinner until they give up. Every call gets a deadline. */
 const DEFAULT_TIMEOUT_MS = 6000;
 
 function assertConfigured() {
-  if (!URL_BASE || !SERVICE_KEY) {
+  const { url, key } = credentials();
+  if (!url || !key) {
     const err = new Error("Supabase environment variables are not set");
     err.code = "UPSTREAM";
     throw err;
@@ -33,6 +41,7 @@ function assertConfigured() {
 
 async function request(path, { method = "GET", body, headers, timeoutMs } = {}) {
   assertConfigured();
+  const { url: URL_BASE, key: SERVICE_KEY } = credentials();
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), timeoutMs || DEFAULT_TIMEOUT_MS);

@@ -25,7 +25,12 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
 
-/* Whole folders, matched at any depth by folder name. */
+/* Whole folders, matched at any depth by folder name. "api" is dropped here
+   even though functions/api/ needs it on Cloudflare: dist/ never contains the
+   functions tree at all (see DROP_IN_DIST below) — Cloudflare reads edge
+   functions from functions/ at the repository root, not from the build output.
+   Anywhere else an "api" directory appears, it is server code that must not
+   be uploaded as a downloadable asset. */
 const DROP_DIRS = new Set([
   "dist", "node_modules", ".git", ".claude", ".zcode", ".vercel", ".netlify",
   /* Server-side code: it runs as a function, it is never downloaded. */
@@ -68,10 +73,23 @@ function keep(entry, isDir) {
   return !DROP_PATTERNS.some((re) => re.test(entry));
 }
 
+/* dist/ is served as static assets only. Cloudflare Pages reads its edge
+   functions from functions/ at the REPOSITORY ROOT, never from the build
+   output — a functions/ directory inside dist/ would be uploaded as static
+   files, and its code would answer no request. So functions/ is excluded
+   from dist/ entirely; the same exclusion protects dist/ from recursion. */
+const DROP_IN_DIST = new Set(["functions", ...[...DROP_DIRS]]);
+
+function keepInDist(entry, isDir) {
+  if (isDir) return !DROP_IN_DIST.has(entry);
+  if (DROP_FILES.has(entry)) return false;
+  return !DROP_PATTERNS.some((re) => re.test(entry));
+}
+
 let files = 0;
 let bytes = 0;
 
-function copyDir(from, to) {
+function copyDir(from, to, keepFn) {
   fs.mkdirSync(to, { recursive: true });
 
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
@@ -80,13 +98,13 @@ function copyDir(from, to) {
     if (entry.isSymbolicLink()) continue;
 
     const isDir = entry.isDirectory();
-    if (!keep(entry.name, isDir)) continue;
+    if (!keepFn(entry.name, isDir)) continue;
 
     const src = path.join(from, entry.name);
     const dst = path.join(to, entry.name);
 
     if (isDir) {
-      copyDir(src, dst);
+      copyDir(src, dst, keepFn);
     } else {
       fs.copyFileSync(src, dst);
       files += 1;
@@ -96,27 +114,29 @@ function copyDir(from, to) {
 }
 
 fs.rmSync(DIST, { recursive: true, force: true });
-copyDir(ROOT, DIST);
+copyDir(ROOT, DIST, keepInDist);
 
 /* Mirror the 3D world to dist/world so direct routes (/world/...) always resolve natively */
 const worldSrc = path.join(DIST, "3D Wedding Invitation Sample 2", "world");
 const worldDst = path.join(DIST, "world");
 if (fs.existsSync(worldSrc) && !fs.existsSync(worldDst)) {
-  copyDir(worldSrc, worldDst);
+  copyDir(worldSrc, worldDst, keep);
 }
 
-/* Write Cloudflare Pages & Netlify route mapping */
-const redirectsContent = `# Cloudflare Pages & Netlify route mapping
-/invite/:slug   /.netlify/functions/invite?slug=:slug  200
-/invite/*       /.netlify/functions/invite?slug=:splat 200
-/world/*        /3D%20Wedding%20Invitation%20Sample%202/world/:splat 200
-/world          /3D%20Wedding%20Invitation%20Sample%202/world/index.html 200
+/* Write route mapping. Two hosts, one file — both read _redirects from the
+   build output. Cloudflare Pages runs functions/ (repo root) BEFORE these
+   rules, so /api/* and /invite/:slug never appear here: their rules would
+   either be shadowed by the function or rewrites to a host-specific internal
+   path that does not exist on the other platform. What remains is the set of
+   static-to-static aliases both hosts honour identically. */
+const redirectsContent = `# Static aliases shared by Cloudflare Pages and Netlify.
+# /api/* and /invite/:slug are served by functions/ (Cloudflare) and
+# netlify/functions (Netlify config) — never rewritten here.
+/world/*        /3D%20Wedding%20Invitation%20Sample%202/world/:splat  200
+/world          /3D%20Wedding%20Invitation%20Sample%202/world/index.html  200
 /3d%20wedding%20invitation%20sample%202/*  /3D%20Wedding%20Invitation%20Sample%202/:splat 200
 /3d-wedding-invitation-sample-2/*  /3D%20Wedding%20Invitation%20Sample%202/:splat 200
 /wedding-invite-sample-1/*  /wedding-invite%20sample%201/:splat 200
-/3D%20Wedding%20Invitation%20Sample%202/share.html  /.netlify/functions/card?template=sample2 200
-/3d%20wedding%20invitation%20sample%202/share.html  /.netlify/functions/card?template=sample2 200
-/3d-wedding-invitation-sample-2/share.html  /.netlify/functions/card?template=sample2 200
 `;
 fs.writeFileSync(path.join(DIST, "_redirects"), redirectsContent, "utf8");
 
@@ -153,6 +173,17 @@ if (!fs.existsSync(path.join(DIST, "shared", "limits.js"))) {
 if (!fs.existsSync(path.join(DIST, "index.html"))) {
   console.error("index.html is missing from the build.");
   process.exit(1);
+}
+
+/* A server-code folder inside dist/ is a deployable secret waiting to happen:
+   Cloudflare serves everything here as static assets, and Netlify serves
+   everything except its own netlify/functions. Fail the build loudly rather
+   than publish an api/ or functions/ tree a guest could download. */
+for (const leaked of ["api", "functions", "netlify", "supabase"]) {
+  if (fs.existsSync(path.join(DIST, leaked))) {
+    console.error(`dist/${leaked}/ exists — server code must never ship as static assets.`);
+    process.exit(1);
+  }
 }
 
 console.log(`dist/ built: ${files} files, ${(bytes / 1024 / 1024).toFixed(1)} MB`);

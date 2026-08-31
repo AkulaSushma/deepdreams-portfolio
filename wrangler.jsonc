@@ -1,0 +1,16 @@
+{
+  // Cloudflare Pages project configuration. Mirrors what the dashboard would
+  // otherwise hold, so a rebuild from a clean clone keeps the same behaviour:
+  // the Functions under functions/ use require("crypto") and other Node
+  // built-ins, which need nodejs_compat and a compatibility date of
+  // 2024-09-23 or later (bare "crypto" resolves from that date).
+  //
+  // Build command and output directory must ALSO match this file in the Pages
+  // dashboard: Settings → Builds & deployments → Build command "node netlify/build.js",
+  // output directory "dist". The functions directory is auto-detected at the
+  // repo root; do not put one inside dist/.
+  "name": "deepdreams-portfolio",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "dist"
+}
