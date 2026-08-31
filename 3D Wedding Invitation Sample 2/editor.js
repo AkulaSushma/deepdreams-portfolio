@@ -108,7 +108,14 @@ const addDaysYMD = (ymd, days) => {
 
 /* ── persistence ── */
 let saveTimer = 0;
+/* True only after a genuine edit. Until then nothing is written: a demo
+   state must never masquerade as someone’s unfinished design on a device
+   that has only viewed the page. The first input handler flips this via
+   markTouched(); save() refuses to persist before that. */
+let userTouchedTheDesign = false;
+const markTouched = () => { userTouchedTheDesign = true; };
 const save = () => {
+  if (!userTouchedTheDesign) return;      /* viewing is not designing */
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch {}
@@ -434,6 +441,7 @@ const syncVenueAutoFill = () => {
       const bound = BINDINGS.get(id);
       if (bound) el.value = bound.get() ?? "";
     });
+    markTouched();
     sync(); save();
   });
   $("#draft-dismiss")?.addEventListener("click", () => {
@@ -458,6 +466,7 @@ $$("#side-toggle .side-btn").forEach(btn => {
     S.couple.side = btn.dataset.side;
     updateSideToggleUI();
     syncCoupleAutoFill();
+    markTouched();
     sync(); save();
   });
 });
@@ -469,7 +478,7 @@ const bind = (id, get, set, evt = "input") => {
   if (!el) return;
   BINDINGS.set(id, { get, set });
   el.value = get() ?? "";
-  el.addEventListener(evt, () => { set(el.value); sync(); save(); });
+  el.addEventListener(evt, () => { markTouched(); set(el.value); sync(); save(); });
 };
 
 bind("#f-bride", () => S.couple.bride, v => { S.couple.bride = v; syncCoupleAutoFill(); });
@@ -489,7 +498,7 @@ if (![...tzSel.options].some(o => o.value === iso.tz))
 tzSel.value = iso.tz;
 
 ["#f-date", "#f-time", "#f-tz"].forEach(sel =>
-  $(sel).addEventListener("change", () => { syncDateAutoFill(); sync(); save(); }));
+  $(sel).addEventListener("change", () => { markTouched(); syncDateAutoFill(); sync(); save(); }));
 
 bind("#f-venueName", () => S.venue.name, v => { S.venue.name = v; userEdited.venueName = !!v.trim(); syncVenueAutoFill(); });
 bind("#f-venueAddress", () => S.venue.address, v => { S.venue.address = v; syncVenueAutoFill(); });
@@ -543,7 +552,7 @@ S.films ??= [
           st.classList.add("warn");
         }
         checkVideoDuration(url, null);
-        sync(); save();
+        markTouched(); sync(); save();
       }
     });
   }
@@ -587,7 +596,7 @@ $("#preset-row").innerHTML = PRESETS.map((p, i) =>
 $$(".preset").forEach(b => b.addEventListener("click", () => {
   S.theme = { ...PRESETS[+b.dataset.p].t };
   THEME_KEYS.forEach(k => $("#f-" + k).value = S.theme[k]);
-  sync(); save();
+  markTouched(); sync(); save();
 }));
 
 /* ── events editor ── */
@@ -652,6 +661,7 @@ const renderEvents = () => {
            let the cascade adopt it (Wedding card) or flow down, so the
            invitation stays consistent everywhere. */
         if (k === "venue") syncVenueAutoFill();
+        markTouched();
         sync(); save();
       });
     });
@@ -661,7 +671,7 @@ const renderEvents = () => {
       if (a === "del") { if (S.events.length > 1) S.events.splice(i, 1); }
       if (a === "up" && i > 0) S.events.splice(i - 1, 0, S.events.splice(i, 1)[0]);
       if (a === "down" && i < S.events.length - 1) S.events.splice(i + 1, 0, S.events.splice(i, 1)[0]);
-      renderEvents(); sync(); save();
+      markTouched(); renderEvents(); sync(); save();
     }));
     evList.appendChild(row);
   });
@@ -1147,6 +1157,11 @@ syncDateAutoFill();
 syncVenueAutoFill();
 sync();
 setScene("couple");   /* preview starts on the step the editor opens on */
-save();
+/* No save() here. Saving on load wrote a demo copy of the state into every
+   visitor’s browser — which then looked like “a saved design” on the next
+   visit, even on a device that had never edited anything. The draft is
+   written only when the designer actually changes something (every input
+   handler calls save(), and save() refuses until markTouched has run). */
+userTouchedTheDesign = false;
 
 })();

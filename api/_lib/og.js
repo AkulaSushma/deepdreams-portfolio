@@ -32,6 +32,7 @@ const BG_BOT = [12, 6, 10];
 const GOLD_HI = [244, 214, 146];
 const GOLD_LO = [196, 150, 66];
 const RULE_GOLD = [212, 175, 106];
+const SOFT = [226, 196, 140];
 
 /* ── PNG encoder ──────────────────────────────────────────────────────────
    The smallest correct PNG: 8-byte signature, IHDR, one IDAT with every
@@ -222,4 +223,65 @@ function shareCard(first, second) {
   return encodePng(px, W, H);
 }
 
-module.exports = { shareCard, W, H };
+/* ── Full-text helpers (Sample 1's names card) ────────────────────────────
+   Sample 2's approved card shows the two initials; Sample 1's template has
+   no monogram motif, and its couples upload photographs rather than artwork
+   — so its card says the names in full: "ANANYA & ROHIT", the date, the
+   venue, on the same maroon-and-gold language. */
+
+function textWidth(text, capH) {
+  let w = 0;
+  for (const ch of String(text)) {
+    const g = FONT[ch];
+    if (!g) { w += capH * 0.26; continue; }
+    w += (g.w / g.h) * capH + capH * 0.12;
+  }
+  return Math.max(0, w - capH * 0.12);
+}
+
+function drawText(px, text, cx, top, capH, hi, lo) {
+  const total = textWidth(text, capH);
+  let x = Math.round(cx - total / 2);
+  for (const ch of String(text)) {
+    const g = FONT[ch];
+    if (!g) { x += Math.round(capH * 0.26); continue; }
+    drawGlyph(px, g, x, top, capH, hi, lo);
+    x += Math.round((g.w / g.h) * capH) + Math.round(capH * 0.12);
+  }
+  return total;
+}
+
+const cleanText = (s) => String(s || "").replace(/[^\p{L}\p{N}&·—,.'\- ]/gu, "").trim().slice(0, 60);
+
+/** Sample 1's share card: the couple's full names, date and venue in text. */
+function namesCard(first, second, opts) {
+  const o = opts || {};
+  const px = background();
+
+  drawText(px, "WEDDING INVITATION", W / 2, 92, 30, SOFT, SOFT);
+
+  const a = cleanText(first).toUpperCase();
+  const b = cleanText(second).toUpperCase();
+  const line = (a && b) ? a + " & " + b : (a || b || "");
+  if (!line) return encodePng(px, W, H);
+
+  let capH = 112;
+  const budget = W - 220;
+  while (textWidth(line, capH) > budget && capH > 40) capH -= 4;
+  drawText(px, line, W / 2, Math.round(H / 2 - 190), capH);
+
+  const ruleY = Math.round(H / 2 - 190 + capH * 1.85);
+  drawRule(px, W / 2, ruleY, 430);
+
+  const date = cleanText(o.date).toUpperCase();
+  if (date) drawText(px, date, W / 2, ruleY + 54, 40, SOFT, SOFT);
+  const venue = cleanText(o.venue).toUpperCase();
+  if (venue) drawText(px, venue, W / 2, ruleY + 124, 34, SOFT, SOFT);
+
+  drawDiamond(px, W / 2, H - 118, 8);
+  drawText(px, "DEEPDREAMS AI STUDIO", W / 2, H - 96, 24, SOFT, SOFT);
+
+  return encodePng(px, W, H);
+}
+
+module.exports = { shareCard, namesCard, W, H };

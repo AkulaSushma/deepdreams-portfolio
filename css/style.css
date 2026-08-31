@@ -632,3 +632,71 @@ footer b{color:var(--gold-soft)}
   .carousel-item-916{flex:0 0 210px;max-width:210px}
 }font-size:12.5px}
 }
+
+/* ── Smart gallery navigation strip ─────────────────────────────────────
+   Replaces the dots. Dots told a visitor nothing: not that there were more
+   films, not how many, not what they were — families scrolled straight past
+   whole sections. This strip shows a numbered thumbnail for every film
+   with the active one highlighted, plus a live "3 of 7 films" counter. */
+.carousel-strip{
+  display:flex;justify-content:center;align-items:center;gap:10px;
+  flex-wrap:wrap;margin-top:24px;padding:6px 4px
+}
+.strip-chip{
+  position:relative;width:64px;height:40px;border-radius:6px;overflow:hidden;
+  border:2px solid rgba(199,154,58,.28);background:#0c0a08;padding:0;cursor:pointer;
+  transition:border-color .25s, transform .25s, box-shadow .25s
+}
+.strip-chip img{width:100%;height:100%;object-fit:cover;display:block;opacity:.55;transition:opacity .25s}
+.strip-chip:hover img{opacity:.9}
+.strip-chip:hover{border-color:rgba(199,154,58,.75)}
+.strip-chip.active{
+  border-color:var(--gold);transform:translateY(-2px) scale(1.06);
+  box-shadow:0 6px 18px rgba(0,0,0,.45), 0 0 0 3px rgba(199,154,58,.18)
+}
+.strip-chip.active img{opacity:1}
+.chip-num{
+  position:absolute;bottom:2px;right:3px;
+  font:700 10px/1 Jost,Arial,sans-serif;color:#f4e9d0;
+  background:rgba(10,7,5,.78);border-radius:3px;padding:2px 4px
+}
+.strip-counter{
+  margin-left:10px;font:500 13px/1 Jost,Arial,sans-serif;letter-spacing:.06em;
+  color:rgba(244,233,208,.72);white-space:nowrap
+}
+/* Narrow screens: keep the strip meaningful without scrolling sideways */
+@media (max-width:640px){
+  .strip-chip{width:52px;height:34px}
+  .strip-counter{margin-left:6px;font-size:12px}
+}
+
+/* ── "Request this type" on every gallery card ──────────────────────────
+   Opens WhatsApp with the film's title, its section and a direct link, so
+   the studio sees exactly which sample the customer means (YouTube renders
+   the film's thumbnail for the link) without any guessing. */
+.card-request{
+  position:absolute;left:12px;bottom:12px;z-index:5;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 14px;border-radius:8px;
+  background:linear-gradient(135deg,#c79a3a,#a67c22);color:#1a1005;
+  font:600 13px/1 Jost,Arial,sans-serif;letter-spacing:.02em;text-decoration:none;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .25s, transform .25s;
+  box-shadow:0 4px 14px rgba(0,0,0,.4)
+}
+.card-request::before{content:"";width:14px;height:14px;flex:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a1005'%3E%3Cpath d='M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.737-.979z'/%3E%3C/svg%3E") center/contain no-repeat}
+.carousel-item,.carousel-item-916{position:relative}
+.carousel-item:hover .card-request,.carousel-item-916:hover .card-request,
+.carousel-item:focus-within .card-request,.carousel-item-916:focus-within .card-request{opacity:1;transform:translateY(0)}
+/* The button sits beside the caption, not over it: when it appears, the
+   caption slides up a little so both stay readable. */
+.carousel-item:hover .meta,.carousel-item-916:hover .meta{transform:translateY(-6px)}
+.carousel-item .meta,.carousel-item-916 .meta{transition:transform .25s}
+/* Touch devices have no hover: the button stays visible, slightly softened
+   so the thumbnail behind it still reads. */
+@media (hover:none){
+  .card-request{opacity:.96;transform:none}
+  .carousel-item .meta{padding-bottom:46px}
+  .carousel-item-916 .meta{padding-bottom:46px}
+}

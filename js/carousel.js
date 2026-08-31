@@ -301,25 +301,73 @@
       if (this.nextBtn) this.nextBtn.disabled = this.track.scrollLeft >= maxScroll;
     }
 
+    /* The rail used to be navigated by dots — a row of identical circles that
+       told a visitor nothing: not that there were more films, not how many,
+       not what they were. Families scrolled past whole sections without
+       realising more work sat one swipe away. The dots are replaced by a
+       strip that SHOWS the films: a numbered thumbnail for every video, the
+       active one highlighted, a "3 of 7" counter beside it, and arrows that
+       stay visible on touch devices (dots were the only discoverability on
+       mobile, and they were invisible). */
     buildDots() {
       if (!this.dots) return;
+      this.dots.className = 'carousel-strip';
+      this.dots.setAttribute('role', 'tablist');
+      this.dots.setAttribute('aria-label', 'Choose a film');
       this.dots.innerHTML = '';
-      this.items.forEach((_, i) => {
-        const dot = document.createElement('button');
-        dot.className = 'carousel-dot' + (i === this.currentIndex ? ' active' : '');
-        dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
-        dot.addEventListener('click', () => this.goTo(i));
-        this.dots.appendChild(dot);
+
+      this.items.forEach((item, i) => {
+        const chip = document.createElement('button');
+        chip.className = 'strip-chip' + (i === this.currentIndex ? ' active' : '');
+        chip.type = 'button';
+        chip.setAttribute('role', 'tab');
+        chip.setAttribute('aria-label', `Film ${i + 1} of ${this.items.length}`);
+        const img = item.querySelector('img');
+        chip.innerHTML = img
+          ? `<img src="${img.src}" alt="" loading="lazy" /><span class="chip-num">${i + 1}</span>`
+          : `<span class="chip-num">${i + 1}</span>`;
+        chip.addEventListener('click', () => this.goTo(i));
+        this.dots.appendChild(chip);
       });
+
+      const counter = document.createElement('span');
+      counter.className = 'strip-counter';
+      counter.setAttribute('aria-live', 'polite');
+      this.dots.appendChild(counter);
+      this.updateDots();
     }
 
     updateDots() {
       if (!this.dots) return;
-      Array.from(this.dots.children).forEach((dot, i) => {
-        dot.classList.toggle('active', i === this.currentIndex);
+      Array.from(this.dots.querySelectorAll('.strip-chip')).forEach((chip, i) => {
+        chip.classList.toggle('active', i === this.currentIndex);
+        chip.setAttribute('aria-selected', i === this.currentIndex ? 'true' : 'false');
       });
+      const counter = this.dots.querySelector('.strip-counter');
+      if (counter) {
+        counter.textContent = `${this.currentIndex + 1} of ${this.items.length} films`;
+      }
     }
   }
+
+  /* "Request this type" — the customer taps it on the film they want. The
+     WhatsApp message then carries the film's title AND a direct link to it,
+     and the studio sees the film's own thumbnail (YouTube renders the card
+     for any youtu.be link) so there is never any doubt about which of the
+     nine samples the customer means. */
+  const requestMsg = (title, id, section) =>
+    `Hi DeepDreams AI Studio! I'd like this type of video for my family — the studio can see the exact sample here.
+
+` +
+    `Type: ${section || 'AI video'}
+Sample: "${title}"
+Watch: https://youtu.be/${id}
+
+` +
+    `Please share pricing and details. Thank you!`;
+
+  const requestUrl = (title, id, section) =>
+    `https://wa.me/${CFG.WHATSAPP}?text=${encodeURIComponent(requestMsg(title, id, section))}`;
 
   // Video lightbox — use the shared one from app.js when available
   function openVideo(ytId, title, isVertical) {
@@ -368,6 +416,9 @@
             <small>${category}</small>
             <h3>${title}</h3>
           </div>
+          <a class="card-request" target="_blank" rel="noopener"
+             href="${requestUrl(title, id, category)}"
+             aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
         `;
         item.addEventListener('click', () => openVideo(id, title, false));
         track.appendChild(item);
@@ -413,6 +464,9 @@
           <small>${category || 'Wedding Invitation'}</small>
           <h3>${title}</h3>
         </div>
+        <a class="card-request" target="_blank" rel="noopener"
+           href="${requestUrl(title, id, category || 'Wedding Invitation')}"
+           aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
       `;
       el.addEventListener('click', () => openVideo(id, title, true));
       container.appendChild(el);
@@ -453,6 +507,9 @@
           <small>${category || 'Name Reveal'}</small>
           <h3>${title}</h3>
         </div>
+        <a class="card-request" target="_blank" rel="noopener"
+           href="${requestUrl(title, id, 'Name Reveal')}"
+           aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
       `;
       el.addEventListener('click', () => openVideo(id, title, false));
       track.appendChild(el);

@@ -32,6 +32,9 @@ module.exports = handler("og", async (req, res) => {
   const b = url.searchParams.get("b") || "";
   const g = url.searchParams.get("g") || "";
   const side = url.searchParams.get("side") || "";
+  const mode = url.searchParams.get("mode") === "names" ? "names" : "initials";
+  const dParam = url.searchParams.get("d") || "";
+  const vParam = url.searchParams.get("v") || "";
 
   if (!LETTER.test(b) && !LETTER.test(g)) {
     return fail(res, "BAD_REQUEST");
@@ -44,8 +47,13 @@ module.exports = handler("og", async (req, res) => {
   const second = side === "groom" ? b : g;
 
   try {
-    const png = og.shareCard(first, second);
-    log("og.rendered", { w: og.W, h: og.H, bytes: png.length });
+    /* mode=names renders the couple’s full names in text — Sample 1’s card,
+       whose template has no monogram motif. The default remains Sample 2’s
+       approved initials card. */
+    const png = mode === "names"
+      ? og.namesCard(first, second, { date: dParam, venue: vParam })
+      : og.shareCard(first, second);
+    log("og.rendered", { w: og.W, h: og.H, bytes: png.length, mode });
     res.statusCode = 200;
     res.setHeader("Content-Type", "image/png");
     res.setHeader("Cache-Control", CACHE);
