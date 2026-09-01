@@ -485,16 +485,24 @@ function buildPosterOverlay(mk, ev) {
     </div>`;
   }
   if (mk === "rub") {
-    // Haldi
+    /* The name and date come from the event itself — a couple who chose the
+       turmeric gesture for their Nichitartam must see "Nichitartam" here,
+       not "Haldi", and their own date and venue, not the sample's. The old
+       version hardcoded all four, which is exactly how the wrong couple's
+       words ended up inside the wrong card. */
+    const whenBits = (ev.when || "").match(/^(.*?)\s*(?:·|at|@)?\s*(\d{1,2}:\d{2}\s*(?:AM|PM)?)\s*·?\s*(.*)$/i);
+    const rubTime = (whenBits && whenBits[2]) || "";
+    const rubDay = (whenBits && (whenBits[3] || "").replace(/^(?:at|on|·)\s*/i, "")) ||
+                   (whenParts[whenParts.length - 1] || "");
     return `<div class="poster-overlay ov-haldi">
       <p class="ov-line ov-invite-text">You are so invited to our</p>
-      <p class="ov-line ov-title">Haldi</p>
+      <p class="ov-line ov-title">${esc(ev.name)}</p>
       <p class="ov-line ov-ceremony">CEREMONY</p>
       <div class="ov-line ov-divider"></div>
       <p class="ov-line ov-person" style="--person-len:${(`${b} & ${g}`).length}">${b} &amp; ${g}</p>
-      <p class="ov-line ov-time">AT 6:00 PM</p>
-      <p class="ov-line ov-day">8th December, 2026</p>
-      <p class="ov-line ov-venue" style="--venue-len:${(ev.where || "").length}">${esc(ev.where || "Vemuri Vari Palace, Rajahmundry")}</p>
+      ${rubTime ? `<p class="ov-line ov-time">${esc(rubTime.toUpperCase())}</p>` : ""}
+      ${rubDay ? `<p class="ov-line ov-day">${esc(rubDay)}</p>` : ""}
+      <p class="ov-line ov-venue" style="--venue-len:${(ev.where || "").length}">${esc(ev.where || "")}</p>
       <div class="ov-banner">INVITE YOUR FAMILY</div>
     </div>`;
   }
@@ -895,20 +903,23 @@ function knock() {
     const ctx = ac();
     const one = t => {
       /* the impact — a few milliseconds of noise through a bandpass at the
-         wood's "tok" frequency */
+         wood's "tok" frequency. A real door knock is a low thud: the centre
+         sits in the wood's body (≈750 Hz) — the old 1800 Hz centre rang as
+         a thin, toy-like tap. */
       const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.03), ctx.sampleRate);
       const ch = buf.getChannelData(0);
       for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / ch.length, 1.6);
       const n = ctx.createBufferSource(); n.buffer = buf;
-      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1800; bp.Q.value = 1.2;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 750; bp.Q.value = 0.9;
       const ng = ctx.createGain();
       ng.gain.setValueAtTime(0.5, t);
       ng.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
       n.connect(bp).connect(ng).connect(ctx.destination);
       n.start(t); n.stop(t + 0.06);
 
-      /* the door itself — low resonances, fast decay */
-      [[110, 0.5], [210, 0.22], [330, 0.1]].forEach(([f, v]) => {
+      /* the door itself — low resonances, fast decay. The 110 Hz body now
+         dominates more strongly, which is what a wooden door actually does. */
+      [[85, 0.55], [170, 0.24], [310, 0.09]].forEach(([f, v]) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.type = "sine";
         o.frequency.setValueAtTime(f * 1.04, t);
@@ -1723,10 +1734,74 @@ function pubDone(url) {
   try { localStorage.removeItem(STORE_KEY); } catch (e) {}
 }
 
-/* The photographs the couple actually uploaded, swapped for position markers
-   and handed to the image pipeline. Anything already living as a site file
-   (posters/…) is left alone — it does not need uploading and must not be
-   re-encoded. */
+/* The share-card cover: the couple's own photograph with a deep-maroon band
+   across its lower edge carrying the couple's names, both families and the
+   date in gold — the same words the invitation's hero says. Composed in the
+   couple's browser at publish time (the canvas and the image both live
+   here), then handed to the normal image pipeline as the cover, so WhatsApp
+   renders the couple's photo WITH their names rather than a bare image. */
+async function composeShareCover(blob) {
+  if (!blob) return null;
+  const bitmap = await createImageBitmap(blob);
+  const W = 1200, H = 630;                    /* the og:image aspect */
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const c = canvas.getContext("2d");
+
+  /* Cover-fill the photo, centred — never stretched. */
+  const scale = Math.max(W / bitmap.width, H / bitmap.height);
+  const dw = bitmap.width * scale, dh = bitmap.height * scale;
+  c.drawImage(bitmap, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  bitmap.close?.();
+
+  /* Deep-maroon gradient rising from the bottom — matches the invitation. */
+  const bandH = Math.round(H * 0.34);
+  const grad = c.createLinearGradient(0, H - bandH, 0, H);
+  grad.addColorStop(0, "rgba(38,6,16,0)");
+  grad.addColorStop(0.35, "rgba(38,6,16,0.82)");
+  grad.addColorStop(1, "rgba(24,4,10,0.97)");
+  c.fillStyle = grad;
+  c.fillRect(0, H - bandH, W, bandH);
+  /* A hairline gold rule above the text block. */
+  c.strokeStyle = "rgba(229,200,120,0.75)";
+  c.lineWidth = 2;
+  c.beginPath();
+  c.moveTo(W * 0.2, H - bandH + 26); c.lineTo(W * 0.8, H - bandH + 26); c.stroke();
+
+  const gold = "#E5C878";
+  const side = DATA.side === "groom";
+  const first = side ? (DATA.groom || "") : (DATA.bride || "");
+  const second = side ? (DATA.bride || "") : (DATA.groom || "");
+  const names = (first && second) ? `${first} & ${second}` : (first || second || "Our Wedding");
+
+  const drawText = (text, y, px, weight) => {
+    c.textAlign = "center";
+    c.fillStyle = gold;
+    let fontPx = px;
+    c.font = `${weight} ${fontPx}px 'Cormorant Garamond', Georgia, serif`;
+    while (c.measureText(text).width > W * 0.86 && fontPx > 14) {
+      fontPx -= 2;
+      c.font = `${weight} ${fontPx}px 'Cormorant Garamond', Georgia, serif`;
+    }
+    c.shadowColor = "rgba(0,0,0,0.55)";
+    c.shadowBlur = 6;
+    c.fillText(text, W / 2, y);
+    c.shadowBlur = 0;
+  };
+
+  drawText(names.toUpperCase(), H - 132, 62, 600);
+
+  /* Both families — the way the invitation's cover presents them. */
+  const families = [DATA.brideParents, DATA.groomParents].filter(Boolean);
+  if (families.length) drawText(families.join("  ·  ").slice(0, 90), H - 84, 24, 500);
+
+  const dateLine = DATA.date
+    ? new Date(`${DATA.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    : "";
+  if (dateLine) drawText(dateLine, H - 44, 22, 500);
+
+  return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.88));
+}
 async function collectForPublish() {
   const H = window.DD_HYDRATE, P = window.DD_IMAGE_PREP;
   if (!H || !P) throw new Error("PUBLISH_UNAVAILABLE");
@@ -1752,6 +1827,20 @@ async function collectForPublish() {
   }
 
   const roles = picked.images.map((_, i) => (i === picked.coverIndex ? "cover" : "gallery"));
+
+  /* The cover becomes the share card itself: the couple's hero photograph
+     with a deep-maroon band across its lower edge carrying their names,
+     both families' names and the wedding date in gold — so the WhatsApp
+     preview says WHOSE wedding this is, in the couple's own image, instead
+     of a bare photograph with nothing written beside them. Composed here,
+     in the couple's browser, where the canvas and the photograph already
+     live; nothing is uploaded that was not going to be uploaded anyway. */
+  if (picked.coverIndex >= 0) {
+    try {
+      const composed = await composeShareCover(blobs[picked.coverIndex]);
+      if (composed) blobs[picked.coverIndex] = composed;
+    } catch (e) { /* the plain photograph is still a valid cover */ }
+  }
 
   const photos = await P.prepareAll(blobs, {
     roles,

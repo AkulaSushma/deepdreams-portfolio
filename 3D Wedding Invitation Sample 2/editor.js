@@ -342,6 +342,29 @@ const syncVenueAutoFill = (opts) => {
   /* The one-time suggestion for each celebration card. Only cards the
      designer has never touched. The Wedding card mirrors the main venue —
      the invitation hero shows S.venue.name — but only until it is edited. */
+  /* The reverse direction, with the same rule: a venue typed on the WEDDING
+     celebration card suggests itself into the main Venue & RSVP field — once.
+     The wedding usually IS the main venue, so the couple should not have to
+     type it twice. But the main field is only ever filled while it is empty
+     or still holding this suggestion's own last value: the moment the couple
+     edits the main field (or the Wedding card) themselves, that direction is
+     closed and never reopens — editing Venue & RSVP must never rewrite the
+     Wedding card, and editing the Wedding card a second time never rewrites
+     a main venue the couple has taken into their own hands. */
+  if (Array.isArray(S.events)) {
+    const wed = S.events.find(ev => ev && (ev.icon === "wedding" || /wedding|pheras|muhurtham|muhurat/i.test(ev.name || "")));
+    const wedEdited = wed ? (userEdited.events[wed.id] || {}).venue : false;
+    const wv = wed ? (wed.venue || "").trim() : "";
+    if (wv && wedEdited) {
+      const mainEl = $("#f-venueName");
+      const mainHoldsSuggestion = !S.venue.name || S.venue.name === wv || !userEdited.venueName;
+      if (mainHoldsSuggestion && S.venue.name !== wv) {
+        S.venue.name = wv;
+        if (mainEl && document.activeElement !== mainEl) mainEl.value = wv;
+      }
+    }
+  }
+
   if (Array.isArray(S.events) && vName) {
     S.events.forEach(ev => {
       if (!ev || !ev.id) return;
