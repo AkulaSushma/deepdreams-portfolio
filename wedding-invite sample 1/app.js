@@ -450,6 +450,21 @@ const DEMO_POSTERS = {
   tap: "posters/reception_clean.jpg"
 };
 
+/* The fallback poster for an event's card is chosen by WHAT the event is —
+   never by the gesture that opens it. Choosing by gesture meant a couple who
+   picked "rub off the turmeric" for their Nichitartam got the Haldi poster
+   inside it, because the two are keyed by gesture. The gesture decides how a
+   card is opened; the event decides what the card shows. */
+function posterFor(ev) {
+  const n = (ev && ev.name || "").toLowerCase();
+  if (/haldi|snanam|manjal|pasupu|pithi/.test(n)) return "posters/haldi_clean.jpg";
+  if (/mehndi|mehendi|henna/.test(n)) return "posters/sangeet_clean.jpg";
+  if (/nichit|nichay|engag|roka|thilak|sagai/.test(n)) return "posters/nichayathartham_clean.jpg";
+  if (/sangeet|reception|dance|music|dj|baraat/.test(n)) return "posters/reception_clean.jpg";
+  if (/muhurtham|muhurtam|muhurat|wedding|kalyanam|marriage|vivah|mangalyam|lagnam/.test(n)) return "posters/muhurtham_clean.jpg";
+  return "posters/welcome_clean.jpg";
+}
+
 function buildPosterOverlay(mk, ev) {
   const b = esc(DATA.bride || "Saanvi"), g = esc(DATA.groom || "Vihaan");
   const note = ev.note || "";
@@ -530,7 +545,7 @@ function openFest(i) {
   $("#festBless").hidden = true;
   const paper = $("#festPaper");
   
-  const imgSrc = ev.img || DEMO_POSTERS[mk] || "posters/welcome_clean.jpg";
+  const imgSrc = ev.img || posterFor(ev) || "posters/welcome_clean.jpg";
   const isDefaultPoster = isDefaultImage(imgSrc);
   paper.classList.add("has-art");
   paper.innerHTML = `
@@ -1716,7 +1731,18 @@ async function collectForPublish() {
   const H = window.DD_HYDRATE, P = window.DD_IMAGE_PREP;
   if (!H || !P) throw new Error("PUBLISH_UNAVAILABLE");
 
-  const picked = H.collectImages(DATA, { coverKey: "cover" });
+  /* The WhatsApp preview must be the invitation's own hero — the "You are
+     warmly invited" welcome image the couple chose — not the first gallery
+     photo. The welcome image is marked as the cover; the golden-seal photo
+     and any gallery photos follow it. A couple who never uploaded a welcome
+     image falls back to the seal photo, then the gallery, exactly as before. */
+  const coverDataUrl = (DATA.welcomeImg && String(DATA.welcomeImg).indexOf("data:image/") === 0)
+    ? DATA.welcomeImg
+    : (DATA.cover && String(DATA.cover).indexOf("data:image/") === 0 ? DATA.cover : null);
+  const DATAForPick = coverDataUrl
+    ? { ...DATA, cover: coverDataUrl, welcomeImg: (String(DATA.welcomeImg||"").indexOf("data:")===0 ? coverDataUrl : DATA.welcomeImg) }
+    : DATA;
+  const picked = H.collectImages(DATAForPick, { coverKey: "cover" });
 
   const blobs = [];
   for (const dataUrl of picked.images) {
@@ -1912,7 +1938,7 @@ const DEFAULT_POSTERS = {
 };
 if (DEMO) {
   DATA.welcomeImg = "posters/welcome_clean.jpg";
-  DATA.events.forEach((ev, i) => { ev.img = DEFAULT_POSTERS[modeFor(ev, i)] || "posters/welcome_clean.jpg"; });
+  DATA.events.forEach((ev) => { ev.img = posterFor(ev); });
 }
 
 /* Global helpers for poster cards */

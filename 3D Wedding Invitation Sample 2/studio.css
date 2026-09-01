@@ -1,3 +1,11 @@
+/* Authoritative hidden: an element with the hidden attribute stays hidden
+   even when a class sets display:flex/grid. Without this, .draft-banner's
+   display:flex overrode the hidden attribute and the "Welcome back" banner
+   was visible on EVERY device — including brand-new incognito users — and
+   the Restore/Start-fresh buttons could not hide it. */
+[hidden]{display:none!important}
+.draft-banner.is-hidden{display:none!important}
+
 /* ═══════════════════════════════════════════════════════════
    INVITATION STUDIO — landing page + editor
    ═══════════════════════════════════════════════════════════ */

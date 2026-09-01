@@ -5,3 +5,7 @@ node_modules
 
 .wrangler
 gui-test-screenshots/
+isolate-*.log
+_loader_base.png
+_og_base_b64.txt
+_loader_shot.png

@@ -73,6 +73,14 @@ function ogImage(view, origin) {
 /* The image a link card shows: the couple's own photograph if they uploaded
    one, otherwise their initials on the studio card — never the demo couple. */
 function shareImage(view, origin) {
+  /* Sample 1’s card is the names card: its couples’ photographs carry no
+     text, so a bare photo said nothing about whose wedding the link was.
+     The card says the names, date and venue in the studio’s gold; the
+     photograph itself stays front and centre inside the invitation.
+     Sample 2 keeps the seal screen (its own artwork IS the brand). */
+  if (view && view.template === "sample1") {
+    return ogImage(view, origin) || coverImage(view) || fallbackImage(view.template, origin);
+  }
   return coverImage(view) || ogImage(view, origin) || fallbackImage(view.template, origin);
 }
 
