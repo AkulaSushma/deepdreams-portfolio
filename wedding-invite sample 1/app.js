@@ -465,75 +465,88 @@ function posterFor(ev) {
   return "posters/welcome_clean.jpg";
 }
 
-function buildPosterOverlay(mk, ev) {
-  const b = esc(DATA.bride || "Saanvi"), g = esc(DATA.groom || "Vihaan");
-  const note = ev.note || "";
+/* The text on a celebration card is laid out for the ARTWORK behind it —
+   each poster has its own safe zones (the nichayathartham's cream band, the
+   haldi's blank left, the muhurtham's scroll box). The old version keyed
+   the layout to the opening GESTURE instead, so a couple who picked the
+   turmeric gesture for their engagement got engagement artwork with the
+   text placed for the haldi poster — half of it landing in the garlands.
+   The gesture still decides how the card is opened; the poster decides
+   where the words sit. Every line comes from the event itself: its name,
+   its own time, its own day, its own venue. */
+
+/* Which poster layout matches which poster image. */
+function posterLayoutFor(imgPath) {
+  const p = String(imgPath || "");
+  if (p.includes("nichayathartham")) return "nichayathartham";
+  if (p.includes("haldi")) return "haldi";
+  if (p.includes("muhurtham")) return "muhurtham";
+  if (p.includes("reception")) return "reception";
+  return "welcome";
+}
+
+function buildPosterOverlay(mk, ev, imgPath) {
+  const b = esc(DATA.bride || "Saanvi"), g = esc(DATA.groom || "Saanvi");
   const when = ev.when || "";
   const whenParts = when.split("·").map(s => s.trim());
+  /* Pull the event's own time and day out of its "when" line, whatever
+     shape the couple typed it in ("At 6:00 PM · 8th December, 2026",
+     "7:30 PM · 15th March 2027", or plain text). */
+  const whenBits = when.match(/(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)/);
+  const evTime = whenBits ? whenBits[1].toUpperCase() : "";
+  const evDay = (whenParts.filter(p2 => p2 && !/^\d{1,2}:\d{2}/i.test(p2)).pop()) || "";
+  const layout = posterLayoutFor(imgPath);
 
-  if (mk === "trace") {
-    // Nichayathartham
+  /* Bar layout — the nichayathartham, muhurtham and reception posters all
+     carry a three-column details bar in their lower ornate band. */
+  const bar = (dayLabel) => `
+      <div class="ov-bar">
+        <div class="ov-bar-col"><p class="ov-bar-label">${esc(dayLabel)}</p><p class="ov-bar-val">${esc(evDay || whenParts[1] || "")}</p></div>
+        <div class="ov-bar-col"><p class="ov-bar-label">TIME</p><p class="ov-bar-val">${esc(evTime || "")}</p></div>
+        <div class="ov-bar-col"><p class="ov-bar-label">VENUE</p><p class="ov-bar-val">${esc(ev.where || "")}</p></div>
+      </div>`;
+
+  if (layout === "nichayathartham") {
     return `<div class="poster-overlay ov-nichayathartham">
       <p class="ov-line ov-title">${esc(ev.name)}</p>
-      <p class="ov-line ov-desc1">The formal engagement</p>
-      <p class="ov-line ov-desc2">with the exchange of Thambulams</p>
-      <div class="ov-bar">
-        <div class="ov-bar-col"><p class="ov-bar-label">ENGAGEMENT DAY</p><p class="ov-bar-val">${esc(whenParts[1] || "August 16th")}</p></div>
-        <div class="ov-bar-col"><p class="ov-bar-label">TIME</p><p class="ov-bar-val">${esc(whenParts[2] || "10:30 AM")}</p></div>
-        <div class="ov-bar-col"><p class="ov-bar-label">VENUE</p><p class="ov-bar-val">${esc(ev.where || "MAIN MANDAPAM")}</p></div>
-      </div>
+      ${ev.note ? `<p class="ov-line ov-desc1">${esc(ev.note.slice(0, 40))}</p>` : `<p class="ov-line ov-desc1">You are warmly invited</p>`}
+      ${bar("CELEBRATION DAY")}
     </div>`;
   }
-  if (mk === "rub") {
-    /* The name and date come from the event itself — a couple who chose the
-       turmeric gesture for their Nichitartam must see "Nichitartam" here,
-       not "Haldi", and their own date and venue, not the sample's. The old
-       version hardcoded all four, which is exactly how the wrong couple's
-       words ended up inside the wrong card. */
-    const whenBits = (ev.when || "").match(/^(.*?)\s*(?:·|at|@)?\s*(\d{1,2}:\d{2}\s*(?:AM|PM)?)\s*·?\s*(.*)$/i);
-    const rubTime = (whenBits && whenBits[2]) || "";
-    const rubDay = (whenBits && (whenBits[3] || "").replace(/^(?:at|on|·)\s*/i, "")) ||
-                   (whenParts[whenParts.length - 1] || "");
+  if (layout === "haldi") {
     return `<div class="poster-overlay ov-haldi">
       <p class="ov-line ov-invite-text">You are so invited to our</p>
       <p class="ov-line ov-title">${esc(ev.name)}</p>
       <p class="ov-line ov-ceremony">CEREMONY</p>
       <div class="ov-line ov-divider"></div>
       <p class="ov-line ov-person" style="--person-len:${(`${b} & ${g}`).length}">${b} &amp; ${g}</p>
-      ${rubTime ? `<p class="ov-line ov-time">${esc(rubTime.toUpperCase())}</p>` : ""}
-      ${rubDay ? `<p class="ov-line ov-day">${esc(rubDay)}</p>` : ""}
+      ${evTime ? `<p class="ov-line ov-time">${esc(evTime)}</p>` : ""}
+      ${evDay ? `<p class="ov-line ov-day">${esc(evDay)}</p>` : ""}
       <p class="ov-line ov-venue" style="--venue-len:${(ev.where || "").length}">${esc(ev.where || "")}</p>
       <div class="ov-banner">INVITE YOUR FAMILY</div>
     </div>`;
   }
-  if (mk === "light") {
-    // Muhurtham
+  if (layout === "muhurtham") {
     return `<div class="poster-overlay ov-muhurtham">
       <p class="ov-line ov-title">${esc(ev.name)}</p>
-      <p class="ov-line ov-desc-pre">The tying of Mangalyam</p>
-      <p class="ov-line ov-desc-sub">— the moment two becomes one —</p>
-      <div class="ov-bar">
-        <div class="ov-bar-col"><p class="ov-bar-label">WEDDING DAY</p><p class="ov-bar-val">${esc(whenParts[1] || "August 16th")}</p></div>
-        <div class="ov-bar-col"><p class="ov-bar-label">TIME</p><p class="ov-bar-val">${esc(whenParts[2] || "9:42 AM")}</p></div>
-        <div class="ov-bar-col"><p class="ov-bar-label">VENUE</p><p class="ov-bar-val">${esc(ev.where || "MAIN MANDAPAM")}</p></div>
-      </div>
+      ${ev.note ? `<p class="ov-line ov-desc-pre">${esc(ev.note.slice(0, 40))}</p>` : `<p class="ov-line ov-desc-pre">With the blessings of both families</p>`}
+      ${bar("WEDDING DAY")}
     </div>`;
   }
-  if (mk === "tap") {
-    // Reception
+  if (layout === "reception") {
     return `<div class="poster-overlay ov-reception">
       <p class="ov-line ov-title">${esc(ev.name)}</p>
-      <p class="ov-line ov-desc1">Dinner, Music and</p>
-      <p class="ov-line ov-desc2">Your Blessings for the New Couple</p>
-      <div class="ov-bar">
-        <div class="ov-bar-col"><p class="ov-bar-label">RECEPTION DAY</p><p class="ov-bar-val">${esc(whenParts[1] || "August 16th")}</p></div>
-        <div class="ov-bar-col"><p class="ov-bar-label">TIME</p><p class="ov-bar-val">7:00 PM Onwards</p></div>
-        <div class="ov-bar-col"><p class="ov-bar-label">VENUE</p><p class="ov-bar-val">${esc(ev.where || "MAIN MANDAPAM")}</p></div>
-      </div>
+      ${ev.note ? `<p class="ov-line ov-desc1">${esc(ev.note.slice(0, 34))}</p><p class="ov-line ov-desc2">${esc(ev.note.slice(34, 68))}</p>` : `<p class="ov-line ov-desc1">Dinner, Music and</p><p class="ov-line ov-desc2">Your Blessings for the New Couple</p>`}
+      ${bar("CELEBRATION DAY")}
       <div class="ov-banner">YOU ARE WARMLY INVITED</div>
     </div>`;
   }
-  return "";
+  /* Unknown artwork: only a title and the details bar, placed in the
+     layout the welcome poster uses — nothing overlapping the art. */
+  return `<div class="poster-overlay ov-welcome">
+    <p class="ov-line ov-together">${esc(ev.name)}</p>
+    ${bar("CELEBRATION DAY")}
+  </div>`;
 }
 
 let activeFestIndex = null;
@@ -560,7 +573,7 @@ function openFest(i) {
     <div class="poster-card-container">
       <div class="poster-img-wrap">
         <img class="fp-art poster-card-img" src="${fixSample1Img(imgSrc)}" alt="${esc(ev.name)} ceremony poster" onerror="this.onerror=null;this.src=fixSample1Img('posters/welcome_clean.jpg')" />
-        ${isDefaultPoster ? buildPosterOverlay(mk, ev) : ""}
+        ${isDefaultPoster ? buildPosterOverlay(mk, ev, imgSrc) : ""}
         <div class="fest-overlay" id="festOverlay"></div>
       </div>
       <div class="poster-card-actions"${EDITING ? "" : " hidden"}>
@@ -1734,12 +1747,14 @@ function pubDone(url) {
   try { localStorage.removeItem(STORE_KEY); } catch (e) {}
 }
 
-/* The share-card cover: the couple's own photograph with a deep-maroon band
-   across its lower edge carrying the couple's names, both families and the
-   date in gold — the same words the invitation's hero says. Composed in the
-   couple's browser at publish time (the canvas and the image both live
-   here), then handed to the normal image pipeline as the cover, so WhatsApp
-   renders the couple's photo WITH their names rather than a bare image. */
+/* The share-card cover, laid out like the invitation's own welcome poster:
+   the couple's photograph on the left, and a deep-maroon panel down the
+   right side carrying their names — stacked the way the site's hero shows
+   them, each with their family beneath — then the wedding date and venue,
+   all in gold. Composed in the couple's browser at publish time (the
+   canvas and the photograph both live here), then handed to the normal
+   image pipeline as the cover, so the WhatsApp preview reads exactly like
+   the invitation's first page instead of a bare photograph. */
 async function composeShareCover(blob) {
   if (!blob) return null;
   const bitmap = await createImageBitmap(blob);
@@ -1748,57 +1763,86 @@ async function composeShareCover(blob) {
   canvas.width = W; canvas.height = H;
   const c = canvas.getContext("2d");
 
-  /* Cover-fill the photo, centred — never stretched. */
-  const scale = Math.max(W / bitmap.width, H / bitmap.height);
+  /* The ground: the invitation's deep maroon. */
+  c.fillStyle = "#3A0A18";
+  c.fillRect(0, 0, W, H);
+
+  /* The couple's photograph fills the LEFT ~55% of the card, cover-fit and
+     anchored to the left edge — mirroring the welcome poster, where the
+     couple stands on the left and the text sits beside them. */
+  const PHOTO_W = Math.round(W * 0.56);
+  const scale = Math.max(PHOTO_W / bitmap.width, H / bitmap.height);
   const dw = bitmap.width * scale, dh = bitmap.height * scale;
-  c.drawImage(bitmap, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  c.drawImage(bitmap, PHOTO_W - dw < -8 ? 0 : PHOTO_W - dw, (H - dh) / 2, dw, dh);
   bitmap.close?.();
 
-  /* Deep-maroon gradient rising from the bottom — matches the invitation. */
-  const bandH = Math.round(H * 0.34);
-  const grad = c.createLinearGradient(0, H - bandH, 0, H);
-  grad.addColorStop(0, "rgba(38,6,16,0)");
-  grad.addColorStop(0.35, "rgba(38,6,16,0.82)");
-  grad.addColorStop(1, "rgba(24,4,10,0.97)");
-  c.fillStyle = grad;
-  c.fillRect(0, H - bandH, W, bandH);
-  /* A hairline gold rule above the text block. */
-  c.strokeStyle = "rgba(229,200,120,0.75)";
-  c.lineWidth = 2;
-  c.beginPath();
-  c.moveTo(W * 0.2, H - bandH + 26); c.lineTo(W * 0.8, H - bandH + 26); c.stroke();
+  /* A soft gold seam where photo meets panel. */
+  c.strokeStyle = "rgba(212,169,55,0.55)";
+  c.lineWidth = 3;
+  c.beginPath(); c.moveTo(PHOTO_W, 0); c.lineTo(PHOTO_W, H); c.stroke();
+
+  /* The text panel on the right, with a gentle vignette so the names sit
+     on depth rather than flat colour. */
+  const panelGrad = c.createLinearGradient(PHOTO_W, 0, W, 0);
+  panelGrad.addColorStop(0, "#4A0F22");
+  panelGrad.addColorStop(0.5, "#3A0A18");
+  panelGrad.addColorStop(1, "#2A0610");
+  c.fillStyle = panelGrad;
+  c.fillRect(PHOTO_W, 0, W - PHOTO_W, H);
 
   const gold = "#E5C878";
-  const side = DATA.side === "groom";
-  const first = side ? (DATA.groom || "") : (DATA.bride || "");
-  const second = side ? (DATA.bride || "") : (DATA.groom || "");
-  const names = (first && second) ? `${first} & ${second}` : (first || second || "Our Wedding");
+  const cream = "#F3E3C3";
+  const maroonInk = "#D4A955";
 
-  const drawText = (text, y, px, weight) => {
+  const CX = PHOTO_W + (W - PHOTO_W) / 2;
+  const drawLine = (text, y, px, weight, color, maxW) => {
+    if (!text) return;
     c.textAlign = "center";
-    c.fillStyle = gold;
-    let fontPx = px;
-    c.font = `${weight} ${fontPx}px 'Cormorant Garamond', Georgia, serif`;
-    while (c.measureText(text).width > W * 0.86 && fontPx > 14) {
-      fontPx -= 2;
-      c.font = `${weight} ${fontPx}px 'Cormorant Garamond', Georgia, serif`;
+    c.fillStyle = color || gold;
+    let f = px;
+    c.font = `${weight} ${f}px 'Cormorant Garamond', Georgia, serif`;
+    while (c.measureText(text).width > (maxW || (W - PHOTO_W - 40)) && f > 12) {
+      f -= 1;
+      c.font = `${weight} ${f}px 'Cormorant Garamond', Georgia, serif`;
     }
-    c.shadowColor = "rgba(0,0,0,0.55)";
-    c.shadowBlur = 6;
-    c.fillText(text, W / 2, y);
+    c.shadowColor = "rgba(0,0,0,0.5)";
+    c.shadowBlur = 4;
+    c.fillText(text, CX, y);
     c.shadowBlur = 0;
   };
 
-  drawText(names.toUpperCase(), H - 132, 62, 600);
+  /* The names, stacked as the invitation's hero presents them. */
+  const side = DATA.side === "groom";
+  const first = side ? (DATA.groom || "") : (DATA.bride || "");
+  const second = side ? (DATA.bride || "") : (DATA.groom || "");
+  const firstParents = side ? DATA.groomParents : DATA.brideParents;
+  const secondParents = side ? DATA.brideParents : DATA.groomParents;
 
-  /* Both families — the way the invitation's cover presents them. */
-  const families = [DATA.brideParents, DATA.groomParents].filter(Boolean);
-  if (families.length) drawText(families.join("  ·  ").slice(0, 90), H - 84, 24, 500);
+  drawLine("Wedding Invitation", 84, 26, 500, maroonInk);
 
-  const dateLine = DATA.date
-    ? new Date(`${DATA.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
-    : "";
-  if (dateLine) drawText(dateLine, H - 44, 22, 500);
+  if (first) drawLine(first, 190, 74, 600, cream);
+  if (firstParents) drawLine(firstParents, 232, 22, 500, gold);
+  if (first && second) {
+    c.textAlign = "center";
+    c.fillStyle = maroonInk;
+    c.font = "500 34px 'Cormorant Garamond', Georgia, serif";
+    c.fillText("&", CX, 292);
+  }
+  if (second) drawLine(second, 358, 74, 600, cream);
+  if (secondParents) drawLine(secondParents, 400, 22, 500, gold);
+
+  /* A short gold rule before the details. */
+  c.strokeStyle = "rgba(212,169,55,0.8)";
+  c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(CX - 70, 448); c.lineTo(CX + 70, 448); c.stroke();
+
+  if (DATA.date) {
+    const dateLine = new Date(`${DATA.date}T00:00:00`)
+      .toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    drawLine(dateLine, 492, 24, 500, cream);
+  }
+  if (DATA.time) drawLine(`at ${DATA.time}`, 524, 22, 500, gold);
+  if (DATA.venueName) drawLine(DATA.venueName, 566, 20, 500, gold, W - PHOTO_W - 60);
 
   return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.88));
 }
