@@ -1605,6 +1605,9 @@ const openPanel = () => {
   buildForm();
   if (panel) panel.hidden = false;
   if (veil) veil.hidden = false;
+  /* The dock slides away while the panel is up: two stacked rows of buttons
+     overlapped on phones (see style.css). */
+  document.body.classList.add("panel-open");
   /* A parked draft is offered back to its owner the moment the editor opens;
      it never silently becomes the next person's starting point. */
   const banner = document.querySelector("#draft-banner");
@@ -1626,7 +1629,11 @@ document.addEventListener("click", (e) => {
     if (banner) banner.hidden = true; /* parked, not deleted */
   }
 });
-const closePanel = () => { if (panel) panel.hidden = true; if (veil) veil.hidden = true; };
+const closePanel = () => {
+  if (panel) panel.hidden = true;
+  if (veil) veil.hidden = true;
+  document.body.classList.remove("panel-open");
+};
 
 if ($("#dockEdit")) $("#dockEdit").addEventListener("click", openPanel);
 if ($("#panelClose")) $("#panelClose").addEventListener("click", closePanel);
@@ -1856,23 +1863,22 @@ function mountCover() {
     cover.classList.add("opening");
     setTimeout(() => { cover.hidden = true; document.body.style.overflow = ""; }, 3000);
   };
-  /* The first tap is a knock: a real wooden-door sound, a haptic pulse, and
-     the doors shudder as if struck. The second tap opens them. Guests who
-     just want in can tap twice quickly; nobody is trapped by it. */
+  /* One tap opens the invitation. The old two-stage knock ("tap again to
+     open") was designed as theatre, but on a phone it read as a bug:
+     families tapped, nothing opened, and they tapped again. The knock
+     sound and the shudder still play — as the door swings open, not as a
+     demand for a second tap. */
   const tap = () => {
     if (opened) return;
-    if (!knocked) {
-      knocked = true;
-      knock();
-      buzz(25);
-      if (!REDUCED) {
-        cover.classList.add("knocked");
-        setTimeout(() => cover.classList.remove("knocked"), 420);
-      }
-      const hint = $(".cover-open", cover);
-      if (hint) hint.textContent = "• TAP AGAIN TO OPEN •";
-      return;
+    knocked = true;
+    knock();
+    buzz([12, 40, 24]);
+    if (!REDUCED) {
+      cover.classList.add("knocked");
+      setTimeout(() => cover.classList.remove("knocked"), 420);
     }
+    const hint = $(".cover-open", cover);
+    if (hint) hint.textContent = "• OPENING •";
     open();
   };
   cover.addEventListener("click", e => {

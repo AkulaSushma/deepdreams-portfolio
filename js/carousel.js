@@ -409,16 +409,21 @@ Watch: https://youtu.be/${id}
       items.forEach(({ id, title, category }) => {
         const item = document.createElement('div');
         item.className = 'carousel-item';
+        /* The thumbnail stays clean — no text is painted over the video
+           image. The caption and the request button sit below it, the way
+           every professional gallery presents work. */
         item.innerHTML = `
-          <img src="${thumb(id)}" alt="${title}" loading="lazy" />
-          <div class="play"><b></b></div>
-          <div class="meta">
+          <div class="card-media">
+            <img src="${thumb(id)}" alt="${title}" loading="lazy" />
+            <div class="play"><b></b></div>
+          </div>
+          <div class="card-caption">
             <small>${category}</small>
             <h3>${title}</h3>
+            <a class="card-request" target="_blank" rel="noopener"
+               href="${requestUrl(title, id, category)}"
+               aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
           </div>
-          <a class="card-request" target="_blank" rel="noopener"
-             href="${requestUrl(title, id, category)}"
-             aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
         `;
         item.addEventListener('click', () => openVideo(id, title, false));
         track.appendChild(item);
@@ -458,15 +463,17 @@ Watch: https://youtu.be/${id}
       const el = document.createElement('div');
       el.className = 'carousel-item-916';
       el.innerHTML = `
-        <img src="${thumb(id)}" alt="${title}" loading="lazy" />
-        <div class="play"><b></b></div>
-        <div class="meta">
+        <div class="card-media">
+          <img src="${thumb(id)}" alt="${title}" loading="lazy" />
+          <div class="play"><b></b></div>
+        </div>
+        <div class="card-caption">
           <small>${category || 'Wedding Invitation'}</small>
           <h3>${title}</h3>
+          <a class="card-request" target="_blank" rel="noopener"
+             href="${requestUrl(title, id, category || 'Wedding Invitation')}"
+             aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
         </div>
-        <a class="card-request" target="_blank" rel="noopener"
-           href="${requestUrl(title, id, category || 'Wedding Invitation')}"
-           aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
       `;
       el.addEventListener('click', () => openVideo(id, title, true));
       container.appendChild(el);
@@ -501,15 +508,17 @@ Watch: https://youtu.be/${id}
       const el = document.createElement('div');
       el.className = 'carousel-item';
       el.innerHTML = `
-        <img src="${thumb(id)}" alt="${title}" loading="lazy" />
-        <div class="play"><b></b></div>
-        <div class="meta">
+        <div class="card-media">
+          <img src="${thumb(id)}" alt="${title}" loading="lazy" />
+          <div class="play"><b></b></div>
+        </div>
+        <div class="card-caption">
           <small>${category || 'Name Reveal'}</small>
           <h3>${title}</h3>
+          <a class="card-request" target="_blank" rel="noopener"
+             href="${requestUrl(title, id, 'Name Reveal')}"
+             aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
         </div>
-        <a class="card-request" target="_blank" rel="noopener"
-           href="${requestUrl(title, id, 'Name Reveal')}"
-           aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
       `;
       el.addEventListener('click', () => openVideo(id, title, false));
       track.appendChild(el);

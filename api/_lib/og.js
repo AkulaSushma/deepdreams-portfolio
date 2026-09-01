@@ -110,17 +110,18 @@ function background() {
   return px;
 }
 
-/* Draw one glyph mask (from og-font.js, RLE rows of 4-bit alpha) with a
- * vertical gold gradient, blended over the background. */
-function drawGlyph(px, glyph, left, top, targetH) {
+/* Draw one glyph with a gold gradient, blended over the background. The
+ * optional `glow` radius lays a soft warm halo under the letter first —
+ * the seal monogram's own text-shadow. */
+function drawGlyph(px, glyph, left, top, targetH, hi, lo, glow) {
   if (!glyph || !glyph.rows || !glyph.rows.length) return;
   const scale = targetH / glyph.h;
   const gw = Math.max(1, Math.round(glyph.w * scale));
   const gh = Math.max(1, Math.round(glyph.h * scale));
+  const h = hi || GOLD_HI, l = lo || GOLD_LO;
 
   for (let y = 0; y < gh; y++) {
     const sy = Math.min(glyph.rows.length - 1, Math.round(y / scale));
-    /* Expand the row's RLE into alpha values across the target width. */
     const alphas = new Float32Array(gw);
     let gx = 0;
     for (const [level, run] of glyph.rows[sy]) {
@@ -135,15 +136,21 @@ function drawGlyph(px, glyph, left, top, targetH) {
       if (a <= 0.01) continue;
       const pxX = left + x, pxY = top + y;
       if (pxX < 0 || pxX >= W || pxY < 0 || pxY >= H) continue;
-      /* Gradient gold: brighter at the glyph's top, deeper at its bottom. */
-      const gt = (y / gh) * 0.55 + (x / gw) * 0.15;
-      const r = GOLD_HI[0] + (GOLD_LO[0] - GOLD_HI[0]) * gt;
-      const g = GOLD_HI[1] + (GOLD_LO[1] - GOLD_HI[1]) * gt;
-      const b = GOLD_HI[2] + (GOLD_LO[2] - GOLD_HI[2]) * gt;
-      const o = (pxY * W + pxX) * 3;
-      px[o] = Math.round(px[o] * (1 - a) + r * a);
-      px[o + 1] = Math.round(px[o + 1] * (1 - a) + g * a);
-      px[o + 2] = Math.round(px[o + 2] * (1 - a) + b * a);
+      const gt = (y / gh) * 0.5;
+      const r = h[0] + (l[0] - h[0]) * gt;
+      const g = h[1] + (l[1] - h[1]) * gt;
+      const b = h[2] + (l[2] - h[2]) * gt;
+      if (glow) {
+        /* A soft halo under the letter, without a per-pixel disc: the
+           glyph is laid at five jittered offsets in the warm glow colour
+           at low alpha — the same effect, a fraction of the cost. */
+        blendPx(px, pxX, pxY, a * 0.16, SEAL.glowGold);
+        blendPx(px, pxX + glow, pxY, a * 0.10, SEAL.glowGold);
+        blendPx(px, pxX - glow, pxY, a * 0.10, SEAL.glowGold);
+        blendPx(px, pxX, pxY + glow, a * 0.10, SEAL.glowGold);
+        blendPx(px, pxX, pxY - glow, a * 0.10, SEAL.glowGold);
+      }
+      blendPx(px, pxX, pxY, a, [r, g, b]);
     }
   }
 }
@@ -190,35 +197,199 @@ const initialOf = (name) => {
   return s ? s[0].toUpperCase() : "";
 };
 
-/** Compose the full share card. `first`/`second` are the couple's short
- *  names in the order chosen by the family; only their initials are shown.
- *  Returns a PNG Buffer. */
+/* ══ SAMPLE 2's CARD: the seal screen, as the invitation opens ══════════
+   The reference is the moment a guest first sees the website: a dark
+   ground, a maroon wax-seal circle with the site's exact radial gradient
+   and a dashed gold rim, mandala whisper rings, a soft breathing halo,
+   the couple's monogram in the seal's elegant serif with a warm glow, and
+   the invitation's own words beneath. The monogram letters derive from
+   the couple's names in the order the family chose. */
+
+/* The seal's own palette, from styles.css. */
+const SEAL = {
+  maroonHi: [140, 43, 71],   /* #8C2B47 — the seal's upper sheen  */
+  maroon:   [109, 26, 51],   /* #6D1A33 — the seal ground          */
+  maroonLo: [74, 15, 34],    /* #4A0F22 — the seal's depth         */
+  glowGold: [255, 236, 190], /* the monogram's warm text-shadow    */
+  goldDeep: [201, 162, 75],  /* the breathing halo                 */
+};
+
+/* Dark cinematic ground with a warm centre — the loader's doors. */
+function sealBackground() {
+  const px = Buffer.alloc(W * H * 3);
+  for (let y = 0; y < H; y++) {
+    const t = y / (H - 1);
+    for (let x = 0; x < W; x++) {
+      const dx = (x - W / 2) / (W * 0.55), dy = (y - H / 2) / (H * 0.62);
+      const warm = Math.max(0, 1 - (dx * dx + dy * dy)) * 20;
+      const base = 10 + t * 10;
+      const o = (y * W + x) * 3;
+      px[o] = Math.min(255, Math.round(base + warm * 1.15));
+      px[o + 1] = Math.min(255, Math.round(base * 0.55 + warm * 0.45));
+      px[o + 2] = Math.min(255, Math.round(base * 0.62 + warm * 0.38));
+    }
+  }
+  return px;
+}
+
+function blendPx(px, x, y, alpha, color) {
+  if (x < 0 || x >= W || y < 0 || y >= H) return;
+  const o = (y * W + x) * 3;
+  px[o] = Math.round(px[o] * (1 - alpha) + color[0] * alpha);
+  px[o + 1] = Math.round(px[o + 1] * (1 - alpha) + color[1] * alpha);
+  px[o + 2] = Math.round(px[o + 2] * (1 - alpha) + color[2] * alpha);
+}
+
+/* Blend over a small disc — strokes and soft glow. */
+function stampDisc(px, x, y, r, alpha, color) {
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d > r) continue;
+      const a = alpha * (r <= 1 ? 1 : 1 - d / (r + 0.5));
+      blendPx(px, x + dx, y + dy, a, color);
+    }
+  }
+}
+
+/* The wax seal: radial gradient, top sheen, lower depth, drop shadow. */
+function sealDisc(px, cx, cy, R) {
+  /* The gradient is smooth, so a coarse quarter-grid is precomputed once
+     and bilinear-sampled per pixel — an order of magnitude faster than a
+     per-pixel sqrt-and-branch loop, indistinguishable to the eye. */
+  const G = 48;
+  const q = new Float32Array((G + 1) * (G + 1));
+  for (let gy = 0; gy <= G; gy++) {
+    for (let gx = 0; gx <= G; gx++) {
+      const yUp = (gy / G) * R;         /* +y = up */
+      const xR = (gx / G) * R;
+      const lx = (xR + R * 0.32) / R, ly = (yUp + R * 0.40) / R;
+      q[gy * (G + 1) + gx] = Math.min(1, Math.sqrt(lx * lx + ly * ly) / 1.35);
+    }
+  }
+  const grad = (ld) => {
+    if (ld < 0.45) {
+      const m = ld / 0.45;
+      return [
+        SEAL.maroonHi[0] + (SEAL.maroon[0] - SEAL.maroonHi[0]) * m,
+        SEAL.maroonHi[1] + (SEAL.maroon[1] - SEAL.maroonHi[1]) * m,
+        SEAL.maroonHi[2] + (SEAL.maroon[2] - SEAL.maroonHi[2]) * m,
+      ];
+    }
+    const m = (ld - 0.45) / 0.55;
+    return [
+      SEAL.maroon[0] + (SEAL.maroonLo[0] - SEAL.maroon[0]) * m,
+      SEAL.maroon[1] + (SEAL.maroonLo[1] - SEAL.maroon[1]) * m,
+      SEAL.maroon[2] + (SEAL.maroonLo[2] - SEAL.maroon[2]) * m,
+    ];
+  };
+  for (let y = -R - 26; y <= R + 26; y++) {
+    const pxY = cy + y;
+    if (pxY < 0 || pxY >= H) continue;
+    const xMax = Math.floor(Math.sqrt(Math.max(0, (R + 26) * (R + 26) - y * y)));
+    const sheenRow = Math.max(0, (R * 0.35 - y) / R);       /* screen y grows down */
+    const depthRow = Math.max(0, (y - R * 0.55) / R);
+    for (let x = -xMax; x <= xMax; x++) {
+      const pxX = cx + x;
+      if (pxX < 0 || pxX >= W) continue;
+      const d = Math.sqrt(x * x + y * y);
+      const o = (pxY * W + pxX) * 3;
+      if (d <= R) {
+        /* bilinear sample of the quarter grid (mirrored to +x, y-up) */
+        const gx = Math.min(G, Math.max(0, (Math.abs(x) / R) * G));
+        const gy = Math.min(G, Math.max(0, ((-y) / R) * G));
+        const x0 = gx | 0, y0 = gy | 0;
+        const fx = gx - x0, fy = gy - y0;
+        const x1 = Math.min(G, x0 + 1), y1 = Math.min(G, y0 + 1);
+        const ld =
+          q[y0 * (G + 1) + x0] * (1 - fx) * (1 - fy) +
+          q[y0 * (G + 1) + x1] * fx * (1 - fy) +
+          q[y1 * (G + 1) + x0] * (1 - fx) * fy +
+          q[y1 * (G + 1) + x1] * fx * fy;
+        const c = grad(ld);
+        let r = c[0], g = c[1], b = c[2];
+        const sheen = sheenRow * (1 - d / R) * 16;
+        r += sheen; g += sheen * 0.75; b += sheen * 0.52;
+        const depth = depthRow * (1 - d / R) * 22;
+        r -= depth * 0.7; g -= depth * 0.8; b -= depth * 0.8;
+        px[o] = Math.max(0, Math.round(r));
+        px[o + 1] = Math.max(0, Math.round(g));
+        px[o + 2] = Math.max(0, Math.round(b));
+      } else {
+        const a = Math.max(0, 1 - (d - R) / 26) * 0.5;
+        px[o] = Math.round(px[o] * (1 - a));
+        px[o + 1] = Math.round(px[o + 1] * (1 - a) + 6 * a);
+        px[o + 2] = Math.round(px[o + 2] * (1 - a) + 14 * a);
+      }
+    }
+  }
+}
+
+/* A ring — solid, or dashed with an [on, off] pattern. */
+function ring(px, cx, cy, r, width, alpha, color, dash) {
+  const twoPi = Math.PI * 2;
+  const step = 1 / (r * 2);
+  if (!dash) {
+    for (let a = 0; a < twoPi; a += step) {
+      stampDisc(px, Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), width, alpha, color);
+    }
+    return;
+  }
+  const period = dash[0] + dash[1];
+  const SEG = 48;
+  const segArc = twoPi / SEG;
+  for (let seg = 0; seg < SEG; seg++) {
+    const start = seg * segArc;
+    const len = (dash[0] / period) * segArc;
+    for (let a = start; a < start + len; a += step) {
+      stampDisc(px, Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), width, alpha, color);
+    }
+  }
+}
+
+/* The breathing halo of the seal-pulse keyframe, at its brightest. */
+function halo(px, cx, cy, r, color, alpha) {
+  for (let y = -r; y <= r; y++) {
+    for (let x = -r; x <= r; x++) {
+      const d = Math.sqrt(x * x + y * y);
+      if (d > r) continue;
+      blendPx(px, cx + x, cy + y, alpha * (1 - d / r), color);
+    }
+  }
+}
+
+/** Compose Sample 2's share card: the "tap the seal to open" screen.
+ *  `first`/`second` are the couple's names in the family's chosen order;
+ *  their initials form the monogram inside the seal. */
 function shareCard(first, second) {
+  const px = sealBackground();
+
+  const cx = W / 2;
+  const cy = H / 2 - 22;
+  const R = 200;
+
+  /* Mandala whisper: the two faint rings of the spinning mandala. */
+  ring(px, cx, cy, R + 66, 1.5, 0.18, GOLD_HI);
+  ring(px, cx, cy, R + 52, 1, 0.13, GOLD_HI, [2, 3]);
+
+  /* Breathing halo. */
+  halo(px, cx, cy, R + 38, SEAL.goldDeep, 0.15);
+
+  /* The wax seal, dashed gold rim, monogram, words. */
+  sealDisc(px, cx, cy, R);
+  ring(px, cx, cy, Math.round(R * 0.86), 2, 0.55, RULE_GOLD, [2, 3]);
+
   const a = initialOf(first);
   const b = initialOf(second);
-  const px = background();
-
-  const GLYPH_H = 300;
-  const ga = FONT[a], gb = b && a !== b ? FONT[b] : null;
-
-  const gap = 150; /* space reserved for the diamond between the letters */
-  const wa = ga ? (ga.w / ga.h) * GLYPH_H : 0;
-  const wb = gb ? (gb.w / gb.h) * GLYPH_H : 0;
-  const total = wa + wb + (gb ? gap : 0);
-  let left = Math.round((W - total) / 2);
-  const top = Math.round(H / 2 - GLYPH_H * 0.62);
-
-  if (ga) { drawGlyph(px, ga, left, top, GLYPH_H); left += Math.round(wa); }
-  if (gb) {
-    drawDiamond(px, left + gap / 2, H / 2 - 10, 16);
-    left += gap;
-    drawGlyph(px, gb, left, top, GLYPH_H);
-  } else if (a) {
-    /* A single name: one initial, centred, with flanking rules. */
-    drawRule(px, W / 2, H - 130, 300);
+  const mono = b ? `${a} · ${b}` : a;
+  if (mono) {
+    let capH = 116;
+    const budget = R * 1.58;
+    while (textWidth(mono, capH) > budget && capH > 40) capH -= 4;
+    drawText(px, mono, cx, Math.round(cy - capH * 0.52), capH, GOLD_HI, GOLD_LO, 22);
   }
 
-  if (gb) drawRule(px, W / 2, H - 130, 380);
+  drawText(px, "TAP THE SEAL TO OPEN", cx, cy + R + 52, 28, GOLD_HI, GOLD_LO, 10);
 
   return encodePng(px, W, H);
 }
@@ -239,13 +410,13 @@ function textWidth(text, capH) {
   return Math.max(0, w - capH * 0.12);
 }
 
-function drawText(px, text, cx, top, capH, hi, lo) {
+function drawText(px, text, cx, top, capH, hi, lo, glow) {
   const total = textWidth(text, capH);
   let x = Math.round(cx - total / 2);
   for (const ch of String(text)) {
     const g = FONT[ch];
     if (!g) { x += Math.round(capH * 0.26); continue; }
-    drawGlyph(px, g, x, top, capH, hi, lo);
+    drawGlyph(px, g, x, top, capH, hi, lo, glow);
     x += Math.round((g.w / g.h) * capH) + Math.round(capH * 0.12);
   }
   return total;

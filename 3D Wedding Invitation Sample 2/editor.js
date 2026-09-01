@@ -613,6 +613,18 @@ const renderEvents = () => {
     openIndices.add(0); // keep first event open by default so prefilled fields are immediately visible
   }
 
+  /* Typing in a field must never lose focus. The cascade re-renders this
+     list after every keystroke (so the other cards update live); without
+     restoring focus and caret, the field died after one character and the
+     couple could not type a venue on a celebration card at all. */
+  const active = document.activeElement;
+  let restore = null;
+  if (active && active.dataset && active.dataset.k && active.closest && active.closest(".ev")) {
+    const row = active.closest(".ev");
+    const rowIdx = Array.prototype.indexOf.call(evList.children, row);
+    restore = { rowIdx, key: active.dataset.k, caret: active.selectionStart };
+  }
+
   evList.innerHTML = "";
   S.events.forEach((ev, i) => {
     const row = document.createElement("div");
@@ -675,6 +687,19 @@ const renderEvents = () => {
     }));
     evList.appendChild(row);
   });
+
+  /* Put the caret back where the designer left it, in the rebuilt copy of
+     the same field, so typing continues seamlessly across the rebuild. */
+  if (restore && restore.rowIdx >= 0 && restore.rowIdx < S.events.length) {
+    const newRow = evList.children[restore.rowIdx];
+    if (newRow) {
+      const el = newRow.querySelector(`[data-k="${restore.key}"]`);
+      if (el) {
+        el.focus();
+        try { el.setSelectionRange(restore.caret, restore.caret); } catch (e) {}
+      }
+    }
+  }
 };
 function esc(s) { return String(s ?? "").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
 

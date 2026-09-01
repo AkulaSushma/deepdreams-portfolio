@@ -430,21 +430,22 @@ footer b{color:var(--gold-soft)}
   padding:0;margin:0;touch-action:pan-x pan-y}
 .carousel-track::-webkit-scrollbar{display:none}
 .carousel-item{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;
-  aspect-ratio:16/9;position:relative;border-radius:var(--radius);overflow:hidden;
+  position:relative;border-radius:var(--radius);overflow:hidden;
   border:1px solid var(--border);background:#000;cursor:pointer;
   box-shadow:0 30px 70px -30px rgba(0,0,0,.9),0 0 40px -12px var(--blue-glow)}
-.carousel-item img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
-.carousel-item:hover img{transform:scale(1.06)}
-.carousel-item .play{position:absolute;inset:0;display:grid;place-items:center;
-  background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.05) 58%)}
+.carousel-item .card-media img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
+.carousel-item:hover .card-media img{transform:scale(1.06)}
+/* superseded by .card-media .play — lighter, so the thumbnail stays clear */
+.carousel-item .play{display:none}
 .carousel-item .play b{width:64px;height:64px;border-radius:50%;background:rgba(199,154,58,.95);
   display:grid;place-items:center;box-shadow:0 0 28px var(--gold-glow);transition:.35s}
 .carousel-item:hover .play b{transform:scale(1.14);background:var(--blue-core);box-shadow:0 0 32px var(--blue-glow)}
 .carousel-item .play b::after{content:"";border-left:18px solid #05060a;border-top:11px solid transparent;
   border-bottom:11px solid transparent;margin-left:4px}
-.carousel-item .meta{position:absolute;left:16px;right:16px;bottom:16px;text-align:left;z-index:2}
-.carousel-item .meta small{color:var(--gold-soft);font-size:10px;letter-spacing:1.6px;text-transform:uppercase;display:block}
-.carousel-item .meta h3{font-family:'Cormorant Garamond';font-size:22px;font-weight:600;margin-top:5px;
+/* superseded by .card-caption — the caption now sits below the image */
+.carousel-item .meta{display:none}
+.carousel-item .meta small{display:none}
+.carousel-item .meta h3{display:none;
   color:#fff;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,0.8)}
 
 .carousel-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;
@@ -595,7 +596,6 @@ footer b{color:var(--gold-soft)}
 .carousel-item-916{
   flex:0 0 calc(33.333% - 12px);
   max-width:280px;
-  aspect-ratio:9/16;
   scroll-snap-align:center;
   scroll-snap-stop:always;
   position:relative;
@@ -620,9 +620,10 @@ footer b{color:var(--gold-soft)}
 .carousel-item-916:hover .play b{transform:scale(1.14);background:var(--blue-core);box-shadow:0 0 32px var(--blue-glow)}
 .carousel-item-916 .play b::after{content:"";border-left:16px solid #05060a;border-top:9px solid transparent;
   border-bottom:9px solid transparent;margin-left:4px}
-.carousel-item-916 .meta{position:absolute;left:14px;right:14px;bottom:14px;text-align:left;z-index:2}
-.carousel-item-916 .meta small{color:var(--gold-soft);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;display:block}
-.carousel-item-916 .meta h3{font-family:'Cormorant Garamond';font-size:18px;font-weight:600;margin-top:4px;
+/* superseded by .card-caption — the caption now sits below the image */
+.carousel-item-916 .meta{display:none}
+.carousel-item-916 .meta small{display:none}
+.carousel-item-916 .meta h3{display:none;
   color:#fff;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,0.8)}
 
 @media(max-width:768px){
@@ -670,33 +671,37 @@ footer b{color:var(--gold-soft)}
   .strip-counter{margin-left:6px;font-size:12px}
 }
 
-/* ── "Request this type" on every gallery card ──────────────────────────
-   Opens WhatsApp with the film's title, its section and a direct link, so
-   the studio sees exactly which sample the customer means (YouTube renders
-   the film's thumbnail for the link) without any guessing. */
+/* ── Gallery card layout: clean image, caption and button below ────────
+   No text is painted over the video thumbnail anymore — the overlay made
+   titles unreadable on phones. The card is now: the image (with its play
+   affordance), then a caption row underneath holding the category, the
+   title, and the "Request this type" button. Every gallery behaves the
+   same, portrait or landscape. */
+.carousel-item,.carousel-item-916{position:relative;display:flex;flex-direction:column;
+  background:#0c0a08;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.card-media{position:relative;flex:0 0 auto}
+.carousel-item .card-media{aspect-ratio:16/9}
+.carousel-item-916 .card-media{aspect-ratio:9/16}
+.card-media img{display:block;width:100%;height:100%;object-fit:cover}
+.card-media .play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;
+  background:linear-gradient(to top,rgba(0,0,0,.25),rgba(0,0,0,0) 45%)}
+.card-media .play b{width:54px;height:54px;border-radius:50%;background:rgba(199,154,58,.95);
+  display:grid;place-items:center;box-shadow:0 0 28px var(--gold-glow);transition:.35s}
+.carousel-item:hover .card-media .play b,.carousel-item-916:hover .card-media .play b{transform:scale(1.1)}
+.card-media .play b::after{content:"";border-left:15px solid #05060a;border-top:9px solid transparent;
+  border-bottom:9px solid transparent;margin-left:3px}
+.card-caption{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1 1 auto}
+.card-caption small{color:var(--gold-soft);font-size:10px;letter-spacing:1.6px;text-transform:uppercase}
+.card-caption h3{font-family:'Cormorant Garamond';font-size:18px;font-weight:600;line-height:1.25;
+  color:#f4e9d0;margin:0;min-height:2.5em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card-request{
-  position:absolute;left:12px;bottom:12px;z-index:5;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  padding:8px 14px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px 12px;border-radius:8px;
   background:linear-gradient(135deg,#c79a3a,#a67c22);color:#1a1005;
   font:600 13px/1 Jost,Arial,sans-serif;letter-spacing:.02em;text-decoration:none;
-  opacity:0;transform:translateY(8px);
-  transition:opacity .25s, transform .25s;
-  box-shadow:0 4px 14px rgba(0,0,0,.4)
+  transition:transform .2s, box-shadow .2s;
+  box-shadow:0 3px 10px rgba(0,0,0,.35);
 }
+.card-request:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.45)}
 .card-request::before{content:"";width:14px;height:14px;flex:none;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a1005'%3E%3Cpath d='M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.737-.979z'/%3E%3C/svg%3E") center/contain no-repeat}
-.carousel-item,.carousel-item-916{position:relative}
-.carousel-item:hover .card-request,.carousel-item-916:hover .card-request,
-.carousel-item:focus-within .card-request,.carousel-item-916:focus-within .card-request{opacity:1;transform:translateY(0)}
-/* The button sits beside the caption, not over it: when it appears, the
-   caption slides up a little so both stay readable. */
-.carousel-item:hover .meta,.carousel-item-916:hover .meta{transform:translateY(-6px)}
-.carousel-item .meta,.carousel-item-916 .meta{transition:transform .25s}
-/* Touch devices have no hover: the button stays visible, slightly softened
-   so the thumbnail behind it still reads. */
-@media (hover:none){
-  .card-request{opacity:.96;transform:none}
-  .carousel-item .meta{padding-bottom:46px}
-  .carousel-item-916 .meta{padding-bottom:46px}
-}

@@ -311,6 +311,11 @@ body.viewing .gal-item:not(.has-photo){display:none}
 /* ============================================================
    EDITOR DOCK + PANEL + SHARE
    ============================================================ */
+/* While the editor panel (or any modal) is open the dock hides itself: on a
+   phone the two rows of buttons overlapped — "Edit details" and "Publish"
+   sat on top of the panel's own "Save & preview" — and neither row was
+   usable. The dock returns the moment the panel closes. */
+body.panel-open .dock{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(24px)}
 .dock{
   position:fixed;bottom:calc(14px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);z-index:999;
   display:inline-flex;align-items:center;gap:8px;padding:6px 8px;border-radius:999px;
