@@ -1757,7 +1757,17 @@ function pubDone(url) {
    the invitation's first page instead of a bare photograph. */
 async function composeShareCover(blob) {
   if (!blob) return null;
-  const bitmap = await createImageBitmap(blob);
+  /* createImageBitmap fails on HEIC/HEIF — the format iPhones upload by
+     default — which is exactly why a published link show a bare photograph
+     with no names. Draw via an <img> element instead: the browser's own
+     decoder handles every format it accepts anywhere else. */
+  const bitmap = await new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("UNSUPPORTED_IMAGE")); };
+    img.src = url;
+  });
   const W = 1200, H = 630;                    /* the og:image aspect */
   const canvas = document.createElement("canvas");
   canvas.width = W; canvas.height = H;
@@ -1771,10 +1781,11 @@ async function composeShareCover(blob) {
      anchored to the left edge — mirroring the welcome poster, where the
      couple stands on the left and the text sits beside them. */
   const PHOTO_W = Math.round(W * 0.56);
-  const scale = Math.max(PHOTO_W / bitmap.width, H / bitmap.height);
-  const dw = bitmap.width * scale, dh = bitmap.height * scale;
+  const bW = bitmap.naturalWidth || bitmap.width;
+  const bH = bitmap.naturalHeight || bitmap.height;
+  const scale = Math.max(PHOTO_W / bW, H / bH);
+  const dw = bW * scale, dh = bH * scale;
   c.drawImage(bitmap, PHOTO_W - dw < -8 ? 0 : PHOTO_W - dw, (H - dh) / 2, dw, dh);
-  bitmap.close?.();
 
   /* A soft gold seam where photo meets panel. */
   c.strokeStyle = "rgba(212,169,55,0.55)";

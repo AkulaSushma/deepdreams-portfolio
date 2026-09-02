@@ -65,6 +65,13 @@ const DROP_PATTERNS = [
   /^_nav-fixed\.png$/,
   /^_phone-fixed\.png$/,
   /^verify-.*\.png$/,
+  /* Working scratch files from the og-card pipeline: the base captures and
+     intermediate measurements never belong on the CDN. */
+  /^_welcome_.*\.(png|ppm|txt|jpg)$/,
+  /^_loader_.*\.png$/,
+  /^_wb\.png$/,
+  /^_welcome_card.*\.png$/,
+  /^_welcome_preview\./,
 ];
 
 function keep(entry, isDir) {

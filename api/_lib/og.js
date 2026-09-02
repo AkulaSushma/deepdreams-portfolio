@@ -329,6 +329,178 @@ function drawText(px, text, cx, top, capH, hi, lo, glow) {
 
 const cleanText = (s) => String(s || "").replace(/[^\p{L}\p{N}&·—,.'\- ]/gu, "").trim().slice(0, 60);
 
+/* ══ SAMPLE 1's CARD: the actual first page, per couple ═══════════════════
+   Sample 1's first page is its welcome poster: the couple standing on the
+   left, and the parchment on the right carrying the names, both families
+   and the date. og-base-welcome is a capture of that poster with its text
+   lifted out; welcomeCard paints the couple's own wording back into the
+   same parchment, in the same layout the site itself renders (ov-welcome
+   in style.css). The WhatsApp card IS the website's first page for THAT
+   couple — the brief's exact words — with the names visible on it.
+
+   The parchment's own inks: a deep maroon for the names and a warm brown
+   for the family lines, straight from the overlay's palette. */
+const { baseImage: welcomeBase } = require("./og-base-welcome");
+
+const PARCH = {
+  name:  [125, 29, 29],   /* #7D1D1D — ov-bride/ov-groom maroon        */
+  small: [74, 40, 16],    /* #4A2810 — ov-*-parents brown             */
+  ink:   [58, 16, 16],    /* #3A1010 — ov-time/date/venue             */
+  soft:  [92, 58, 26],   /* #5C3A1A — script-tone lines              */
+};
+
+/* Where the parchment sits on the base capture, in base pixels. Measured
+   from the artwork, not the CSS: the quiet zone runs x 400–760, y 108–362
+   (with a wider floor band to y 410 between x 480–680 where the bottom
+   ornament recedes). All drawing happens inside this window. */
+const PARCH_GEOM = { x0: 400, x1: 760, cx: 580, y0: 108, y1: 362 };
+
+/* Draw one line of text centred in the parchment, shrinking to fit the
+   window. `h` is the cap height in base pixels. Returns the height used. */
+function parchLine(px, text, top, h, color, opts) {
+  const o = opts || {};
+  let size = h;
+  const maxW = o.maxW || (PARCH_GEOM.x1 - PARCH_GEOM.x0 - 8);
+  while (size > 7 && textWidth(String(text), size) > maxW) size -= 1;
+  if (size <= 7) return 0;
+  drawTextOn(px, String(text), o.cx || PARCH_GEOM.cx, top, size, color, color);
+  return size;
+}
+
+/* drawText/drawGlyph draw against the fixed W×H card. The welcome base is
+   a different buffer, so this variant takes the target dimensions from the
+   image it is painting (the pattern shareCard already uses for the seal). */
+function drawTextOn(px, text, cx, top, capH, hi, lo, imgW, imgH) {
+  const W2 = imgW || require("./og-base-welcome").baseImage().w;
+  const H2 = imgH || require("./og-base-welcome").baseImage().h;
+  const total = textWidth(text, capH);
+  let x = Math.round(cx - total / 2);
+  for (const ch of String(text)) {
+    const g = FONT[ch];
+    if (!g) { x += Math.round(capH * 0.26); continue; }
+    drawGlyphBuf(px, g, x, top, capH, hi, lo, W2, H2);
+    x += Math.round((g.w / g.h) * capH) + Math.round(capH * 0.12);
+  }
+  return total;
+}
+
+/* drawGlyph with explicit buffer bounds — same letterforms, same gold
+   gradient math, any target size. */
+function drawGlyphBuf(px, glyph, left, top, targetH, hi, lo, imgW, imgH) {
+  if (!glyph || !glyph.rows || !glyph.rows.length) return;
+  const scale = targetH / glyph.h;
+  const gw = Math.max(1, Math.round(glyph.w * scale));
+  const gh = Math.max(1, Math.round(glyph.h * scale));
+  for (let y = 0; y < gh; y++) {
+    const sy = Math.min(glyph.rows.length - 1, Math.round(y / scale));
+    const alphas = new Float32Array(gw);
+    let gx = 0;
+    for (const [level, run] of glyph.rows[sy]) {
+      const a = (level / 15) * 255;
+      const spanW = Math.max(1, Math.round(run * scale));
+      for (let i = 0; i < spanW && gx + i < gw; i++) alphas[gx + i] = a;
+      gx += spanW;
+      if (gx >= gw) break;
+    }
+    for (let x = 0; x < gw; x++) {
+      const a = alphas[x] / 255;
+      if (a <= 0.01) continue;
+      const pxX = left + x, pxY = top + y;
+      if (pxX < 0 || pxX >= imgW || pxY < 0 || pxY >= imgH) continue;
+      const gt = (y / gh) * 0.5;
+      const r = hi[0] + (lo[0] - hi[0]) * gt;
+      const g = hi[1] + (lo[1] - hi[1]) * gt;
+      const bb = hi[2] + (lo[2] - hi[2]) * gt;
+      blendOn(px, pxX, pxY, a, [r, g, bb], imgW);
+    }
+  }
+}
+
+function blendOn(px, x, y, alpha, color, imgW) {
+  const o = (y * imgW + x) * 3;
+  px[o] = Math.round(px[o] * (1 - alpha) + color[0] * alpha);
+  px[o + 1] = Math.round(px[o + 1] * (1 - alpha) + color[1] * alpha);
+  px[o + 2] = Math.round(px[o + 2] * (1 - alpha) + color[2] * alpha);
+}
+
+/** Compose Sample 1's share card on the real welcome-poster capture. */
+function welcomeCard(first, second, opts) {
+  const o = opts || {};
+  const base = welcomeBase();                /* {rgb, w, h} — real poster */
+  const px = Buffer.from(base.rgb);          /* writable copy */
+  const { w, h } = base;
+
+  const a = cleanText(first).toUpperCase();
+  const b = cleanText(second).toUpperCase();
+  if (!a && !b) return encodePng(px, w, h);
+
+  /* The parchment's vertical rhythm, mapped from the site's own ov-welcome
+     zones into the measured quiet window (parchment y 108–362; the ornament
+     frame starts ~y 375). Lines are measured first, then flowed downward, and
+     the whole stack is lifted uniformly if it ran past the quiet floor — so
+     no couple's wording ever lands on the artwork's ornate border. Family
+     lines sit directly beneath each name, exactly as the overlay stacks
+     them. */
+  const fa = cleanText(o.firstParents).toUpperCase();
+  const fb = cleanText(o.secondParents).toUpperCase();
+  const firstLabel = fa ? (o.firstLabel || "DAUGHTER OF") : "";
+  const secondLabel = fb ? (o.secondLabel || "SON OF") : "";
+
+  const date = cleanText(o.date).toUpperCase();
+  const time = cleanText(o.time).toUpperCase();
+  const venue = cleanText(o.venue).toUpperCase();
+
+  /* Pass 1 — measure every line at its natural size, auto-shrunk to fit
+     the window's width (a size of 0 means it did not fit and is dropped). */
+  const fit = (h, text, maxW) => {
+    let size = h;
+    const w0 = maxW || (PARCH_GEOM.x1 - PARCH_GEOM.x0 - 8);
+    while (size > 7 && textWidth(text, size) > w0) size -= 1;
+    return size > 7 ? size : 0;
+  };
+  const firstLabelLine = fa ? `${firstLabel} ${fa}` : "";
+  const secondLabelLine = fb ? `${secondLabel} ${fb}` : "";
+  const timeLine = time ? `TIME: ${time}` : "";
+  const venueLine = venue ? `VENUE: ${venue}` : "";
+
+  const stack = [
+    { size: fit(13, "TOGETHER WITH"), color: PARCH.soft, text: "TOGETHER WITH" },
+    { size: fit(22, "LOVE & FAMILIES,"), color: PARCH.name, text: "LOVE & FAMILIES," },
+    { size: fit(11, "REQUEST THE HONOR OF YOUR PRESENCE", 340), color: PARCH.soft, text: "REQUEST THE HONOR OF YOUR PRESENCE", maxW: 340 },
+    { size: fit(44, a), color: PARCH.name, text: a },
+    { size: fa ? fit(11, firstLabelLine) : 0, color: PARCH.small, text: firstLabelLine },
+    { size: fit(20, "&"), color: PARCH.name, text: "&" },
+    { size: fit(44, b), color: PARCH.name, text: b },
+    { size: fb ? fit(11, secondLabelLine) : 0, color: PARCH.small, text: secondLabelLine },
+    { size: date ? fit(13, date) : 0, color: PARCH.ink, text: date },
+    { size: time ? fit(13, timeLine, 300) : 0, color: PARCH.ink, text: timeLine, maxW: 300 },
+    { size: venue ? fit(13, venueLine, 350) : 0, color: PARCH.ink, text: venueLine, maxW: 350 },
+  ].filter((L) => L.size > 0 && L.text);
+
+  /* Pass 2 — flow the stack down from the eyebrow's fixed top, using the
+     leading the site's own overlay keeps between zones. */
+  const LEAD = 8;
+  let y = 118;
+  const placed = [];
+  for (const L of stack) {
+    y += placed.length ? LEAD : 0;
+    placed.push({ ...L, top: y });
+    y += L.size;
+  }
+
+  /* Pass 3 — lift the stack if it ran past the quiet floor. The eyebrow
+     keeps a little headroom above it; nothing goes below the floor. */
+  const FLOOR = 356;
+  if (y > FLOOR && placed.length) {
+    const lift = y - FLOOR;
+    for (const L of placed) L.top = Math.max(108, L.top - lift);
+  }
+
+  for (const L of placed) parchLine(px, L.text, L.top, L.size, L.color, { maxW: L.maxW });
+
+  return encodePng(px, w, h);
+}
+
 /** Sample 1's share card: the couple's full names, date and venue in text. */
 function namesCard(first, second, opts) {
   const o = opts || {};
@@ -360,4 +532,4 @@ function namesCard(first, second, opts) {
   return encodePng(px, W, H);
 }
 
-module.exports = { shareCard, namesCard, W, H };
+module.exports = { shareCard, namesCard, welcomeCard, W, H };

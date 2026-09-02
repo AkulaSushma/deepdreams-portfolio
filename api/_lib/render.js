@@ -71,19 +71,30 @@ function ogImage(view, origin) {
   u.searchParams.set("b", b);
   u.searchParams.set("g", g);
   u.searchParams.set("side", side);
-  /* Sample 1's card is the full-names version — the invitation's first
-     page shows the couple's names, family and date in text beside the
-     couple, and the share card agrees with the first page. */
+  /* Sample 1's card reproduces its actual first page — the welcome poster's
+     artwork with the couple's names, both families and the date painted
+     into the parchment, exactly as the site lays them out. The card is the
+     website as it looks after publish, with the couple's names on it. */
   if (view.template === "sample1") {
-    u.searchParams.set("mode", "names");
+    u.searchParams.set("mode", "welcome");
     const d = (c.date || "").toString().trim();
     if (d) {
       // dates look like "2027-03-14" — render as "Sunday, 14 March 2027"
       const dt = new Date(d + "T00:00:00");
       u.searchParams.set("d", isNaN(dt) ? d : dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
     }
+    const t = (c.time || "").toString().trim();
+    if (t) u.searchParams.set("t", t);
     const v = (c.venueName || c.venue || "").toString().trim();
     if (v) u.searchParams.set("v", v);
+    /* The parchment shows each family beneath their child's name, in the
+       order the family chose. Sample 1's own overlay derives these from the
+       same fields — mirror it exactly. */
+    const isGroomSide = side === "groom";
+    const fp = (isGroomSide ? c.groomParents : c.brideParents || "").toString().trim();
+    const gp = (isGroomSide ? c.brideParents : c.groomParents || "").toString().trim();
+    if (fp) u.searchParams.set("fp", fp);
+    if (gp) u.searchParams.set("gp", gp);
   }
   return u.toString();
 }

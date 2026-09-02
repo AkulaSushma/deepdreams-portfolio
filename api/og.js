@@ -32,9 +32,13 @@ module.exports = handler("og", async (req, res) => {
   const b = url.searchParams.get("b") || "";
   const g = url.searchParams.get("g") || "";
   const side = url.searchParams.get("side") || "";
-  const mode = url.searchParams.get("mode") === "names" ? "names" : "initials";
+  const modeRaw = url.searchParams.get("mode") || "initials";
+  const mode = ["names", "welcome"].includes(modeRaw) ? modeRaw : "initials";
   const dParam = url.searchParams.get("d") || "";
+  const tParam = url.searchParams.get("t") || "";
   const vParam = url.searchParams.get("v") || "";
+  const fpParam = url.searchParams.get("fp") || "";
+  const gpParam = url.searchParams.get("gp") || "";
 
   if (!LETTER.test(b) && !LETTER.test(g)) {
     return fail(res, "BAD_REQUEST");
@@ -47,12 +51,21 @@ module.exports = handler("og", async (req, res) => {
   const second = side === "groom" ? b : g;
 
   try {
-    /* mode=names renders the couple’s full names in text — Sample 1’s card,
-       whose template has no monogram motif. The default remains Sample 2’s
-       approved initials card. */
-    const png = mode === "names"
-      ? og.namesCard(first, second, { date: dParam, venue: vParam })
-      : og.shareCard(first, second);
+    /* mode=welcome renders Sample 1's actual first page: the welcome
+       poster's own artwork with the couple's names, families and date
+       painted into its parchment — the site as it looks after publish.
+       mode=names is the older text-only card; the default remains Sample
+       2's approved initials card. */
+    const png = mode === "welcome"
+      ? og.welcomeCard(first, second, {
+          date: dParam, time: tParam, venue: vParam,
+          firstParents: fpParam, secondParents: gpParam,
+          firstLabel: side === "groom" ? "SON OF" : "DAUGHTER OF",
+          secondLabel: side === "groom" ? "DAUGHTER OF" : "SON OF",
+        })
+      : mode === "names"
+        ? og.namesCard(first, second, { date: dParam, venue: vParam })
+        : og.shareCard(first, second);
     log("og.rendered", { w: og.W, h: og.H, bytes: png.length, mode });
     res.statusCode = 200;
     res.setHeader("Content-Type", "image/png");
