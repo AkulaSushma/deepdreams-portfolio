@@ -58,26 +58,40 @@ function fallbackImage(template, origin) {
    maroon-and-gold card instead, in the order the family chose. A couple
    who did upload a cover photograph keeps their photograph. */
 function ogImage(view, origin) {
-  const cp = (view && view.content && view.content.couple) || {};
+  /* Names live in content.couple for Sample 2 and at the top level of
+     content for Sample 1 — read either. Sample 1 previously never matched,
+     so its couples always got the demo poster's photograph. */
+  const c = (view && view.content) || {};
+  const cp = c.couple || c;
   const b = cp.bride || "";
   const g = cp.groom || "";
   if (!origin || !b.trim() || !g.trim()) return null;
-  const side = cp.side === "groom" ? "groom" : "bride";
+  const side = (cp.side === "groom" || c.side === "groom") ? "groom" : "bride";
   const u = new URL(`${origin}/api/og`);
   u.searchParams.set("b", b);
   u.searchParams.set("g", g);
   u.searchParams.set("side", side);
+  /* Sample 1's card is the full-names version — the invitation's first
+     page shows the couple's names, family and date in text beside the
+     couple, and the share card agrees with the first page. */
+  if (view.template === "sample1") {
+    u.searchParams.set("mode", "names");
+    const d = (c.date || "").toString().trim();
+    if (d) {
+      // dates look like "2027-03-14" — render as "Sunday, 14 March 2027"
+      const dt = new Date(d + "T00:00:00");
+      u.searchParams.set("d", isNaN(dt) ? d : dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
+    }
+    const v = (c.venueName || c.venue || "").toString().trim();
+    if (v) u.searchParams.set("v", v);
+  }
   return u.toString();
 }
 
-/* The image a link card shows: the couple's own photograph if they uploaded
-   one, otherwise their initials on the studio card — never the demo couple. */
+/* The image a link card shows. For Sample 1 the names card comes first —
+   its wallpost shows the couple's names in gold beside the invitation's
+   hero photograph, which is exactly what a bare photograph never said. */
 function shareImage(view, origin) {
-  /* Sample 1’s card is the names card: its couples’ photographs carry no
-     text, so a bare photo said nothing about whose wedding the link was.
-     The card says the names, date and venue in the studio’s gold; the
-     photograph itself stays front and centre inside the invitation.
-     Sample 2 keeps the seal screen (its own artwork IS the brand). */
   if (view && view.template === "sample1") {
     return ogImage(view, origin) || coverImage(view) || fallbackImage(view.template, origin);
   }
