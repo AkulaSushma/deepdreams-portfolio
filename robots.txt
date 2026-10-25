@@ -1,3 +1,8 @@
+# Explicit permission for ChatGPT Search. This is separate from GPTBot, which
+# controls potential model-training use rather than inclusion in search results.
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: *
 Allow: /
 
