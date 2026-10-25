@@ -1,3 +1,8 @@
+# Explicit permission for ChatGPT Search. This is separate from GPTBot, which
+# controls potential model-training use rather than inclusion in search results.
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: *
 Allow: /
 
@@ -9,4 +14,4 @@ Disallow: /3D%20Wedding%20Invitation%20Sample%202/create.html
 # a search result is an invitation to try.
 Disallow: /admin
 
-Sitemap: https://deepdreams-ai-portfolio.netlify.app/sitemap.xml
+Sitemap: https://deepdreams-portfolio.pages.dev/sitemap.xml
