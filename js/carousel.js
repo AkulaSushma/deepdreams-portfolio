@@ -350,18 +350,25 @@
     }
   }
 
-  /* "Request this type" — the customer taps it on the film they want. The
-     WhatsApp message then carries the film's title AND a direct link to it,
-     and the studio sees the film's own thumbnail (YouTube renders the card
-     for any youtu.be link) so there is never any doubt about which of the
-     nine samples the customer means. */
-  const requestMsg = (title, id, section) =>
-    `Hi DeepDreams AI Studio! I'd like this type of video for my family — the studio can see the exact sample here.
+  /* "Request with preview" — the customer taps it on the exact film they
+     want. WhatsApp receives a DeepDreams sharing page first, which has that
+     film's Open Graph thumbnail and title, then the direct YouTube fallback.
+     A wa.me link can prefill text but cannot attach a file to a customer chat. */
+  const samplePreviewUrl = (title, id, section) => {
+    const url = new URL(`/sample/${encodeURIComponent(id)}`, window.location.origin);
+    url.searchParams.set('title', title);
+    url.searchParams.set('type', section || 'AI video');
+    return url.href;
+  };
 
-` +
-    `Type: ${section || 'AI video'}
+  const requestMsg = (title, id, section) =>
+    `Hi DeepDreams AI Studio! I'd like this type of video for my family.
+
+Exact sample preview: ${samplePreviewUrl(title, id, section)}
+
+Type: ${section || 'AI video'}
 Sample: "${title}"
-Watch: https://youtu.be/${id}
+YouTube video: https://www.youtube.com/watch?v=${id}
 
 ` +
     `Please share pricing and details. Thank you!`;
@@ -422,7 +429,7 @@ Watch: https://youtu.be/${id}
             <h3>${title}</h3>
             <a class="card-request" target="_blank" rel="noopener"
                href="${requestUrl(title, id, category)}"
-               aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
+               aria-label="Request a video like ${title} with its preview on WhatsApp">Request with preview</a>
           </div>
         `;
         item.addEventListener('click', () => openVideo(id, title, false));
@@ -472,7 +479,7 @@ Watch: https://youtu.be/${id}
           <h3>${title}</h3>
           <a class="card-request" target="_blank" rel="noopener"
              href="${requestUrl(title, id, category || 'Wedding Invitation')}"
-             aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
+             aria-label="Request a video like ${title} with its preview on WhatsApp">Request with preview</a>
         </div>
       `;
       el.addEventListener('click', () => openVideo(id, title, true));
@@ -517,7 +524,7 @@ Watch: https://youtu.be/${id}
           <h3>${title}</h3>
           <a class="card-request" target="_blank" rel="noopener"
              href="${requestUrl(title, id, 'Name Reveal')}"
-             aria-label="Request a video like ${title} on WhatsApp">Request this type</a>
+             aria-label="Request a video like ${title} with its preview on WhatsApp">Request with preview</a>
         </div>
       `;
       el.addEventListener('click', () => openVideo(id, title, false));
