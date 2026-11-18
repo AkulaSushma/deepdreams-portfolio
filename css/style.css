@@ -193,6 +193,9 @@ section {
 .svc-no{font-family:'Cormorant Garamond';font-size:14px;color:var(--gold-soft);letter-spacing:2px}
 .svc h3{font-family:'Cormorant Garamond';font-size:26px;font-weight:600;margin:6px 0 8px}
 .svc p{color:var(--muted);font-size:13.5px;position:relative}
+.service-detail-link,.service-directory-link a{color:var(--gold-soft);text-underline-offset:3px}
+.service-detail-link:focus-visible,.service-directory-link a:focus-visible{outline:2px solid var(--gold-soft);outline-offset:4px}
+.service-directory-link{margin-top:24px;text-align:center;font-size:14px}
 .svc-tag{display:inline-block;margin-top:14px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue-core);border:1px solid rgba(58,160,255,.25);padding:5px 11px;border-radius:20px}
 
 /* ===== ABOUT ===== */
@@ -219,6 +222,12 @@ section {
 .cbtn-line{background:transparent;color:var(--gold-soft);border:1px solid var(--border)}
 .cbtn:hover{transform:translateY(-2px)}
 .contact-meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.studio-details{margin:0 auto 28px;max-width:620px;line-height:1.8;color:var(--muted);font-size:14px}
+.studio-details h3{color:var(--gold-soft);font-size:20px;margin-bottom:12px}
+.studio-details address{font-style:normal;margin-bottom:12px}
+.studio-details p+p{margin-top:8px}
+.studio-details a{color:var(--gold-soft);text-underline-offset:3px}
+.studio-details a:focus-visible{outline:2px solid var(--gold-soft);outline-offset:4px}
 .meta-link{font-size:12px;color:var(--muted);text-decoration:none;border:1px solid rgba(255,255,255,.08);padding:8px 15px;border-radius:30px;background:transparent;cursor:pointer;transition:.35s;font-family:inherit}
 .meta-link:hover{color:var(--blue-core);border-color:rgba(58,160,255,.3)}
 
